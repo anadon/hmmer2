@@ -1,4 +1,4 @@
-Brief installation instructions for HMMER @RELEASE@
+Brief installation instructions for HMMER 2.5j
 SRE, Tue Dec  5 13:09:31 2006
 ------------------------------------------
 
@@ -11,9 +11,9 @@ special ./configure arguments you probably want to pay attention to.
 
 
 1. Unpack the tarball.
-    % uncompress hmmer-@RELEASE@.tar.gz  
-    % tar xf hmmer-@RELEASE@.tar         
-    % cd hmmer-@RELEASE@   
+    % uncompress hmmer-2.5j.tar.gz  
+    % tar xf hmmer-2.5j.tar         
+    % cd hmmer-2.5j   
 
 2. Configure.
    If you just do ./configure, it'll work, but the default

@@ -1,6 +1,8 @@
 HMMER - profile hidden Markov models for biological sequence analysis
-Version @RELEASE@ (@RELEASEDATE@)
-@COPYRIGHT@
+Version 2.5j (December 2006)
+Copyright (C) 1992-2006 HHMI Janelia Farm
+Copyright (C) 2006-2018 Sean Eddy?
+Copyright (C) 2018-     I am not a lawyer, but GPL lets me use this.
 ------------------------------------------------------------------
 
 o About this software...
@@ -14,12 +16,11 @@ o About this software...
 
 
 o Getting HMMER
-   WWW home:       http://hmmer.janelia.org/
-   Distribution:   ftp://selab.janelia.org/pub/software/hmmer/CURRENT/
+   Project home: https://github.com/MichiganTech/hmmer
 
 
 o Installing HMMER
-   See the file 00INSTALL for brief instructions.
+   See the file INSTALL for brief instructions.
    See the chapter Installation in the HMMER User's Guide (Userguide.pdf)
    for more detailed instructions.
    See the file NOTES for notes particular to this release.
@@ -35,14 +36,13 @@ o Getting started with HMMER
 
 
 o Reporting bugs
-   These programs are under active development. Though this release
-   has been tested and appears to be stable, bugs may crop up. If you
-   use these programs, feel free to contact me with suggestions,
-   comments, and bug reports.
-   
-Sean Eddy
-http://selab.janelia.org/
+   Hmmer2 is not actively maintained.  However, bug reports, requests, and
+   other things may be communicated on the project main page at
+   https://github.com/MichiganTech/hmmer .
+
+
+o Contributers
+   Sean Eddy (original author)
+   Josh Marshall
+
 -------------------------------------------------------------------
-
-
-
