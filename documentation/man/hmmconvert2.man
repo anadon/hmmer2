@@ -1,8 +1,8 @@
-.TH "hmmconvert" 1 "@RELEASEDATE@" "@PACKAGE@ @RELEASE@" "@PACKAGE@ Manual"
+.TH "hmmconvert2" 1 "April 2018" "HMMER 2.5j" "HMMER Manual"
 
 .SH NAME
-.TP 
-hmmconvert - convert between profile HMM file formats
+.TP
+hmmconvert2 - convert between profile HMM file formats
 
 .SH SYNOPSIS
 .B hmmconvert
@@ -12,37 +12,37 @@ hmmconvert - convert between profile HMM file formats
 
 .SH DESCRIPTION
 
-.B hmmconvert
+.B hmmconvert2
 reads an HMM file from
 .I oldhmmfile
 in any HMMER format, and writes it to a new file
-.I newhmmfile 
-in a new format.
-.I oldhmmfile 
-and 
 .I newhmmfile
-must be different files; you can't reliably overwrite 
+in a new format.
+.I oldhmmfile
+and
+.I newhmmfile
+must be different files; you can't reliably overwrite
 the old file.
 By default, the new HMM file is written in HMMER 2
-ASCII format. 
+ASCII format.
 
 Available formats are HMMER 2 ASCII (default), HMMER 2 binary
 .I (-b)
-GCG profile 
+GCG profile
 .I (-p)
-, and Compugen XSW extended profile 
+, and Compugen XSW extended profile
 .I (-P).
 
 .SH OPTIONS
 
 .TP
-.B -a 
+.B -a
 Convert to HMMER 2 ASCII file. This is the default, so this option
 is unnecessary.
 
-.TP 
-.B -b 
-Convert to HMMER 2 binary file. 
+.TP
+.B -b
+Convert to HMMER 2 binary file.
 
 .TP
 .B -h
@@ -53,22 +53,22 @@ all options, including expert options.
 .B -p
 Convert to GCG profile .prf format.
 
-.TP 
+.TP
 .B -A
 Append mode; append to
 .I newhmmfile
-rather than creating a new file. 
+rather than creating a new file.
 
 .TP
 .B -F
-Force; if 
+Force; if
 .I newhmmfile
 already exists, and
-.I -A 
+.I -A
 is not being used to append to the file,
 hmmconvert will refuse to clobber the existing
-file unless 
-.I -F 
+file unless
+.I -F
 is used.
 
 .TP
@@ -78,4 +78,3 @@ which is similar to GCG profile format but has two
 extra columns for delete-open and delete-extend costs.
 (I do not believe that Compugen publicly supports this
 format; it may be undocumented.)
-

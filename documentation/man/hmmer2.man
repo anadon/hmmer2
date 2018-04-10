@@ -1,60 +1,60 @@
-.TH "hmmer" 1 "@RELEASEDATE@" "@PACKAGE@ @RELEASE@" "@PACKAGE@ Manual"
+.TH "hmmer2" 1 "April 2018" "HMMER 2.5j" "HMMER Manual"
 
 .SH NAME
-.TP 
+.TP
 HMMER - profile hidden Markov model software
 
 .SH SYNOPSIS
 .TP
-.B hmmalign
+.B hmmalign2
 Align multiple sequences to a profile HMM.
 
 .TP
-.B hmmbuild
+.B hmmbuild2
 Build a profile HMM from a given multiple sequence alignment.
 
 .TP
-.B hmmcalibrate
-Determine appropriate statistical significance parameters 
+.B hmmcalibrate2
+Determine appropriate statistical significance parameters
 for a profile HMM prior to doing database searches.
 
-.TP 
-.B hmmconvert
+.TP
+.B hmmconvert2
 Convert HMMER profile HMMs to other formats, such as GCG profiles.
 
 .TP
-.B hmmemit
+.B hmmemit2
 Generate sequences probabilistically from a profile HMM.
 
 .TP
-.B hmmfetch
+.B hmmfetch2
 Retrieve an HMM from an HMM database
 
-.TP 
-.B hmmindex
+.TP
+.B hmmindex2
 Create a binary SSI index for an HMM database
 
 .TP
-.B hmmpfam
+.B hmmpfam2
 Search a profile HMM database with a sequence (i.e., annotate various
 kinds of domains in the query sequence).
 
 .TP
-.B hmmsearch
+.B hmmsearch2
 Search a sequence database with a profile HMM (i.e., find additional
-homologues of a modeled family). 
+homologues of a modeled family).
 
 .SH DESCRIPTION
 
 These programs use profile hidden Markov models (profile HMMs) to
 model the primary structure consensus of a family of protein or
-nucleic acid sequences. 
+nucleic acid sequences.
 
 .SH OPTIONS
 
 .PP
 All
-.B HMMER 
+.B HMMER
 programs give a brief summary of their command-line syntax and options
 if invoked without any arguments.
 When invoked with the single argument,
@@ -79,19 +79,19 @@ the current HMMER release.
 .PP
 In general, no command line options should be needed by beginning users.
 The defaults are set up for optimum performance in most situations.
-Options that are single lowercase letters (e.g. 
+Options that are single lowercase letters (e.g.
 .B -a
 ) are "common" options that are expected to be frequently used
 and will be important in many applications.
-Options that are single uppercase letters (e.g. 
+Options that are single uppercase letters (e.g.
 .B -B
 ) are usually less common options, but also may be important
 in some applications.
-Options that are full words (e.g. 
+Options that are full words (e.g.
 .B --verbose
-) are either rarely used, experimental, or expert options. 
+) are either rarely used, experimental, or expert options.
 Some experimental options are only there for my own ongoing experiments
-with HMMER, and may not be supported or documented adequately. 
+with HMMER, and may not be supported or documented adequately.
 
 
 .SH SEQUENCE FILE FORMATS
@@ -100,18 +100,18 @@ In general,
 .B HMMER
 attempts to read most common biological sequence file formats.
 It autodetects the format of the file. It also autodetects
-whether the sequences are protein or nucleic acid. 
+whether the sequences are protein or nucleic acid.
 Standard IUPAC degeneracy codes are allowed in addition
-to the usual 4-letter or 20-letter codes. 
+to the usual 4-letter or 20-letter codes.
 
 .TP
 .B Unaligned sequences
 Unaligned sequence files may be in FASTA, Swissprot, EMBL, GenBank,
-PIR, Intelligenetics, Strider, or GCG format. 
+PIR, Intelligenetics, Strider, or GCG format.
 These formats
 are documented in the User's Guide.
 
-.TP 
+.TP
 .B Sequence alignments
 Multiple sequence alignments may be in CLUSTALW, SELEX, or GCG MSF
 format. These formats
@@ -136,4 +136,3 @@ is likely to already be set.
 .B HMMERDB
 Specifies the directory location of HMM databases. Example:
 .B /seqlibs/pfam/.
-

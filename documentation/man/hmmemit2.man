@@ -1,17 +1,17 @@
-.TH "hmmemit" 1 "@RELEASEDATE@" "@PACKAGE@ @RELEASE@" "@PACKAGE@ Manual"
+.TH "hmmemit2" 1 "April 2018" "HMMER 2.5j" "HMMER Manual"
 
 .SH NAME
-.TP 
-hmmemit - generate sequences from a profile HMM
+.TP
+hmmemit2 - generate sequences from a profile HMM
 
 .SH SYNOPSIS
-.B hmmemit
+.B hmmemit2
 .I [options]
 .I hmmfile
 
 .SH DESCRIPTION
 
-.B hmmemit
+.B hmmemit2
 reads an HMM file from
 .I hmmfile
 containing one or more HMMs,
@@ -20,11 +20,11 @@ or, if the
 .B -c
 option is selected, generate a single majority-rule consensus.
 This can be useful for various applications in which one needs a simulation
-of sequences consistent with a sequence family consensus. 
+of sequences consistent with a sequence family consensus.
 
 .pp
 By default,
-.B hmmemit
+.B hmmemit2
 generates 10 sequences and outputs them in FASTA (unaligned) format.
 
 .SH OPTIONS
@@ -52,7 +52,7 @@ all options, including expert options.
 .TP
 .BI -n " <n>"
 Generate
-.I <n> 
+.I <n>
 sequences. Default is 10.
 
 .TP
@@ -72,15 +72,13 @@ Useful for piping or directing the output.
 .BI --seed " <n>"
 Set the random seed to
 .I <n>,
-where 
-.I <n> 
-is a positive integer. The default is to use 
+where
+.I <n>
+is a positive integer. The default is to use
 .B time()
 to generate a different seed for each run, which
 means that two different runs of
-.B hmmemit
+.B hmmemit2
 on the same HMM will give slightly different
 results.  You can use
 this option to generate reproducible results.
-
-
