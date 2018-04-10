@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* hmmcalibrate.c
@@ -8,7 +14,7 @@
  * Score an HMM against random sequence data sets;
  * set histogram fitting parameters.
  * 
- * CVS $Id$
+ * CVS $Id: hmmcalibrate.c 998 2005-01-26 22:11:49Z eddy $
  */
 
 #include "config.h"		/* compile-time configuration constants */
@@ -22,12 +28,8 @@
 #include <time.h>
 #include <limits.h>
 #include <float.h>
-#ifdef HMMER_THREADS
 #include <pthread.h>
-#endif
-#ifdef HMMER_PVM
-#include <pvm3.h>
-#endif
+#include <unistd.h>
 
 #include "squid.h"		/* general sequence analysis library    */
 #include "stopwatch.h"		/* process timings                      */
@@ -50,7 +52,6 @@ static char experts[] = "\
   --histfile <f> : save histogram(s) to file <f>\n\
   --mean <x>     : set random seq length mean at <x> [350]\n\
   --num <n>      : set number of sampled seqs to <n> [5000]\n\
-  --pvm          : run on a Parallel Virtual Machine (PVM)\n\
   --sd <x>       : set random seq length std. dev to <x> [350]\n\
   --seed <n>     : set random seed to <n> [time()]\n\
 ";
@@ -62,7 +63,6 @@ static struct opt_s OPTIONS[] = {
    { "--histfile", FALSE, sqdARG_STRING },
    { "--mean",     FALSE, sqdARG_FLOAT },
    { "--num",      FALSE, sqdARG_INT   },
-   { "--pvm",      FALSE, sqdARG_NONE  },
    { "--sd",       FALSE, sqdARG_FLOAT },   
    { "--seed",     FALSE, sqdARG_INT}, 
 };
@@ -73,7 +73,7 @@ static void main_loop_serial(struct plan7_s *hmm, int seed, int nsample,
 			     float lenmean, float lensd, int fixedlen,
 			     struct histogram_s **ret_hist, float *ret_max);
 
-#ifdef HMMER_THREADS
+
 /* A structure of this type is shared by worker threads in the POSIX
  * threads parallel version.
  */
@@ -117,15 +117,6 @@ static struct workpool_s *workpool_start(struct plan7_s *hmm,
 static void  workpool_stop(struct workpool_s *wpool);
 static void  workpool_free(struct workpool_s *wpool);
 static void *worker_thread(void *ptr);
-#endif /* HMMER_THREADS */
-
-#ifdef HMMER_PVM
-static void main_loop_pvm(struct plan7_s *hmm, int seed, int nsample, 
-			  int lumpsize,
-			  float lenmean, float lensd, int fixedlen,
-			  struct histogram_s **ret_hist, float *ret_max, 
-			  Stopwatch_t *extrawatch, int *ret_nslaves);
-#endif /* HMMER_PVM */
 
 
 int
@@ -141,13 +132,13 @@ main(int argc, char **argv)
   sigset_t blocksigs;		/* list of signals to protect from */
   int     nhmm;			/* number of HMMs calibrated       */
 
-  struct histogram_s *hist;     /* a resulting histogram           */
-  float   max;			/* maximum score from an HMM       */
+  struct histogram_s *hist = NULL; /* a resulting histogram           */
+  float   max = 0;		/* maximum score from an HMM       */
   char   *histfile;             /* histogram save file             */
   FILE   *hfp;                  /* open file pointer for histfile  */
 
-  Stopwatch_t stopwatch;	/* main stopwatch for process       */
-  Stopwatch_t extrawatch;	/* stopwatch for threads/PVM slaves */
+  Stopwatch_t stopwatch;	/* main stopwatch for process      */
+  Stopwatch_t extrawatch;	/* stopwatch for threads           */
 
   float  *mu;			/* array of EVD mu's for HMMs      */
   float  *lambda;		/* array of EVD lambda's for HMMs  */
@@ -158,11 +149,6 @@ main(int argc, char **argv)
   int     fixedlen;		/* fixed length, or 0 if unused    */
   float   lenmean;		/* mean of length distribution     */
   float   lensd;		/* std dev of length distribution  */
-  int     do_pvm;		/* TRUE to use PVM                 */
-  int     pvm_lumpsize;		/* # of seqs to do per PVM slave exchange */
-#ifdef HMMER_PVM
-  int     pvm_nslaves;		/* number of slaves used in the PVM */
-#endif
 
 
   char *optname;		/* name of option found by Getopt() */
@@ -184,14 +170,8 @@ main(int argc, char **argv)
   lensd        = 200.;
   seed         = (int) time ((time_t *) NULL);
   histfile     = NULL;
-  do_pvm       = FALSE;
-  pvm_lumpsize = 20;		/* 20 seqs/PVM exchange: sets granularity */
   mu_lumpsize  = 100;
-#ifdef HMMER_THREADS
-  num_threads  = ThreadNumber(); /* only matters if we're threaded */
-#else
-  num_threads  = 0;
-#endif
+  num_threads  = sysconf(_SC_NPROCESSORS_ONLN);
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
 		&optind, &optname, &optarg))
@@ -201,7 +181,6 @@ main(int argc, char **argv)
       else if (strcmp(optname, "--histfile") == 0) histfile = optarg;
       else if (strcmp(optname, "--mean")     == 0) lenmean  = atof(optarg); 
       else if (strcmp(optname, "--num")      == 0) nsample  = atoi(optarg); 
-      else if (strcmp(optname, "--pvm")      == 0) do_pvm   = TRUE;
       else if (strcmp(optname, "--sd")       == 0) lensd    = atof(optarg); 
       else if (strcmp(optname, "--seed")     == 0) seed     = atoi(optarg);
       else if (strcmp(optname, "-h") == 0)
@@ -216,12 +195,6 @@ main(int argc, char **argv)
   if (argc - optind != 1) Die("Incorrect number of arguments.\n%s\n", usage);
   hmmfile = argv[optind++];
 
-#ifndef HMMER_PVM
-  if (do_pvm) Die("PVM support is not compiled into HMMER; --pvm doesn't work.");
-#endif
-#ifndef HMMER_THREADS
-  if (num_threads) Die("Posix threads support is not compiled into HMMER; --cpu doesn't have any effect");
-#endif
 
   /***********************************************
    * Open our i/o file pointers, make sure all is well
@@ -271,9 +244,7 @@ main(int argc, char **argv)
   printf("random seed:              %d\n", seed);
   printf("histogram(s) saved to:    %s\n",
 	 histfile != NULL ? histfile : "[not saved]");
-  if (do_pvm)
-    printf("PVM:                      ACTIVE\n");
-  else if (num_threads > 0)
+  if (num_threads > 0)
     printf("POSIX threads:            %d\n", num_threads);
   printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
 
@@ -294,22 +265,12 @@ main(int argc, char **argv)
       if (hmm == NULL)
 	Die("HMM file may be corrupt or in incorrect format; parse failed");
 
-      if (! do_pvm && num_threads == 0)
+      if (num_threads <= 1)
 	main_loop_serial(hmm, seed, nsample, lenmean, lensd, fixedlen, 
 			 &hist, &max);
-#ifdef HMMER_PVM
-      else if (do_pvm) {
-	pvm_nslaves = 0;	/* solely to silence compiler warnings */
-	main_loop_pvm(hmm, seed, nsample, pvm_lumpsize, 
-		      lenmean, lensd, fixedlen, 
-		      &hist, &max, &extrawatch, &pvm_nslaves);
-      }
-#endif 
-#ifdef HMMER_THREADS
       else if (num_threads > 0)
 	main_loop_threaded(hmm, seed, nsample, lenmean, lensd, fixedlen,
 			   num_threads, &hist, &max, &extrawatch);
-#endif
       else 
 	Die("wait. that can't happen. I didn't do anything.");
 
@@ -408,17 +369,9 @@ main(int argc, char **argv)
    ***********************************************/
 
   StopwatchStop(&stopwatch);
-#ifdef HMMER_PVM
-  if (do_pvm > 0) {
-    printf("PVM processors used: %d\n", pvm_nslaves);
-    StopwatchInclude(&stopwatch, &extrawatch);
-  }
-#endif
 #ifdef PTHREAD_TIMES_HACK
   else if (num_threads > 0) StopwatchInclude(&stopwatch, &extrawatch);
 #endif
-
-  /*  StopwatchDisplay(stdout, "CPU Time: ", &stopwatch); */
 
   free(mu);
   free(lambda);
@@ -510,7 +463,6 @@ main_loop_serial(struct plan7_s *hmm, int seed, int nsample,
 }
 
 
-#ifdef HMMER_THREADS
 /* Function: main_loop_threaded()
  * Date:     SRE, Wed Dec  1 12:43:09 1999 [St. Louis]
  *
@@ -800,184 +752,4 @@ worker_thread(void *ptr)
   pthread_exit(NULL);
   return NULL; /* solely to silence compiler warnings */
 }
-#endif /* HMMER_THREADS */
-
-
-
-#ifdef HMMER_PVM
-/* Function: main_loop_pvm()
- * Date:     SRE, Wed Aug 19 13:59:54 1998 [St. Louis]
- *
- * Purpose:  Given an HMM and parameters for synthesizing random
- *           sequences; return a histogram of scores.
- *           (PVM version)  
- *
- * Args:     hmm     - an HMM to calibrate.
- *           seed    - random number seed
- *           nsample - number of seqs to synthesize
- *           lumpsize- # of seqs per slave exchange; controls granularity
- *           lenmean - mean length of random sequence
- *           lensd   - std dev of random seq length
- *           fixedlen- if nonzero, override lenmean, always this len
- *           hist       - RETURN: the score histogram 
- *           ret_max    - RETURN: highest score seen in simulation
- *           extrawatch - RETURN: total CPU time spend in slaves.
- *           ret_nslaves- RETURN: number of PVM slaves run.
- *
- * Returns:  (void)
- *           hist is alloc'ed here, and must be free'd by caller.
- */
-static void
-main_loop_pvm(struct plan7_s *hmm, int seed, int nsample, int lumpsize,
-	      float lenmean, float lensd, int fixedlen,
-	      struct histogram_s **ret_hist, float *ret_max, 
-	      Stopwatch_t *extrawatch, int *ret_nslaves)
-{
-  struct histogram_s *hist;
-  int                 master_tid;
-  int                *slave_tid;
-  int                 nslaves;
-  int                 nsent;	/* # of seqs we've asked for so far       */
-  int                 ndone;	/* # of seqs we've got results for so far */
-  int		      packet;	/* # of seqs to have a slave do           */
-  float               max;
-  int                 slaveidx;	/* id of a slave */
-  float              *sc;        /* scores returned by a slave */
-  Stopwatch_t         slavewatch;
-  int                 i;
-  
-  StopwatchZero(extrawatch);
-  hist = AllocHistogram(-200, 200, 100);
-  max  = -FLT_MAX;
-
-  /* Initialize PVM
-   */
-  if ((master_tid = pvm_mytid()) < 0)
-    Die("pvmd not responding -- do you have PVM running?");
-#if DEBUGLEVEL >= 1
-  pvm_catchout(stderr);		/* catch output for debugging */
-#endif
-  PVMSpawnSlaves("hmmcalibrate-pvm", &slave_tid, &nslaves);
-
-  /* Initialize the slaves
-   */
-  pvm_initsend(PvmDataDefault);
-  pvm_pkfloat(&lenmean,       1, 1);
-  pvm_pkfloat(&lensd,         1, 1);
-  pvm_pkint(  &fixedlen,      1, 1);
-  pvm_pkint(  &Alphabet_type, 1, 1);
-  pvm_pkint(  &seed,          1, 1);
-  if (! PVMPackHMM(hmm)) Die("Failed to pack the HMM");
-  pvm_mcast(slave_tid, nslaves, HMMPVM_INIT);
-  SQD_DPRINTF1(("Initialized %d slaves\n", nslaves));
-
-  /* Confirm slaves' OK status.
-   */
-  PVMConfirmSlaves(slave_tid, nslaves);
-  SQD_DPRINTF1(("Slaves confirm that they're ok...\n"));
- 
-  /* Load the slaves
-   */
-  nsent = ndone = 0;
-  for (slaveidx = 0; slaveidx < nslaves; slaveidx++)
-    {
-      packet    = (nsample - nsent > lumpsize ? lumpsize : nsample - nsent);
-
-      pvm_initsend(PvmDataDefault);
-      pvm_pkint(&packet,    1, 1);
-      pvm_pkint(&slaveidx,  1, 1);
-      pvm_send(slave_tid[slaveidx], HMMPVM_WORK);
-      nsent += packet;
-    }
-  SQD_DPRINTF1(("Loaded %d slaves\n", nslaves));
-
-  /* Receive/send loop
-   */
-  sc = MallocOrDie(sizeof(float) * lumpsize);
-  while (nsent < nsample)
-    {
-				/* integrity check of slaves */
-      PVMCheckSlaves(slave_tid, nslaves);
-
-				/* receive results */
-      SQD_DPRINTF2(("Waiting for results...\n"));
-      pvm_recv(-1, HMMPVM_RESULTS);
-      pvm_upkint(&slaveidx,   1, 1);
-      pvm_upkint(&packet,     1, 1);
-      pvm_upkfloat(sc,   packet, 1);
-      SQD_DPRINTF2(("Got results.\n"));
-      ndone += packet;
-
-				/* store results */
-      for (i = 0; i < packet; i++) {
-	AddToHistogram(hist, sc[i]);
-	if (sc[i] > max) max = sc[i];
-      }
-				/* send new work */
-      packet    = (nsample - nsent > lumpsize ? lumpsize : nsample - nsent);
-
-      pvm_initsend(PvmDataDefault);
-      pvm_pkint(&packet,    1, 1);
-      pvm_pkint(&slaveidx,  1, 1);
-      pvm_send(slave_tid[slaveidx], HMMPVM_WORK);
-      SQD_DPRINTF2(("Told slave %d to do %d more seqs.\n", slaveidx, packet));
-      nsent += packet;
-    }
-      
-  /* Wait for the last output to come in.
-   */
-  while (ndone < nsample)
-    {
-				/* integrity check of slaves */
-      PVMCheckSlaves(slave_tid, nslaves);
-
-				/* receive results */
-      SQD_DPRINTF1(("Waiting for final results...\n"));
-      pvm_recv(-1, HMMPVM_RESULTS);
-      pvm_upkint(&slaveidx, 1, 1);
-      pvm_upkint(&packet,   1, 1);
-      pvm_upkfloat(sc, packet, 1);
-      SQD_DPRINTF2(("Got some final results.\n"));
-      ndone += packet;
-				/* store results */
-      for (i = 0; i < packet; i++) {
-	AddToHistogram(hist, sc[i]);
-	if (sc[i] > max) max = sc[i];
-      }
-    }
-
-  /* Shut down the slaves: send -1,-1,-1.
-   */
-  pvm_initsend(PvmDataDefault);
-  packet = -1;
-  pvm_pkint(&packet, 1, 1);
-  pvm_pkint(&packet, 1, 1);
-  pvm_pkint(&packet, 1, 1);
-  pvm_mcast(slave_tid, nslaves, HMMPVM_WORK);
-
-  /* Collect stopwatch results; quit the VM; return.
-   */
-  for (i = 0; i < nslaves; i++)
-    {
-      pvm_recv(-1, HMMPVM_RESULTS);
-      pvm_upkint(&slaveidx, 1, 1);
-      StopwatchPVMUnpack(&slavewatch);
-
-      SQD_DPRINTF1(("Slave %d finished; says it used %.2f cpu, %.2f sys\n",
-		    slaveidx, slavewatch.user, slavewatch.sys));
-
-      StopwatchInclude(extrawatch, &slavewatch);
-    }
-
-  free(slave_tid);
-  free(sc);
-  pvm_exit();
-  *ret_hist    = hist;
-  *ret_max     = max;
-  *ret_nslaves = nslaves;
-  return;
-}
-#endif /* HMMER_PVM */
-
-
 

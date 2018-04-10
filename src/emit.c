@@ -1,10 +1,16 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* emit.c
  * SRE, Sun Mar  8 12:26:58 1998
- * CVS $Id$
+ * CVS $Id: emit.c 913 2003-10-04 18:26:49Z eddy $
  * 
  * Generation of sequences/traces from an HMM.
  */

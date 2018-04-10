@@ -1,6 +1,12 @@
 /************************************************************
  * Copyright (C) 1998 Ian Holmes (ihh@sanger.ac.uk)
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* postprob.c
@@ -8,7 +14,7 @@
  * Derived from core_algorithms.c (SRE, Nov 11 1996)
  * Incorporated SRE, Sat Nov  6 09:07:12 1999 [Cold Spring Harbor]
  *
- * RCS $Id$ 
+ * RCS $Id: postprob.c 910 2003-10-02 16:39:41Z eddy $ 
  *****************************************************************
  * IHH's notes:
  * 
@@ -450,7 +456,7 @@ P7OptimalAccuracyTrace(int L,
   int curralloc;		/* current allocated length of trace */
   int tpos;			/* position in trace */
   int i;			/* position in seq (1..L) */
-  int k;			/* position in model (1..M) */
+  int k = 0;			/* position in model (1..M) */
   int **xmx, **mmx, **imx, **dmx;
   int sc;			/* temp var for pre-emission score */
 

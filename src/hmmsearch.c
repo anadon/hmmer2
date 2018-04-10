@@ -1,15 +1,17 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* hmmsearch.c
  * SRE, Tue Jan  7 17:19:20 1997 [St. Louis]
  *
  * Search a sequence database with a profile HMM.
- * Conditionally includes PVM parallelization when HMMER_PVM is defined
- *    at compile time; hmmsearch --pvm runs the PVM version.
- *
- * CVS $Id$
  */
 
 #include "config.h"		/* compile-time configuration constants */
@@ -20,12 +22,8 @@
 #include <string.h>
 #include <limits.h>
 #include <float.h>
-#ifdef HMMER_THREADS
 #include <pthread.h>
-#endif
-#ifdef HMMER_PVM
-#include <pvm3.h>
-#endif
+#include <unistd.h>
 
 #include "squid.h"		/* general sequence analysis library    */
 #include "structs.h"		/* data structures, macros, #define's   */
@@ -55,7 +53,6 @@ static char experts[] = "\
    --forward      : use the full Forward() algorithm instead of Viterbi\n\
    --informat <s> : sequence file is in format <s>\n\
    --null2        : turn OFF the post hoc second null model\n\
-   --pvm          : run on a Parallel Virtual Machine (PVM)\n\
    --xnu          : turn ON XNU filtering of target protein sequences\n\
 ";
 
@@ -75,7 +72,6 @@ static struct opt_s OPTIONS[] = {
   { "--forward", FALSE, sqdARG_NONE },  
   { "--informat",FALSE, sqdARG_STRING},
   { "--null2",   FALSE, sqdARG_NONE },
-  { "--pvm",     FALSE, sqdARG_NONE },
   { "--xnu",     FALSE, sqdARG_NONE },
 
 };
@@ -86,16 +82,12 @@ static void main_loop_serial(struct plan7_s *hmm, SQFILE *sqfp, struct threshold
 			     int do_forward, int do_null2, int do_xnu, 
 			     struct histogram_s *histogram, struct tophit_s *ghit, 
 			     struct tophit_s *dhit, int *ret_nseq);
-static void main_loop_pvm(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, 
-			  int do_forward, int do_null2, int do_xnu, 
-			  struct histogram_s *histogram, struct tophit_s *ghit, 
-			  struct tophit_s *dhit, int *ret_nseq);
 static void main_loop_threaded(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh,
 			       int do_forward, int do_null2, int do_xnu, int num_threads,
 			       struct histogram_s *histogram, struct tophit_s *ghit, 
 			       struct tophit_s *dhit, int *ret_nseq);
 
-#ifdef HMMER_THREADS
+
 /* POSIX threads version:
  * the threads share a workpool_s structure amongst themselves,
  * for obtaining locks on input HMM file and output histogram and
@@ -136,7 +128,7 @@ static struct workpool_s *workpool_start(struct plan7_s *hmm, SQFILE *sqfp,
 static void  workpool_stop(struct workpool_s *wpool);
 static void  workpool_free(struct workpool_s *wpool);
 static void *worker_thread(void *ptr);
-#endif /* HMMER_THREADS */
+
 
 
 
@@ -165,7 +157,7 @@ main(int argc, char **argv)
   char   *name, *desc;          /* hit sequence name and description       */
   int     sqlen;		/* length of seq that was hit              */
   int     nseq;			/* number of sequences searched            */
-  int     Z;			/* # of seqs for purposes of E-val calc    */
+//  int     Z;			/* # of seqs for purposes of E-val calc    */
   int     domidx;		/* number of this domain                   */
   int     ndom;			/* total # of domains in this seq          */
   int     namewidth;		/* max width of sequence name              */
@@ -181,11 +173,8 @@ main(int argc, char **argv)
   int   do_null2;		/* TRUE to adjust scores with null model #2 */
   int   do_forward;		/* TRUE to use Forward() not Viterbi()      */
   int   do_xnu;			/* TRUE to filter sequences thru XNU        */
-  int   do_pvm;			/* TRUE to run on Parallel Virtual Machine  */
   int   be_backwards;		/* TRUE to be backwards-compatible in output*/
   int   num_threads;		/* number of worker threads                 */
-  int   threads_support;	/* TRUE if threads support compiled in      */
-  int   pvm_support;		/* TRUE if PVM support compiled in          */
 
   /*********************************************** 
    * Parse command line
@@ -195,20 +184,10 @@ main(int argc, char **argv)
   do_forward  = FALSE;
   do_null2    = TRUE;
   do_xnu      = FALSE;
-  do_pvm      = FALSE;  
-  Z           = 0;
+  //Z           = 0;
   be_backwards= FALSE; 
 
-  pvm_support     = FALSE;
-  threads_support = FALSE;
-  num_threads     = 0;
-#ifdef HMMER_THREADS
-  num_threads     = ThreadNumber(); 
-  threads_support = TRUE;
-#endif
-#ifdef HMMER_PVM
-  pvm_support     = TRUE;
-#endif
+  num_threads     = sysconf(_SC_NPROCESSORS_ONLN);
 
   Alimit         = INT_MAX;	/* no limit on alignment output       */
   thresh.globE   = 10.0;	/* use a reasonable Eval threshold;   */
@@ -233,7 +212,6 @@ main(int argc, char **argv)
     else if (strcmp(optname, "--domT")    == 0) thresh.domT    = atof(optarg);
     else if (strcmp(optname, "--forward") == 0) do_forward     = TRUE;
     else if (strcmp(optname, "--null2")   == 0) do_null2       = FALSE;
-    else if (strcmp(optname, "--pvm")     == 0) do_pvm         = TRUE;
     else if (strcmp(optname, "--xnu")     == 0) do_xnu         = TRUE;
     else if (strcmp(optname, "--informat") == 0) {
       format = String2SeqfileFormat(optarg);
@@ -253,11 +231,6 @@ main(int argc, char **argv)
   hmmfile = argv[optind++];
   seqfile = argv[optind++]; 
   
-  if (do_pvm && ! pvm_support) 
-    Die("PVM support is not compiled into your HMMER software; --pvm doesn't work.");
-  if (num_threads && ! threads_support)
-    Die("POSIX threads support is not compiled into HMMER; --cpu doesn't have any effect");
-
   /* Try to work around inability to autodetect from a pipe or .gz:
    * assume FASTA format
    */
@@ -305,8 +278,6 @@ main(int argc, char **argv)
   HMMERBanner(stdout, banner);
   printf(   "HMM file:                   %s [%s]\n", hmmfile, hmm->name);
   printf(   "Sequence database:          %s\n", seqfile); 
-  if (do_pvm)
-    printf( "PVM:                        ACTIVE\n");
   printf(   "per-sequence score cutoff:  ");
   if (thresh.globT == -FLT_MAX) printf("[none]\n");
   else  {
@@ -343,10 +314,7 @@ main(int argc, char **argv)
   ghit      = AllocTophits(200);         /* per-seq hits: 200=lumpsize */
   dhit      = AllocTophits(200);         /* domain hits:  200=lumpsize */
 
-  if (pvm_support && do_pvm)
-    main_loop_pvm(hmm, sqfp, &thresh, do_forward, do_null2, do_xnu, 
-		  histogram, ghit, dhit, &nseq);
-  else if (threads_support && num_threads)
+  if (num_threads > 1)
     main_loop_threaded(hmm, sqfp, &thresh, do_forward, do_null2, do_xnu, num_threads,
 		       histogram, ghit, dhit, &nseq);    
   else
@@ -534,8 +502,7 @@ main(int argc, char **argv)
  * Date:     SRE, Wed Sep 23 10:20:49 1998 [St. Louis]
  *
  * Purpose:  Search an HMM against a sequence database.
- *           main loop for the serial (non-PVM, non-threads)
- *           version.
+ *           main loop for the serial version.
  *           
  *           In:   HMM and open sqfile, plus options
  *           Out:  histogram, global hits list, domain hits list, nseq.
@@ -737,254 +704,6 @@ main_loop_serial(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, 
 
 
 
-#ifdef HMMER_PVM
-/*****************************************************************
- * PVM specific functions
- ****************************************************************/ 
-
-/* Function: main_loop_pvm()
- * Date:     SRE, Wed Sep 23 10:36:44 1998 [St. Louis]
- *
- * Purpose:  Search an HMM against a sequence database.
- *           main loop for the PVM version.
- *           
- *           In:   HMM and open sqfile, plus options
- *           Out:  histogram, global hits list, domain hits list, nseq.
- *
- * Args:     hmm        - the HMM to search with. scoring form.
- *           sqfp       - open SQFILE for sequence database
- *           thresh     - score/evalue threshold information
- *           do_forward - TRUE to score using Forward()        
- *           do_null2   - TRUE to use ad hoc null2 score correction
- *           do_xnu     - TRUE to apply XNU mask
- *           histogram  - RETURN: score histogram
- *           ghit       - RETURN: ranked global scores
- *           dhit       - RETURN: ranked domain scores
- *           ret_nseq   - RETURN: actual number of seqs searched
- *           
- * Returns:  (void)
- */
-static void
-main_loop_pvm(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, int do_forward,
-	      int do_null2, int do_xnu, struct histogram_s *histogram, 
-	      struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq)
-{
-  char *seq;                    /* target sequence */
-  unsigned char *dsq;           /* digitized target seq */
-  SQINFO sqinfo;                /* optional info about target seq */
-  int   master_tid;		/* master's (my) PVM TID */
-  int  *slave_tid;              /* array of slave TID's  */
-  int   nslaves;		/* number of slaves      */
-  int   code;			/* status code rec'd from a slave */
-  int   nseq;			/* number of sequences searched */
-  int   sent_trace;		/* TRUE if slave gave us a trace */
-  unsigned char **dsqlist;      /* remember what seqs slaves are doing */
-  char **namelist;              /* remember what seq names slaves are doing */
-  char **acclist ;              /* remember what seq accessions slaves are doing */
-  char **desclist;              /* remember what seq desc's slaves are doing */
-  int   *lenlist;               /* remember lengths of seqs slaves are doing */
-  int    slaveidx;		/* counter for slaves */
-  float  sc;			/* score of an alignment */
-  double pvalue;		/* P-value of a score of an alignment */
-  struct p7trace_s *tr;         /* Viterbi traceback of an alignment */
-  int    i;			/* generic counter */
-
-  /* Initialize PVM.
-   */
-  SQD_DPRINTF1(("Requesting master TID...\n"));
-  master_tid = pvm_mytid();
-#if DEBUGLEVEL >= 1
-  pvm_catchout(stderr);		/* catch output for debugging */
-#endif
-  SQD_DPRINTF1(("Spawning slaves...\n"));
-  PVMSpawnSlaves("hmmsearch-pvm", &slave_tid, &nslaves);
-  SQD_DPRINTF1(("Spawned a total of %d slaves...\n", nslaves));
- 
-  /* Initialize the slaves by broadcast.
-   */
-  SQD_DPRINTF1(("Broadcasting to %d slaves...\n", nslaves));
-  pvm_initsend(PvmDataDefault);
-  pvm_pkfloat(&(thresh->globT), 1, 1);
-  pvm_pkdouble(&(thresh->globE), 1, 1);
-  pvm_pkint(&(thresh->Z),          1, 1);
-  pvm_pkint(&do_forward, 1, 1);
-  pvm_pkint(&do_null2,   1, 1);
-  pvm_pkint(&Alphabet_type, 1, 1);
-  PVMPackHMM(hmm);
-  pvm_mcast(slave_tid, nslaves, HMMPVM_INIT);
-  SQD_DPRINTF1(("Slaves should be ready...\n"));
-
-  /* Confirm slaves' OK status.
-   */
-  PVMConfirmSlaves(slave_tid, nslaves);
-  SQD_DPRINTF1(("Slaves confirm that they're ok...\n"));
-  
-  /* Alloc arrays for remembering what seq each
-   * slave was working on.
-   */
-  namelist = MallocOrDie(sizeof(char *) * nslaves);
-  acclist  = MallocOrDie(sizeof(char *) * nslaves);
-  desclist = MallocOrDie(sizeof(char *) * nslaves);
-  dsqlist  = MallocOrDie(sizeof(unsigned char *) * nslaves);
-  lenlist  = MallocOrDie(sizeof(int) * nslaves);
-
-  /* Load the slaves.
-   * Give them all a sequence number and a digitized sequence
-   * to work on.
-   * A side effect of the seq number is that we assign each slave
-   * a number from 0..nslaves-1.
-   */
-  for (nseq = 0; nseq < nslaves; nseq++)
-    {
-      if (! ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) break;
-      if (sqinfo.len == 0) { nseq--; continue; }
-
-      dsq = DigitizeSequence(seq, sqinfo.len);
-      if (do_xnu && Alphabet_type == hmmAMINO) XNU(dsq, sqinfo.len);
-
-      pvm_initsend(PvmDataDefault);
-      pvm_pkint(&nseq, 1, 1);
-      pvm_pkint(&(sqinfo.len), 1, 1);
-      pvm_pkbyte((char *) dsq, sqinfo.len+2, 1); /* is this char * casting safe?  */
-      pvm_send(slave_tid[nseq], HMMPVM_WORK);
-      SQD_DPRINTF1(("sent a dsq : %d bytes\n", sqinfo.len+2));
-
-      namelist[nseq] = Strdup(sqinfo.name);
-      acclist[nseq]  = (sqinfo.flags & SQINFO_ACC)  ? Strdup(sqinfo.acc)  : NULL;
-      desclist[nseq] = (sqinfo.flags & SQINFO_DESC) ? Strdup(sqinfo.desc) : NULL;
-      lenlist[nseq]  = sqinfo.len;
-      dsqlist[nseq]  = dsq;
-
-      FreeSequence(seq, &sqinfo);
-    }
-  SQD_DPRINTF1(("%d slaves are loaded\n", nseq));
-  
-  /* main receive/send loop
-   */
-  while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) 
-    {
-      if (sqinfo.len == 0) { continue; }
-      nseq++;
-				/* check slaves before blocking */
-      PVMCheckSlaves(slave_tid, nslaves);
-
-				/* receive output */
-      SQD_DPRINTF1(("Waiting for a slave to give me output...\n"));
-      pvm_recv(-1, HMMPVM_RESULTS);
-      pvm_upkint(&slaveidx, 1, 1);     /* # of slave who's sending us stuff */
-      pvm_upkfloat(&sc, 1, 1);         /* score   */
-      pvm_upkdouble(&pvalue, 1, 1);    /* P-value */
-      pvm_upkint(&sent_trace, 1, 1);   /* TRUE if trace is coming */
-      tr = (sent_trace) ? PVMUnpackTrace() : NULL;
-      SQD_DPRINTF1(("Slave %d finished %s for me...\n", slaveidx, namelist[slaveidx]));
-
-				/* send new work */
-      dsq = DigitizeSequence(seq, sqinfo.len);
-      if (do_xnu) XNU(dsq, sqinfo.len);
-
-      pvm_initsend(PvmDataDefault);
-      pvm_pkint(&nseq, 1, 1);
-      pvm_pkint(&(sqinfo.len), 1, 1);
-      pvm_pkbyte((char *) dsq, sqinfo.len+2, 1); /* safety of char * cast unknown. */
-      pvm_send(slave_tid[slaveidx], HMMPVM_WORK);
-      
-				/* process output */
-      if (sent_trace)
-	{
-	  sc = PostprocessSignificantHit(ghit, dhit, 
-					 tr, hmm, dsqlist[slaveidx], lenlist[slaveidx],
-					 namelist[slaveidx], acclist[slaveidx], desclist[slaveidx],
-					 do_forward, sc,
-					 do_null2,
-					 thresh,
-					 FALSE); /* FALSE-> not hmmpfam mode, hmmsearch mode */
-	  P7FreeTrace(tr);
-	}
-      AddToHistogram(histogram, sc);
-
-				/* record seq info for seq we just sent */
-      free(namelist[slaveidx]);
-      if (acclist[slaveidx]  != NULL) free(acclist[slaveidx]);
-      if (desclist[slaveidx] != NULL) free(desclist[slaveidx]);
-      free(dsqlist[slaveidx]);
-
-      dsqlist[slaveidx]  = dsq;
-      namelist[slaveidx] = Strdup(sqinfo.name);
-      acclist[slaveidx]  = (sqinfo.flags & SQINFO_ACC)  ? Strdup(sqinfo.acc)  : NULL;
-      desclist[slaveidx] = (sqinfo.flags & SQINFO_DESC) ? Strdup(sqinfo.desc) : NULL;
-      lenlist[slaveidx]  = sqinfo.len;
-
-      FreeSequence(seq, &sqinfo); 
-    }
-  SQD_DPRINTF1(("End of receive/send loop\n"));
-
-  /* Collect the output. All n slaves are still working.
-   */
-  for (i = 0; i < nslaves && i < nseq; i++)
-    {
-				/* don't check slaves (they're exiting normally);
-				   window of vulnerability here to slave crashes */
-				/* receive output */
-      pvm_recv(-1, HMMPVM_RESULTS);
-      pvm_upkint(&slaveidx, 1, 1);     /* # of slave who's sending us stuff */
-      pvm_upkfloat(&sc, 1, 1);         /* score   */
-      pvm_upkdouble(&pvalue, 1, 1);    /* P-value */
-      pvm_upkint(&sent_trace, 1, 1);   /* TRUE if trace is coming */
-      tr = (sent_trace) ? PVMUnpackTrace() : NULL;
-      SQD_DPRINTF1(("Slave %d finished %s for me...\n", slaveidx, namelist[slaveidx]));
-
-      			/* process output */
-      if (sent_trace)
-	{
-	  sc = PostprocessSignificantHit(ghit, dhit, 
-					 tr, hmm, dsqlist[slaveidx], lenlist[slaveidx],
-					 namelist[slaveidx], acclist[slaveidx], desclist[slaveidx],
-					 do_forward, sc,
-					 do_null2,
-					 thresh,
-					 FALSE); /* FALSE-> not hmmpfam mode, hmmsearch mode */
-	  P7FreeTrace(tr);
-	}
-      SQD_DPRINTF2(("AddToHistogram: %s\t%f\n", namelist[slaveidx], sc));
-      AddToHistogram(histogram, sc);
-
-				/* free seq info */
-      free(namelist[slaveidx]);
-      if (acclist[slaveidx]  != NULL) free(acclist[slaveidx]);
-      if (desclist[slaveidx] != NULL) free(desclist[slaveidx]);
-      free(dsqlist[slaveidx]);
-
-      				/* send cleanup/shutdown flag to slave */
-      pvm_initsend(PvmDataDefault);
-      code = -1;
-      pvm_pkint(&code, 1, 1);
-      pvm_send(slave_tid[slaveidx], HMMPVM_WORK);
-    }
-
-  
-  /* Cleanup; quit the VM; and return
-   */
-  free(slave_tid);
-  free(dsqlist);
-  free(namelist);
-  free(acclist);
-  free(desclist);
-  free(lenlist);
-  pvm_exit();
-  *ret_nseq = nseq;
-  return;
-}
-#else /* HMMER_PVM off, no PVM support, dummy function: */
-static void
-main_loop_pvm(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, int do_forward,
-	      int do_null2, int do_xnu, struct histogram_s *histogram, 
-	      struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq)
-{
-  Die("No PVM support");
-}
-#endif /*HMMER_PVM*/
-
-#ifdef HMMER_THREADS
 /*****************************************************************
  * POSIX threads implementation.
  * 
@@ -1339,14 +1058,3 @@ worker_thread(void *ptr)
   }
 /* end 'infinite' loop over seqs in this thread */
 }
-#else /*HMMER_THREADS off; no threads support; dummy stub: */
-static void
-main_loop_threaded(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, int do_forward,
-		   int do_null2, int do_xnu, int num_threads,
-		   struct histogram_s *histogram, 
-		   struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq)
-{
-  Die("No threads support");
-}
-#endif /* HMMER_THREADS */
-

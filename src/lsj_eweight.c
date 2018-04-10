@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* lsjfuncs.c
@@ -10,7 +16,7 @@
  * achieving a certain target entropy loss, relative to background
  * null distribution.
  *
- * CVS $Id$
+ * CVS $Id: lsj_eweight.c 950 2004-06-16 14:46:04Z eddy $
  */
 
 #include "config.h"
@@ -45,14 +51,14 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
   int j;
   float eff_no;                  /* New effective sequence number */
   float current;                 /* Current mean match state entropy */
-  float prevent;                 /* Previous mean match state entropy */
+//  float prevent;                 /* Previous mean match state entropy */
   float scale;                   /* Current model counts scaling factor */
   float leftscale;               /* Bracket scaling value used in binary search. Lowest mean entropy value. */
   float rightscale;              /* Bracket scaling value used in binary search. Highest mean entropy value. */
   float *pmat;                   /* Temp array of match state counts */
   float *ent;                    /* Match state entropy values */
   int count;                     /* Counter for binary search */
-  int flag;                      /* Used to detect entropy adjustment failure */
+//  int flag;                      /* Used to detect entropy adjustment failure */
 
   /**************
    * Allocations
@@ -66,7 +72,7 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
   current  = 0.;
   scale    = 1.;
   count    = 0;
-  flag     = 0;
+//  flag     = 0;
 
   for(i = 0; i < Alphabet_size; i++){
     pmat[i] = 0;
@@ -132,7 +138,7 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
     /* Calculate current scaling factor based on bracket values */
     scale = (leftscale + rightscale)/2;
 
-    prevent = current;
+    //prevent = current;
 
     /*******************************************
      * Scale the counts and re-calc the entropy
@@ -190,15 +196,15 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
 void ModelContent(float *ent1, float *ent2, int M)
 {
   int i;
-  float sum1, sum2, sum3;
-  float mean1, mean2, mean3;
+  float sum1, sum2; //, sum3;
+  float mean1, mean2; //, mean3;
 
   sum1  = 0;
   sum2  = 0;
-  sum3  = 0;
+  //sum3  = 0;
   mean1 = 0;
   mean2 = 0;
-  mean3 = 0;
+  //mean3 = 0;
 
   for(i = 1; i < M+1; i++){
     sum1 += ent1[i];

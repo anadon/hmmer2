@@ -1,0 +1,14 @@
+HMMER 2.5j release notes
+Mon Apr 9 23:05:53 2018
+________________________________________________________________
+
+2.5j is a touch-up release.  There are no additional features, but a
+few stability enhancements, simplifications, and even feature removals.
+These changes are to allow co-installation with Hmmer3 and the coming
+Hmmer4.  The autotools build system and Parallel Virtual Machine
+support have been removed, as well as posix threads will now
+unconditionally be built.  This is not intended for further development
+as it was abandoned for a good reason.
+
+- Josh Marshall
+- Michigan Technological University

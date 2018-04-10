@@ -9,7 +9,7 @@
 #pragma once
 
 /*****************************************************************
- * 1. This first section consists of compile-time constants that control 
+ * 1. This first section consists of compile-time constants that control
  *    HMMER's computational behavior (memory and processor use).
  *    It can be edited and configured manually before compilation.
  *****************************************************************/
@@ -30,7 +30,7 @@
 
 
 /*****************************************************************
- * 2. The next section consists of compile-time constants that control 
+ * 2. The next section consists of compile-time constants that control
  *    empirically tuned HMMER default parameters.
  *    You can edit it, but you ought not to, unless you're trying to
  *    improve on our empirical data.
@@ -67,14 +67,14 @@
 
 /*****************************************************************
  * 4. The final section isn't human editable at all.
- *    It is configured automatically by the ./configure script. 
+ *    It is configured automatically by the ./configure script.
  *    DO NOT EDIT BELOW THIS LINE.
  *****************************************************************/
 
 /* Version info - set once for whole package in configure.ac
  */
 #define PACKAGE_NAME "HMMER"
-#define PACKAGE_VERSION "2.4i"
+#define PACKAGE_VERSION "2.5j"
 #define PACKAGE_DATE "December 2006"
 #define PACKAGE_COPYRIGHT "Copyright (C) 1992-2006 HHMI Janelia Farm"
 #define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"

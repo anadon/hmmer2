@@ -1,6 +1,6 @@
 # HMMER benchmark exercises, in sqc command format
 # SRE, Fri Apr 11 16:15:45 2003
-# CVS $Id$
+# CVS $Id: benchmark.sqc 987 2005-01-21 16:34:17Z eddy $
 
 1 prep        hmm            @hmmbuild@ -F --wnone %BENCH.HMM% fn3.seed
 1 prep        seqs           @shuffle@ -i -n 10000 -t 350 --amino -o %BENCH.FA%

@@ -19,15 +19,15 @@ CC     = gcc
 # package will install. There must be a man page for each one of them
 # in the appropriate places (documentation/man for HMMER)
 #
-PROGS = binaries/hmmalign\
-	binaries/hmmbuild\
-	binaries/hmmcalibrate\
-	binaries/hmmconvert\
-	binaries/hmmemit\
-	binaries/hmmfetch\
-	binaries/hmmindex\
-	binaries/hmmpfam\
-	binaries/hmmsearch
+PROGS = hmmalign\
+        hmmbuild\
+        hmmcalibrate\
+        hmmconvert\
+        hmmemit\
+        hmmfetch\
+        hmmindex\
+        hmmpfam\
+        hmmsearch
 
 HMMER2_LIBS = libsquid.a \
               libhmmer.a
@@ -58,8 +58,12 @@ src/libhmmer.a:
 #          Prefix those paths with ${DESTDIR} (rarely used, usually null;
 #          may be set on a make command line when building contrib RPMs).
 install:
-	cd src ; install -D -t  ${DESTDIR}/$(BINDIR)/ $(PROGS)$(PROGSUFFIX)
-	for file in hmmer $(PROGS); do\
+	mkdir -p ${DESTDIR}/$(BINDIR)/
+
+	for file in $(PROGS) ; do\
+		cp src/$$file "${DESTDIR}/$(BINDIR)/$$file""$(PROGSUFFIX)" ;\
+	done
+	for file in hmmer2 $(ls documentation/man/); do\
 	   install -D documentation/man/$$file.man ${DESTDIR}/$(MANDIR)/man$(MANSUFFIX)/$$file.$(MANSUFFIX);\
 	done
 
@@ -67,10 +71,10 @@ install:
 # managed by a package management system like apt, rpm, pacman, or similar.
 uninstall:
 	for file in $(PROGS) ; do\
-	   rm ${BINDIR}/$$file;\
+	   rm "${BINDIR}/$$file""$(PROGSUFFIX)";\
 	done
-	for file in hmmer $(PROGS); do\
-	   rm $(MANDIR)/man$(MANSUFFIX)/$$file.$(MANSUFFIX);\
+	for file in hmmer2 $(ls documentation/man/); do\
+	   rm -f $(MANDIR)/man$(MANSUFFIX)/$$file.$(MANSUFFIX);\
 	done
 
 # after building, prep the whole directory for a binary distribution: symlink

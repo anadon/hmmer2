@@ -1,12 +1,18 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* hmmalign.c
  * SRE, Thu Dec 18 16:05:29 1997 [St. Louis]
  * 
  * main() for aligning a set of sequences to an HMM.
- * CVS $Id$
+ * CVS $Id: hmmalign.c 912 2003-10-03 19:12:59Z eddy $
  */ 
 
 #include "config.h"		/* compile-time configuration constants */

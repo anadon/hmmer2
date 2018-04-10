@@ -1,6 +1,12 @@
 /************************************************************
  * Copyright (C) 1998 Ian Holmes (ihh@sanger.ac.uk)
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* postprob.h

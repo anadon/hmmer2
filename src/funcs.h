@@ -1,9 +1,15 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* funcs.h 
- * SVN $Id$
+ * SVN $Id: funcs.h 1740 2006-12-05 14:21:36Z eddys $
  *
  * Declarations of external functions in HMMER.
  */            
@@ -311,28 +317,10 @@ extern void P7PriorifyEmissionVector(float *vec, struct p7prior_s *pri,
 				     float *ret_mix);
 
 
-#ifdef HMMER_PVM
-/* from pvm.c
- * PVM Parallel Virtual Machine implementation
- */
-extern void              PVMSpawnSlaves(char *slave, int **ret_tid, int *ret_nslaves);
-extern void              PVMConfirmSlaves(int *slave_tid, int nslaves);
-extern void              PVMCheckSlaves(int *slave_tid, int nslaves);
-extern void              PVMKillSlaves(int *slave_tid, int nslaves);
-extern int               PVMPackString(char *s);
-extern char *            PVMUnpackString(void);
-extern int               PVMPackTrace(struct p7trace_s *tr);
-extern struct p7trace_s *PVMUnpackTrace(void);
-extern int               PVMPackHMM(struct plan7_s *hmm);
-extern struct plan7_s *  PVMUnpackHMM(void);
-#endif /*HMMER_PVM*/
-
-#ifdef HMMER_THREADS
 /* from threads.c
  * POSIX threads implementation
  */
 extern int   ThreadNumber(void);
-#endif /*HMMER_THREADS*/
 
 
 /* from tophits.c

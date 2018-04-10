@@ -2,7 +2,7 @@
  * main() for HMM construction from an alignment.
  *
  * SRE, Mon Nov 18 12:41:29 1996
- * SVN $Id$
+ * SVN $Id: hmmbuild.c 1748 2006-12-05 18:24:23Z eddys $
  */
 
 #include "config.h"		/* compile-time configuration constants */
@@ -246,7 +246,7 @@ main(int argc, char **argv)
   MSA             *msa;         /* a multiple sequence alignment           */
   unsigned char  **dsq;         /* digitized unaligned aseq's              */
   struct plan7_s  *hmm;         /* constructed HMM; written to hmmfile     */
-  struct p7prior_s *pri;        /* Dirichlet priors to use                 */
+  struct p7prior_s *pri = NULL; /* Dirichlet priors to use                 */
   struct p7trace_s **tr;        /* fake tracebacks for aseq's              */
   int              idx;		/* counter for sequences                   */
   int              nali;	/* count number of alignments/HMMs         */
@@ -1095,7 +1095,7 @@ position_average_score(struct plan7_s    *hmm,
 		       float             *ret_avg)
 {
   unsigned char sym;
-  int    pos;                   /* position in seq */
+//  int    pos;                   /* position in seq */
   int    tpos;                  /* position in trace/state sequence */
   float *counts;                /* counts at each position */
   float  avg;                   /* RETURN: average overall */
@@ -1113,7 +1113,7 @@ position_average_score(struct plan7_s    *hmm,
   for (idx = 0; idx < nseq; idx++)
     for (tpos = 0; tpos < tr[idx]->tlen; tpos++)
       {
-	pos = tr[idx]->pos[tpos];
+	//pos = tr[idx]->pos[tpos];
 	sym = dsq[idx][tr[idx]->pos[tpos]];
 	k   = tr[idx]->nodeidx[tpos];
 
@@ -1428,7 +1428,7 @@ maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
 static void
 set_model_name(struct plan7_s *hmm, char *setname, char *msa_name, char *alifile, int nali)
 {
-  char *name;
+  char *name = NULL;
 
   printf("%-40s ... ", "Set model name, record commandline");
   fflush(stdout);
@@ -1448,7 +1448,7 @@ set_model_name(struct plan7_s *hmm, char *setname, char *msa_name, char *alifile
 	Die("Oops. Wait. I need name annotation on each alignment.\n");
     }
   Plan7SetName(hmm, name);
-  free(name);
+  if(name) free(name);
   printf("done. [%s]\n", hmm->name);
 }
 
@@ -1539,6 +1539,12 @@ save_hmmbuild_alignment(FILE *alignfp, MSA *msa, unsigned char **dsq, struct pla
 
 
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 

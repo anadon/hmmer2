@@ -3,7 +3,7 @@
  * 
  * Test driver for P7ParsingViterbi(); alignment in linear memory.
  * 
- * CVS $Id$
+ * CVS $Id: parsingviterbi_test.c 913 2003-10-04 18:26:49Z eddy $
  */
 
 #include "config.h"

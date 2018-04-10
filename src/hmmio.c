@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* hmmio.c
@@ -976,9 +982,9 @@ read_asc19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
 
   hmm = AllocPlan7Shell();
   				/* read M from first line */
-  if ((s = Getword(fp, sqdARG_INT))    == NULL) goto FAILURE;  M = atoi(s);          /* model length */
+  if ((s = Getword(fp, sqdARG_INT))    == NULL) goto FAILURE; else M = atoi(s);          /* model length */
   if ((s = Getword(fp, sqdARG_INT))    == NULL) goto FAILURE;                        /* ignore alphabet size */
-  if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;  Plan7SetName(hmm, s); /* name */
+  if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE; else Plan7SetName(hmm, s); /* name */
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE; /* alphabet type */ 
   s2upper(s);           
   if      (strcmp(s, "AMINO") == 0)   atype = hmmAMINO;
@@ -1585,7 +1591,7 @@ read_plan9_aschmm(FILE *fp, int version)
   int   k;			/* state number  */
   int   i;			/* symbol number */
   int   asize;			/* Alphabet size */
-  int   atype;			/* Alphabet type */
+  int   atype = -1;			/* Alphabet type */
 
 				/* read M from first line */
   if (fgets(buffer, 512, fp) == NULL) return NULL;

@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 
@@ -73,7 +79,7 @@ AllocPlan7Shell(void)
   hmm->ins    = NULL;
 
   hmm->tsc     = hmm->msc     = hmm->isc     = NULL;
-  hmm->tsc_mem = hmm->msc_mem = hmm->msc_mem = NULL;
+  hmm->tsc_mem = hmm->msc_mem = NULL;
 
   hmm->begin  = NULL;
   hmm->end    = NULL;

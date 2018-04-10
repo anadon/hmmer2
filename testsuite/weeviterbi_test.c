@@ -3,7 +3,7 @@
  * 
  * Test driver for Myers/Miller/Hirschberg linear memory Viterbi tracebacks.
  * 
- * CVS $Id$
+ * CVS $Id: weeviterbi_test.c 913 2003-10-04 18:26:49Z eddy $
  */
 
 #include "config.h"

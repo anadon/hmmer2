@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* hmmfetch.c
@@ -8,7 +14,7 @@
  * Recover a specific HMM file from an HMM database, using
  * an SSI index (created with hmmindex).
  * 
- * CVS $Id$
+ * CVS $Id: hmmfetch.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"

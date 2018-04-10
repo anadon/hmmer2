@@ -1,5 +1,5 @@
 HMMER testsuite
-CVS $Id$
+CVS $Id: README 876 2003-04-04 00:33:12Z eddy $
 
 
 Some tests are compiled programs. To compile them:

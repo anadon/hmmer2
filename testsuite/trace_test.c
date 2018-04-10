@@ -3,7 +3,7 @@
  * 
  * Test driver for Viterbi tracebacks.
  * 
- * CVS $Id$
+ * CVS $Id: trace_test.c 913 2003-10-04 18:26:49Z eddy $
  */
 
 

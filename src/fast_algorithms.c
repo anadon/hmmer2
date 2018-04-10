@@ -1,10 +1,16 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* fast_algorithms.c
  * SRE, Sun Nov 10 08:54:48 2002 [AA 3080, Denver to StL]
- * CVS $Id$
+ * CVS $Id: fast_algorithms.c 998 2005-01-26 22:11:49Z eddy $
  * 
  * Optimized routines to replace slower implementations in core_algorithms.c.
  * 

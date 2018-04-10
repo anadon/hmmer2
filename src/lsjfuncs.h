@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* lsjfuncs.h
@@ -7,7 +13,7 @@
  * (Entropy-based sequence weighting)
  *
  * Steve Johnson
- * CVS $Id$
+ * CVS $Id: lsjfuncs.h 944 2004-05-24 15:49:07Z eddy $
  */
 
 

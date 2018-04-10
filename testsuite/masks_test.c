@@ -3,7 +3,7 @@
  * 
  * Test driver for sequence masking routines in masks.c
  * 
- * CVS $Id$
+ * CVS $Id: masks_test.c 913 2003-10-04 18:26:49Z eddy $
  */
 
 #include "config.h"

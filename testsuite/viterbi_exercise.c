@@ -3,7 +3,7 @@
  * 
  * Exercise the various Viterbi algorithms, big and small.
  * 
- * CVS $Id$
+ * CVS $Id: viterbi_exercise.c 913 2003-10-04 18:26:49Z eddy $
  */
 
 #include "config.h"

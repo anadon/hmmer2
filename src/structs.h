@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* structs.h
@@ -7,7 +13,7 @@
  * Data structures used in HMMER.
  * Also, a few miscellaneous macros and global variable declarations.
  * 
- * CVS $Id$
+ * CVS $Id: structs.h 1740 2006-12-05 14:21:36Z eddys $
  */
 
 #ifndef STRUCTSH_INCLUDED

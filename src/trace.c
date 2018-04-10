@@ -1,10 +1,16 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* trace.c
  * SRE, Sat Nov 16 12:34:57 1996
- * RCS $Id$
+ * RCS $Id: trace.c 910 2003-10-02 16:39:41Z eddy $
  * 
  * Support for Plan 7 traceback data structure, p7trace_s.
  */
@@ -427,6 +433,7 @@ P7Traces2Alignment(unsigned char **dsq, SQINFO *sqinfo, float *wgt, int nseq, in
       case STS: case STE: break; /* ignore other states */
       case STJ:
 	Die("yo! you don't support J in Traces2Alignment(), remember?");
+        break;
       default:
 	Die("Traces2Alignment reports unrecognized statetype %c", 
 	    Statetype(tr[idx]->statetype[tpos]));

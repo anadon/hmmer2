@@ -1,6 +1,12 @@
 /************************************************************
  * Copyright (C) 1998 Ian Holmes
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* display.c
@@ -10,7 +16,7 @@
  * 
  * Functions for displaying HMMer2.0 structures.
  *
- * CVS $Id$
+ * CVS $Id: display.c 910 2003-10-02 16:39:41Z eddy $
  */
 
 #include "config.h"

@@ -1,10 +1,8 @@
 # HMMER option exercises, in sqc command format
-# SRE, Thu Apr  3 08:23:27 2003
-# CVS $Id$
 
 # Option tests for hmmalign
 #
-1 prep        hmm                  @hmmbuild@ -F %OPT.HMM% Optiontests.slx
+1 prep        hmm                   @hmmbuild@ -F %OPT.HMM% Optiontests.slx
 1 exercise    hmmalign             @hmmalign@ %OPT.HMM% Optiontests.fa
 2 exercise    hmmalign/h           @hmmalign@ -h
 2 exercise    hmmalign/m           @hmmalign@ -m %OPT.HMM% Optiontests.fa
@@ -77,11 +75,11 @@
 2 exercise    hmmcalibrate/num     @hmmcalibrate@ --num 4500 --fixed 15 %OPT.HMM%
 2 exercise    hmmcalibrate/sd      @hmmcalibrate@ --sd 50 --mean 25 %OPT.HMM%
 2 exercise    hmmcalibrate/seed    @hmmcalibrate@ --seed 666 --fixed 15 %OPT.HMM%
-  
+
 
 # Option tests for hmmconvert
 #
-1 prep        hmm                  @hmmbuild@ -F --wnone --fast %OPT.HMM% fn3.seed
+1 prep        hmm                   @hmmbuild@ -F --wnone --fast %OPT.HMM% fn3.seed
 1 exercise    hmmconvert           @hmmconvert@ %OPT.HMM% %OPT.TMP%
 2 exercise    hmmconvert/h         @hmmconvert@ -h
 2 exercise    hmmconvert/F         @hmmconvert@ -F %OPT.HMM% %OPT.TMP%
@@ -105,8 +103,8 @@
 
 # Option tests for hmmindex, hmmfetch
 #
-1 prep        hmm                  @hmmbuild@ -n fn3 --wnone --fast -F %OPT.HMM% fn3.seed
-1 prep        hmm                  @hmmbuild@ -n foo -A %OPT.HMM% Optiontests.slx
+1 prep        hmm                   @hmmbuild@ -n fn3 --wnone --fast -F %OPT.HMM% fn3.seed
+1 prep        hmm                   @hmmbuild@ -n foo -A %OPT.HMM% Optiontests.slx
 1 exercise    hmmindex             @hmmindex@ %OPT.HMM%
 2 exercise    hmmindex/h           @hmmindex@ -h
 2 prep        clear                rm %OPT.HMM%.ssi
@@ -171,4 +169,3 @@
 
 # Test scripts
 1 exercise    test1/conversion    ./test1-conversion.pl @hmmconvert@
-

@@ -1,10 +1,16 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* alphabet.c
  * Configuration of the global symbol alphabet information.
- * CVS $Id$
+ * CVS $Id: alphabet.c 910 2003-10-02 16:39:41Z eddy $
  */
 
 #include "config.h"
@@ -13,9 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#ifdef HMMER_THREADS
 #include <pthread.h>
-#endif /* HMMER_THREADS */
 
 #include "structs.h"
 #include "funcs.h"
@@ -82,7 +86,6 @@ void
 SetAlphabet(int type)
 {
   int x;
-#ifdef HMMER_THREADS
   pthread_mutex_t  alphabet_lock; /* alphabet is global; must protect to be threadsafe */
   int              rtn;		  /* return code from pthreads */
 
@@ -90,7 +93,6 @@ SetAlphabet(int type)
     Die("pthread_mutex_init FAILED; %s\n", strerror(rtn));
   if ((rtn = pthread_mutex_lock(&alphabet_lock)) != 0)
     Die("pthread_mutex_lock FAILED: %s\n", strerror(rtn));
-#endif
 
  /* Because the alphabet information is global, we must
   * be careful to make this a thread-safe function. The mutex
@@ -105,10 +107,8 @@ SetAlphabet(int type)
       if (type != Alphabet_type) 
 	Die("An alphabet type conflict occurred.\nYou probably mixed a DNA seq file with a protein model, or vice versa.");
       
-#ifdef HMMER_THREADS
       if ((rtn = pthread_mutex_unlock(&alphabet_lock)) != 0)
 	Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-#endif
       return;
     }
 
@@ -159,10 +159,8 @@ SetAlphabet(int type)
   default: Die("No support for non-nucleic or protein alphabets");  
   }
 
-#ifdef HMMER_THREADS
   if ((rtn = pthread_mutex_unlock(&alphabet_lock)) != 0)
     Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-#endif
 }
 
 /* Function: SymbolIndex()

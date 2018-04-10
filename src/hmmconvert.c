@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* hmmconvert.c
@@ -8,7 +14,7 @@
  * main() for converting between HMM file formats, and
  * for converting HMMs to other software formats like GCG profiles.
  * 
- * CVS $Id$
+ * CVS $Id: hmmconvert.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"		/* compile-time configuration constants */
@@ -61,7 +67,7 @@ main(int argc, char **argv)
   char    *outfile;             /* name of output HMM file                  */
   HMMFILE *infp;                /* input HMM file ptr                       */
   FILE    *outfp;               /* output HMM file ptr                      */
-  char    *mode;                /* mode to open file in                     */
+  char    *mode = NULL;         /* mode to open file in                     */
   struct plan7_s *hmm;          /* a profile HMM structure                  */
   int      nhmm;		/* number of HMMs converted                 */
 
@@ -135,8 +141,8 @@ main(int argc, char **argv)
       switch (outfmt) {
       case P7ASCII:    mode = "a";  break;
       case P7BINARY:   mode = "ab"; break;
-      case GCGPROFILE: Die("You cannot append GCG profiles");
-      case BICPROFILE: Die("You cannot append Compugen extended profiles");
+      case GCGPROFILE: Die("You cannot append GCG profiles"); break;
+      case BICPROFILE: Die("You cannot append Compugen extended profiles"); break;
       default:         Die("unexpected format");
       }
     }

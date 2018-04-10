@@ -1,11 +1,17 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* evolution.c
  * Routines for phylogenetic "extrapolation" of profile HMMs.
  * 
- * CVS $Id$
+ * CVS $Id: evolution.c 992 2005-01-21 17:02:32Z eddy $
  * incept: SRE, Sun Oct 31 08:13:33 2004 [St. Louis]
  */
 

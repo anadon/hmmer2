@@ -6,7 +6,7 @@
  * against parametric mu, lambda. If they differ badly, calls Die(). 
  * If OK, returns EXIT_SUCCESS.
  * 
- * CVS $Id$
+ * CVS $Id: evd_test.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"

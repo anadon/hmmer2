@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 
@@ -19,9 +25,7 @@
 
 #include <math.h>
 #include <float.h>
-#ifdef HMMER_THREADS
 #include <pthread.h>
-#endif
 
 #include "squid.h"
 #include "dirichlet.h"		/* Gammln() is in dirichlet module */
@@ -152,13 +156,8 @@ int
 ILogsum(int p1, int p2)
 {
   int    diff;
-#ifdef HMMER_THREADS
   static pthread_once_t firsttime = PTHREAD_ONCE_INIT;
   pthread_once(&firsttime, init_ilogsum);
-#else
-  static int firsttime = 1;
-  if (firsttime) { init_ilogsum(); firsttime = 0; }
-#endif
 
   diff = p1-p2;
   if      (diff >=  LOGSUM_TBL) return p1;

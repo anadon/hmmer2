@@ -1,10 +1,16 @@
 /*****************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  *****************************************************************/
 
 /* infocontent.c
  * for evolving models to a specified information content
- * CVS $Id$
+ * CVS $Id: infocontent.c 978 2004-12-12 00:02:44Z eddy $
  * Original author: Dawn J. Brooks (dbrooks@genetics.wustl.edu); 2004.
  */
 

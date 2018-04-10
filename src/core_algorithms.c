@@ -1,10 +1,16 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* core_algorithms.c
  * SRE, Mon Nov 11 15:58:52 1996
- * CVS $Id$
+ * CVS $Id: core_algorithms.c 977 2004-12-12 00:02:03Z eddy $
  * 
  * Simple and robust "research" implementations of Forward, Backward,
  * and Viterbi for Plan7. For optimized replacements for some of these functions,
@@ -684,7 +690,7 @@ P7ViterbiTrace(struct plan7_s *hmm, unsigned char *dsq, int N,
   int curralloc;		/* current allocated length of trace */
   int tpos;			/* position in trace */
   int i;			/* position in seq (1..N) */
-  int k;			/* position in model (1..M) */
+  int k = 0;			/* position in model (1..M) */
   int **xmx, **mmx, **imx, **dmx;
   int sc;			/* temp var for pre-emission score */
 
@@ -1180,6 +1186,7 @@ P7ParsingViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_
    *  - When we enter B, we record the i of the best previous E, or 0 if there
    *    isn't one, in btr.
    */
+  cur = 1;
   for (i = 1; i <= L; i++) {
     cur = i % 2;
     prv = !cur;
@@ -1343,8 +1350,8 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
   int          *endlist;        /* stack of end points on sequence to work on */
   int          *startlist;      /* stack of start points on sequence to work on */
   int          lpos;            /* position in endlist, startlist */
-  int          k1, k2, k3;	/* start, mid, end in model      */
-  char         t1, t2, t3;	/* start, mid, end in state type */
+  int          k1, k2 = 0, k3;	/* start, mid, end in model      */
+  char         t1, t2 = 0, t3;	/* start, mid, end in state type */
   int          s1, s2, s3;	/* start, mid, end in sequence   */
   float        sc;		/* score of segment optimal alignment */
   float        ret_sc;		/* optimal score over complete seq */
@@ -1370,6 +1377,8 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
   kassign[L]      = hmm->M;
   tassign[1]      = STS;	/* temporary boundary condition! will become N or M */
   tassign[L]      = STT;	/* temporary boundary condition! will become M or C */
+
+  t2 = k2 = 0;
 
   /* Recursive divide-and-conquer alignment.
    */
@@ -1604,11 +1613,10 @@ Plan7ESTViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_
     mmx[i][0] = imx[i][0] = dmx[i][0] = -INFTY;
 
 				/* crude calculation of lookup value for codon */
+    codon = 64;             /* ambiguous codon; punt */
     if (i > 2) {
       if (dsq[i-2] < 4 && dsq[i-1] < 4 && dsq[i] < 4)
 	codon = dsq[i-2] * 16 + dsq[i-1] * 4 + dsq[i];
-      else
-	codon = 64;		/* ambiguous codon; punt */
     }
 
     for (k = 1; k <= hmm->M; k++) {

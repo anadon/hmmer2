@@ -1,5 +1,4 @@
 /* alignalign_test.c
- * Sun Jul  5 13:42:41 1998
  * 
  * Test driver for P7ViterbiAlignAlignment().
  * 
@@ -16,7 +15,6 @@
  *    7) If an excessive number of individual traces differ from
  *          those imposed by master, fail.
  * 
- * CVS $Id$
  */
 
 #include "config.h"

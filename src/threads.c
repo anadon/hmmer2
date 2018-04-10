@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* threads.c
@@ -10,7 +16,7 @@
  * threads. Most of the threads code, however, is in the respective
  * main's, i.e. hmmsearch.c, hmmpfam.c, hmmcalibrate.c
  * 
- * RCS $Id$
+ * RCS $Id: threads.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"

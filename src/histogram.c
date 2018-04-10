@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* histogram.c
@@ -8,7 +14,7 @@
  * Accumulation, printing, and fitting of score histograms
  * from database searches.
  *
- * CVS $Id$
+ * CVS $Id: histogram.c 1740 2006-12-05 14:21:36Z eddys $
  ************************************************************
  * Basic API:
  * 
@@ -190,7 +196,7 @@ PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
   char buffer[81];		/* output line buffer */
   int  pos;			/* position in output line buffer */
   int  lowbound, lowcount;	/* cutoffs on the low side  */
-  int  highbound, highcount;	/* cutoffs on the high side */
+  int  highbound = 0, highcount;	/* cutoffs on the high side */
   int  emptybins = 3;
 
   /* Find out how we'll scale the histogram.
@@ -552,7 +558,7 @@ ExtremeValueFitHistogram(struct histogram_s *h, int censor, float high_hint)
   float *x;                     /* array of EVD samples to fit */
   int   *y;                     /* histogram counts            */ 
   int    n;			/* number of observed samples  */
-  int    z;			/* number of censored samples  */
+  int    z = 0;			/* number of censored samples  */
   int    hsize;			/* size of histogram           */
   float  lambda, mu;		/* new estimates of lambda, mu */
   int    sc;		        /* loop index for score        */

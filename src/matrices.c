@@ -177,7 +177,7 @@ ReadAAMatrices (double **ret_Sij, double **ret_pi, char *matrixfile, int environ
   int i, j;  		/* count through elements in Sij and pi 	    */
   int n; 		/* count through environ 			    */
   char TempString[20]; 	/* temp holder for read in string 		    */
-  float read_element; 	/* temp holder for matrix element 		    */
+//  float read_element; 	/* temp holder for matrix element 		    */
   FILE *fp;		/* file pointer 				    */
   double *Sij; 		/* symmetric matrix 				    */
   double *pi; 		/* amino acid frequencies 			    */
@@ -208,13 +208,13 @@ ReadAAMatrices (double **ret_Sij, double **ret_pi, char *matrixfile, int environ
     {
       for (j = 0; j < i; j++)
       {
-         if (fscanf(fp, "%s", TempString) == EOF)
+         if (fscanf(fp, "%s", TempString) == EOF){
            Die("Too little data in your specified input matrixfile.\n");
 	 	/* when assigning matrix elements,
 			use jonesint to make element order hmmer compatible */
-         else
-  	   Sij[n * size + jonesint[i] * L + jonesint[j]] = atof (TempString);
-	   Sij[n * size + jonesint[j] * L + jonesint[i]] = atof (TempString);
+         }
+  	 Sij[n * size + jonesint[i] * L + jonesint[j]] = atof (TempString);
+	 Sij[n * size + jonesint[j] * L + jonesint[i]] = atof (TempString);
       }
     }
     sum = 0.0;
@@ -258,7 +258,7 @@ ReadMatrices (double **ret_Sij, double **ret_pi, char *matrixfile, int environ, 
   int i, j;  		/* count through elements in Sij and pi 	    */
   int n; 		/* count through environ  			    */
   char TempString[10]; 	/* temp holder for read in string 		    */
-  float read_element; 	/* temp holder for matrix element 		    */
+//  float read_element; 	/* temp holder for matrix element 		    */
   FILE *fp;		/* file pointer 				    */
   double *Sij; 		/* symmetric matrix 				    */
   double *pi; 		/* amino acid frequencies 			    */
@@ -286,11 +286,11 @@ ReadMatrices (double **ret_Sij, double **ret_pi, char *matrixfile, int environ, 
     {
       for (j = 0; j < i; j++)
       {
-         if (fscanf(fp, "%s", TempString) == EOF)
+         if (fscanf(fp, "%s", TempString) == EOF){
            Die("Too little data in your specified input matrixfile.\n");
-         else
-  	   Sij[n * size + i * L + j] = atof (TempString);
-	   Sij[n * size + j * L + i] = atof (TempString);
+         }
+  	 Sij[n * size + i * L + j] = atof (TempString);
+	 Sij[n * size + j * L + i] = atof (TempString);
       }
     }
     sum = 0.0;

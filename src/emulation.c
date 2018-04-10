@@ -1,5 +1,11 @@
 /************************************************************
- * @LICENSE@
+ * HMMER - Biological sequence analysis with profile HMMs
+ * Copyright (C) 1992-2006 HHMI Janelia Farm
+ * All Rights Reserved
+ * 
+ *     This source code is distributed under the terms of the
+ *     GNU General Public License. See the files COPYING and LICENSE
+ *     for details.
  ************************************************************/
 
 /* emulation.c
@@ -7,7 +13,7 @@
  * 
  * Interfaces between HMMER and other software packages.
  * 
- * CVS $Id$
+ * CVS $Id: emulation.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"
