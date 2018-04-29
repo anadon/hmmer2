@@ -28,7 +28,7 @@
 #include "funcs.h"
 
 struct plan9_s *
-P9AllocHMM(int M)               		/* length of model to make */
+P9AllocHMM(int M)                   /* length of model to make */
 {
   struct plan9_s *hmm;        /* RETURN: blank HMM */
 
@@ -74,17 +74,17 @@ P9ZeroHMM(struct plan9_s *hmm)
   for (k = 0; k <= hmm->M+1; k++)
     {
       for (ts = 0; ts < 3; ts++)
-	{
-	  hmm->mat[k].t[ts] = 0.0;
-	  hmm->ins[k].t[ts] = 0.0;
-	  hmm->del[k].t[ts] = 0.0;
-	}
+  {
+    hmm->mat[k].t[ts] = 0.0;
+    hmm->ins[k].t[ts] = 0.0;
+    hmm->del[k].t[ts] = 0.0;
+  }
       for (idx = 0; idx < Alphabet_size; idx++)
-	{
-	  hmm->mat[k].p[idx]   = 0.0;
-	  hmm->ins[k].p[idx]   = 0.0;
-	  hmm->del[k].p[idx]   = 0.0;
-	}
+  {
+    hmm->mat[k].p[idx]   = 0.0;
+    hmm->ins[k].p[idx]   = 0.0;
+    hmm->del[k].p[idx]   = 0.0;
+  }
     }
 }
 
@@ -103,11 +103,11 @@ P9ZeroHMM(struct plan9_s *hmm)
 void
 P9Renormalize(struct plan9_s *hmm)
 {
-  int    k;			/* counter for states                  */
+  int    k;      /* counter for states                  */
 
   for (k = 0; k <= hmm->M ; k++)
     {
-				/* match state transition frequencies */
+        /* match state transition frequencies */
       FNorm(hmm->mat[k].t, 3);
       FNorm(hmm->ins[k].t, 3);
       if (k > 0) FNorm(hmm->del[k].t, 3);

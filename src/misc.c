@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,7 +10,7 @@
 
 /* misc.c
  * SRE, Thu Jul 15 18:49:19 1993
- * 
+ *
  * Functions that I don't know quite where to put yet.
  */
 
@@ -33,27 +33,26 @@
  *
  * Purpose:  Print a package version and copyright banner.
  *           Used by all the main()'s.
- *           
+ *
  *    Expects to be able to pick up defined preprocessor variables:
  *    variable          example
- *    --------           --------------  
+ *    --------           --------------
  *    PACKAGE_NAME      "HMMER"
  *    PACKAGE_VERSION   "2.0.42"
  *    PACKAGE_DATE      "April 1999"
  *    PACKAGE_COPYRIGHT "Copyright (C) 1992-1999 Washington University School of Medicine"
  *    PACKAGE_LICENSE   "Freely distributed under the GNU General Public License (GPL)."
- *           
+ *
  *    This gives us a general mechanism to update release information
  *    without changing multiple points in the code.
- * 
+ *
  * Args:     fp     - where to print it
  *           banner - one-line program description, e.g.:
- *                    "foobar - make bars from foo with elan" 
+ *                    "foobar - make bars from foo with elan"
  * Returns:  (void)
  */
 void
-HMMERBanner(FILE *fp, char *banner)
-{
+HMMERBanner(FILE *fp, char *banner){
   fprintf(fp, "%s\n", banner);
   fprintf(fp, "%s %s (%s)\n", PACKAGE_NAME, PACKAGE_VERSION, PACKAGE_DATE);
   fprintf(fp, "%s\n", PACKAGE_COPYRIGHT);
@@ -64,7 +63,7 @@ HMMERBanner(FILE *fp, char *banner)
 
 
 /* Function: Getword()
- * 
+ *
  * Purpose:  little function used by ReadPrior() and ReadHMM() to parse
  *           next valid field out of an open file, ignoring
  *           comments. '#' marks the beginning of a comment.
@@ -77,7 +76,7 @@ Getword(FILE *fp, int type)
 {
   static char buffer[512];
   static char *sptr = NULL;
-  
+
   if (sptr != NULL) sptr = strtok(NULL, " \t\n");
 
   while (sptr == NULL)
@@ -88,13 +87,13 @@ Getword(FILE *fp, int type)
     }
 
   switch (type) {
-  case sqdARG_STRING: 
-    if (strlen(sptr) == 0) { 
-      Warn("Parse failed: expected string, got nothing"); 
-      sptr = NULL; 
+  case sqdARG_STRING:
+    if (strlen(sptr) == 0) {
+      Warn("Parse failed: expected string, got nothing");
+      sptr = NULL;
     }
     break;
-  case sqdARG_INT:    
+  case sqdARG_INT:
     if (!IsInt(sptr)) {
       Warn("Parse failed: expected integer, got %s", sptr);
       sptr = NULL;
@@ -102,7 +101,7 @@ Getword(FILE *fp, int type)
     break;
   case sqdARG_FLOAT:
     if (!IsReal(sptr)) {
-      Warn("Parse failed: expected real value, got %s", sptr); 
+      Warn("Parse failed: expected real value, got %s", sptr);
       sptr = NULL;
     }
     break;
@@ -113,19 +112,21 @@ Getword(FILE *fp, int type)
 
 
 /* Function: Getline()
- * 
+ *
  * Purpose:  Get the next non-blank, non-comment line from an open file.
  *           A comment line has '#' as the first non-whitespace character.
- *           Returns NULL if no line is found. 
+ *           Returns NULL if no line is found.
  *           Syntax is the same as fgets().
- *           
+ *
  * Args:     s  - allocated storage for line
  *           n  - number of characters allocated for s
  *           fp - open FILE *
- *           
+ *
  * Return:   Either s, or NULL if no new line is found.
- */        
-char * 
+ */
+/*
+//REPORTED UNUSED***************************************************************
+char *
 Getline(char *s, int n, FILE *fp)
 {
   char *first;
@@ -136,6 +137,7 @@ Getline(char *s, int n, FILE *fp)
   } while (*first == '#' || *first == '\0');
   return s;
 }
+//*/
 
 
 /* Function: SetAutocuts()

@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,19 +10,18 @@
 
 /* threads.c
  * SRE, Fri Jul 10 10:05:44 1998
- * 
+ *
  * Pthreads code shared by hmmsearch, hmmcalibrate, and hmmpfam
  * to coarse-grain parallelize on platforms capable of POSIX
  * threads. Most of the threads code, however, is in the respective
  * main's, i.e. hmmsearch.c, hmmpfam.c, hmmcalibrate.c
- * 
+ *
  * RCS $Id: threads.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"
 #include "squidconf.h"
 
-#ifdef HMMER_THREADS		/* conditional inclusion of the entire file */
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
@@ -38,11 +37,11 @@
 /* Function: ThreadNumber()
  * Date:     SRE, Sat Jul 11 11:03:50 1998 [St. Louis]
  *
- * Purpose:  Recommend how many threads to use. 
+ * Purpose:  Recommend how many threads to use.
  *
  *             - if we can determine the number of processors
  *               on the machine by SQD_NPROC, use that. This
- *               should succeed for SGI IRIX, Digital UNIX, and 
+ *               should succeed for SGI IRIX, Digital UNIX, and
  *               Sun Solaris platforms.
  *             - if not, assume two processors. We're probably
  *               on a FreeBSD or Linux box, and odds are that its
@@ -58,8 +57,8 @@
  *
  *           Typically, we'll set the default number of
  *           threads with ThreadNumber() but allow it
- *           to be overridden at the command line with --cpu.    
- *           
+ *           to be overridden at the command line with --cpu.
+ *
  *           Summarizing priority:
  *                  --ncpu <x> option
  *                  environment variable, setenv HMMER_NCPU x
@@ -71,23 +70,24 @@
  *
  * Returns:  >= 1, recommended number of threads
  */
+/*
+//REPORTED UNUSED***************************************************************
 int
 ThreadNumber(void)
 {
   int   num;
   char *env;
 
-  num = SQD_NPROC;		/* SGI, Sun, Digital: get # of available CPUs */
-  if (num == -1) num = 2;	/* Linux, FreeBSD: assume dualprocessor       */
-#ifdef HMMER_NCPU	
-  num = HMMER_NCPU;		/* allow config.h to override; usually we don't */
+  num = SQD_NPROC;    // SGI, Sun, Digital: get # of available CPUs
+  if (num == -1) num = 2;  // Linux, FreeBSD: assume dualprocessor
+#ifdef HMMER_NCPU
+  num = HMMER_NCPU;    // allow config.h to override; usually we don't
 #endif
-				/* allow environment variable to override */
+        // allow environment variable to override
   if ((env = getenv("HMMER_NCPU")) != NULL)
-    num = atoi(env);		
-  if (num <= 0) num = 1;	/* silent sanity check */
+    num = atoi(env);
+  if (num <= 0) num = 1;  // silent sanity check
   SQD_DPRINTF1(("ThreadNumber(): setting number of threads to %d\n", num));
   return num;
 }
-
-#endif /*HMMER_THREADS*/
+//*/

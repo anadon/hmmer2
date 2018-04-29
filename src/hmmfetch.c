@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,10 +10,10 @@
 
 /* hmmfetch.c
  * SRE, Wed Aug  5 14:26:51 1998 [St. Louis]
- * 
+ *
  * Recover a specific HMM file from an HMM database, using
  * an SSI index (created with hmmindex).
- * 
+ *
  * CVS $Id: hmmfetch.c 878 2003-04-14 16:00:17Z eddy $
  */
 
@@ -49,37 +49,35 @@ static struct opt_s OPTIONS[] = {
 
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv){
   char    *hmmfile;             /* HMM file to open                */
-  char    *key;			/* HMM name to retrieve            */
+  char    *key;      /* HMM name to retrieve            */
   HMMFILE *hmmfp;               /* opened hmm file pointer         */
-  struct plan7_s *hmm;		/* a hidden Markov model           */
+  struct plan7_s *hmm;    /* a hidden Markov model           */
 
-  char *optname;		/* name of option found by Getopt() */
-  char *optarg;			/* argument found by Getopt()       */
-  int   optind;		        /* index in argv[]                  */
+  char *optname;    /* name of option found by Getopt() */
+  char *optarg;      /* argument found by Getopt()       */
+  int   optind;            /* index in argv[]                  */
 
-  int   by_number;		/* fetch by number, not name        */
-  int   nhmm;			/* hmm number */
+  int   by_number;    /* fetch by number, not name        */
 
   /***********************************************
    * Parse the command line
    ***********************************************/
-  
+
   by_number = FALSE;
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
-		&optind, &optname, &optarg))
+    &optind, &optname, &optarg))
     {
       if      (strcmp(optname, "-n") == 0) by_number = TRUE;
       else if (strcmp(optname, "-h") == 0)
-	{
-	  HMMERBanner(stdout, banner);
-	  puts(usage);
-	  puts(experts);
-	  exit(0);
-	}
+  {
+    HMMERBanner(stdout, banner);
+    puts(usage);
+    puts(experts);
+    exit(0);
+  }
     }
 
   if (argc - optind != 2) Die("Incorrect number of arguments.\n%s\n", usage);
@@ -101,8 +99,9 @@ main(int argc, char **argv)
 
   if (by_number) {
     if (! IsInt(key)) Die("%s does not appear to be a number.", key);
+    int   nhmm;      /* hmm number */
     nhmm = atoi(key);
-    if (! HMMFilePositionByIndex(hmmfp, nhmm)) 
+    if (! HMMFilePositionByIndex(hmmfp, nhmm))
       Die("failed to position %s to HMM #%d", hmmfile, nhmm);
   } else {
     if (! HMMFilePositionByName(hmmfp, key))
@@ -111,7 +110,7 @@ main(int argc, char **argv)
 
   if (! HMMFileRead(hmmfp, &hmm))
     Die("Unexpected end of HMM file");
-  if (hmm == NULL) 
+  if (hmm == NULL)
     Die("HMM file %s may be corrupt or in incorrect format; parse failed", hmmfile);
 
   WriteAscHMM(stdout, hmm);
@@ -126,5 +125,3 @@ main(int argc, char **argv)
   SqdClean();
   return 0;
 }
-
-

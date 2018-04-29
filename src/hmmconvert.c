@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,24 +10,24 @@
 
 /* hmmconvert.c
  * SRE, Thu Oct 30 08:56:22 1997; St. Louis
- * 
+ *
  * main() for converting between HMM file formats, and
  * for converting HMMs to other software formats like GCG profiles.
- * 
+ *
  * CVS $Id: hmmconvert.c 878 2003-04-14 16:00:17Z eddy $
  */
 
-#include "config.h"		/* compile-time configuration constants */
+#include "config.h"    /* compile-time configuration constants */
 #include "squidconf.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "structs.h"		/* data structures, macros, #define's   */
-#include "funcs.h"		/* function declarations                */
-#include "globals.h"		/* alphabet global variables            */
-#include "squid.h"		/* general sequence analysis library    */
+#include "structs.h"    /* data structures, macros, #define's   */
+#include "funcs.h"    /* function declarations                */
+#include "globals.h"    /* alphabet global variables            */
+#include "squid.h"    /* general sequence analysis library    */
 
 static char banner[] = "hmmconvert - convert between profile HMM file formats";
 
@@ -52,7 +52,7 @@ static char experts[] = "\
 static struct opt_s OPTIONS[] = {
   { "-a",        TRUE,  sqdARG_NONE },
   { "-b",        TRUE,  sqdARG_NONE },
-  { "-h",        TRUE,  sqdARG_NONE }, 
+  { "-h",        TRUE,  sqdARG_NONE },
   { "-p",        TRUE,  sqdARG_NONE },
   { "-A",        TRUE,  sqdARG_NONE },
   { "-F",        TRUE,  sqdARG_NONE },
@@ -60,7 +60,7 @@ static struct opt_s OPTIONS[] = {
 };
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
-int 
+int
 main(int argc, char **argv)
 {
   char    *infile;              /* name of input HMM file                   */
@@ -69,33 +69,33 @@ main(int argc, char **argv)
   FILE    *outfp;               /* output HMM file ptr                      */
   char    *mode = NULL;         /* mode to open file in                     */
   struct plan7_s *hmm;          /* a profile HMM structure                  */
-  int      nhmm;		/* number of HMMs converted                 */
+  int      nhmm;    /* number of HMMs converted                 */
 
   char *optname;                /* name of option found by Getopt()         */
   char *optarg;                 /* argument found by Getopt()               */
   int   optind;                 /* index in argv[]                          */
 
-  int   do_append;		/* TRUE to append to existing outfile       */
-  int   do_force;		/* TRUE to allow overwriting */
-  enum hmmfmt_e { P7ASCII, P7BINARY, GCGPROFILE, BICPROFILE } 
-      outfmt;			/* output format */
-      
-  /*********************************************** 
+  int   do_append;    /* TRUE to append to existing outfile       */
+  int   do_force;    /* TRUE to allow overwriting */
+  enum hmmfmt_e { P7ASCII, P7BINARY, GCGPROFILE, BICPROFILE }
+      outfmt;      /* output format */
+
+  /***********************************************
    * Parse command line
    ***********************************************/
 
-  outfmt    = P7ASCII; 
+  outfmt    = P7ASCII;
   do_append = FALSE;
   do_force  = FALSE;
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
                 &optind, &optname, &optarg))  {
     if      (strcmp(optname, "-a") == 0) { outfmt    = P7ASCII;    }
-    else if (strcmp(optname, "-b") == 0) { outfmt    = P7BINARY;   } 
-    else if (strcmp(optname, "-p") == 0) { outfmt    = GCGPROFILE; } 
-    else if (strcmp(optname, "-A") == 0) { do_append = TRUE;       } 
-    else if (strcmp(optname, "-F") == 0) { do_force  = TRUE;       } 
-    else if (strcmp(optname, "-P") == 0) { outfmt    = BICPROFILE; } 
+    else if (strcmp(optname, "-b") == 0) { outfmt    = P7BINARY;   }
+    else if (strcmp(optname, "-p") == 0) { outfmt    = GCGPROFILE; }
+    else if (strcmp(optname, "-A") == 0) { do_append = TRUE;       }
+    else if (strcmp(optname, "-F") == 0) { do_force  = TRUE;       }
+    else if (strcmp(optname, "-P") == 0) { outfmt    = BICPROFILE; }
     else if (strcmp(optname, "-h") == 0) {
       HMMERBanner(stdout, banner);
       puts(usage);
@@ -107,61 +107,57 @@ main(int argc, char **argv)
     Die("Incorrect number of arguments.\n%s\n", usage);
 
   infile  = argv[optind++];
-  outfile = argv[optind++]; 
+  outfile = argv[optind++];
 
-  /*********************************************** 
+  /***********************************************
    * Open input HMM database (might be in HMMERDB or current directory)
    ***********************************************/
 
   if ((infp = HMMFileOpen(infile, "HMMERDB")) == NULL)
     Die("Failed to open HMM database %s\n%s", infile, usage);
 
-  /*********************************************** 
+  /***********************************************
    * Open output HMM file
    ***********************************************/
-  
-  if (do_append) 
-    {		/* If we're appending to a file, it needs to be Plan7 format */
+
+  if (do_append){    /* If we're appending to a file, it needs to be Plan7 format */
+    if (FileExists(outfile)) {
       HMMFILE *test;
+      test = HMMFileOpen(outfile, NULL);
+      if (test == NULL)
+        Die("%s not an HMM file; I refuse to append to it; using stdout instead",
+          outfile);
 
-      if (FileExists(outfile)) { 
-	test = HMMFileOpen(outfile, NULL);
-	if (test == NULL) 
-	  Die("%s not an HMM file; I refuse to append to it; using stdout instead",
-	      outfile);
+      /* bug #14 fix. 12/24/00, xref STL3 p.133. */
+      if (test->is_binary && outfmt != P7BINARY)
+        Die("File %s is in Plan 7 binary format; must append the same fmt.", outfile);
+      else if (! test->is_binary && outfmt != P7ASCII)
+        Die("File %s is in Plan 7 ASCII format; must append the same fmt.", outfile);
 
-	/* bug #14 fix. 12/24/00, xref STL3 p.133. */
-	if (test->is_binary && outfmt != P7BINARY) 
-	  Die("File %s is in Plan 7 binary format; must append the same fmt.", outfile);
-	else if (! test->is_binary && outfmt != P7ASCII) 
-	  Die("File %s is in Plan 7 ASCII format; must append the same fmt.", outfile);
-	      
-	HMMFileClose(test);
-      }
-      switch (outfmt) {
+      HMMFileClose(test);
+    }
+    switch (outfmt) {
       case P7ASCII:    mode = "a";  break;
       case P7BINARY:   mode = "ab"; break;
       case GCGPROFILE: Die("You cannot append GCG profiles"); break;
       case BICPROFILE: Die("You cannot append Compugen extended profiles"); break;
       default:         Die("unexpected format");
-      }
     }
-  else
-    {		/* else, we're writing a new file */
-      if (! do_force && FileExists(outfile))
-	Die("Output HMM file %s already exists. Please rename or delete it.", outfile); 
-      switch (outfmt) {
+  }else{    /* else, we're writing a new file */
+    if (! do_force && FileExists(outfile))
+      Die("Output HMM file %s already exists. Please rename or delete it.", outfile);
+    switch (outfmt) {
       case P7ASCII:    mode = "w";  break;
       case P7BINARY:   mode = "wb"; break;
       case GCGPROFILE: mode = "w";  break;
       case BICPROFILE: mode = "w";  break;
       default:         Die("unexpected format");
-      }
     }
-  if ((outfp = fopen(outfile, mode)) == NULL) 
+  }
+  if ((outfp = fopen(outfile, mode)) == NULL)
     Die("Failed to open output file %s for writing", outfile);
 
-  /*********************************************** 
+  /***********************************************
    * Show the banner
    ***********************************************/
 
@@ -178,13 +174,13 @@ main(int argc, char **argv)
   }
   printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
 
-  /*********************************************** 
+  /***********************************************
    * Do the conversion
    ***********************************************/
 
   nhmm = 0;
   while (HMMFileRead(infp, &hmm)) {
-    if (hmm == NULL) 
+    if (hmm == NULL)
       Die("HMM file %s may be corrupt or in incorrect format; parse failed", infile);
 
     switch(outfmt) {
@@ -201,7 +197,7 @@ main(int argc, char **argv)
   }
   printf("\n%d HMM(s) converted and written to %s\n", nhmm, outfile);
 
-  /*********************************************** 
+  /***********************************************
    * Clean-up and exit.
    ***********************************************/
 

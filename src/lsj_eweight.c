@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,7 +10,7 @@
 
 /* lsjfuncs.c
  * LSJ, Wed Feb  4 15:03:58 CST 2004
- * 
+ *
  * entropy targeting:
  * Code for setting effective sequence number (in hmmbuild) by
  * achieving a certain target entropy loss, relative to background
@@ -32,20 +32,20 @@
 #include "lsjfuncs.h"
 
 /* Function: Eweight() LSJ 2/6/04
- * 
- * Purpose:  Main entropy-based weighting function. 
- *           
- * Args:  
+ *
+ * Purpose:  Main entropy-based weighting function.
+ *
+ * Args:
  *           **mat       - Current model match state counts.
  *           **pri       - Model priors.
  *       numb_seqs       - Number of sequences in alignment.
- *       targetent       - Target mean match state entropy. 
- *           
- * Return: eff_no        - New effective sequence number.                         
+ *       targetent       - Target mean match state entropy.
+ *
+ * Return: eff_no        - New effective sequence number.
  */
-float 
-Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs, 
-	float targetent)
+float
+Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
+  float targetent)
 {
   int i;
   int j;
@@ -65,9 +65,9 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
    **************/
   pmat     = MallocOrDie (MAXABET * sizeof(float *));
   ent      = MallocOrDie ((hmm->M+1) * sizeof(float *));
- 
+
   /*****************
-   * Initializations 
+   * Initializations
    *****************/
   current  = 0.;
   scale    = 1.;
@@ -82,7 +82,7 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
   }
 
   /***************************************
-   * Calculate the starting model entropy 
+   * Calculate the starting model entropy
    ***************************************/
 
   /* Copy model match state probabilities into our temporary pmat[] */
@@ -96,7 +96,7 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
     ent[i] = FEntropy(pmat, Alphabet_size);
   }
   /* Calculate the mean match state entropy. (squid/vectorops.c::FSum) */
-  current = FSum(ent, hmm->M+1)/hmm->M;	
+  current = FSum(ent, hmm->M+1)/hmm->M;
 
   /****************************************
   * Initialize binary search bracket values
@@ -110,9 +110,9 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
      bracket and rightscale produces the highest mean entropy
      bracket */
   if(current < targetent){
-    leftscale  = 1; 
-    rightscale = 0; 
-  } 
+    leftscale  = 1;
+    rightscale = 0;
+  }
   else{
     /* Current model has a higher entropy than our target.
        Calculated effective seq numb <= Number of seqs. Design decision.
@@ -146,7 +146,7 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
     /* Re-copy match state probabilities into pmat[] */
     for(i = 1; i < hmm->M+1; i++){
       for(j = 0; j < Alphabet_size; j++){
-	pmat[j] = hmm->mat[i][j];
+  pmat[j] = hmm->mat[i][j];
       }
       /* Re-scale the current counts by the previously determined amount. (squid/vectorops.c) */
       FScale(pmat, Alphabet_size, scale);
@@ -178,21 +178,23 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
 
 
 /************************************************/
-/* Functions just used in debugging/calibrating */ 
+/* Functions just used in debugging/calibrating */
 /************************************************/
 
 /* Function: ModelContent() LSJ 10/14/03
- * 
- * Purpose:  This is a highly mutable grab-bag function I use  
+ *
+ * Purpose:  This is a highly mutable grab-bag function I use
  *           in benchmarking/debugging to examine model guts.
- *           
- * Args:     
+ *
+ * Args:
  *           *ent1       - Column entropies for count data.
  *           *ent2       - Column entropies for count+prior data.
  *           M           - number of states in model
- *           
- * Return:   (void)                         
+ *
+ * Return:   (void)
  */
+/*
+//RECORDED UNUSED***************************************************************
 void ModelContent(float *ent1, float *ent2, int M)
 {
   int i;
@@ -209,17 +211,17 @@ void ModelContent(float *ent1, float *ent2, int M)
   for(i = 1; i < M+1; i++){
     sum1 += ent1[i];
     sum2 += ent2[i];
-    /*    sum3 += relent[i];
-     */
+    //    sum3 += relent[i];
+
     printf("%d\t%2.4f %2.4f %2.4f\n", i, ent1[i], ent2[i], (ent2[i] - ent1[i]));
   }
   mean1 = sum1/M;
   mean2 = sum2/M;
-  /*  mean3 = sum3/M;
-  fprintf(fp, "Mean Relative Entropy/Column: %2.4f\n", mean3);
-  */
+  //  mean3 = sum3/M;
+  //fprintf(fp, "Mean Relative Entropy/Column: %2.4f\n", mean3);
+
   printf("Counts Mean Entropy/Column: %2.4f\n", mean1);
   printf("Counts+Priors Mean Entropy/Column: %2.4f\n", mean2);
   printf("Diff: %2.4f\n", (mean2-mean1));
 }
-
+//*/

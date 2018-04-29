@@ -30,25 +30,25 @@
  */
 
 extern float P7OptimalAccuracy(unsigned char *dsq, int L, struct plan7_s *hmm, 
-			       struct p7trace_s **ret_tr);
+             struct p7trace_s **ret_tr);
 
 extern float P7Backward(unsigned char *dsq, int L, struct plan7_s *hmm, 
-			struct dpmatrix_s **ret_mx);
+      struct dpmatrix_s **ret_mx);
 
 extern void  P7EmitterPosterior(int L, struct plan7_s *hmm,
-				struct dpmatrix_s *forward,
-				struct dpmatrix_s *backward,
-				struct dpmatrix_s *mx);
+        struct dpmatrix_s *forward,
+        struct dpmatrix_s *backward,
+        struct dpmatrix_s *mx);
 
 extern float P7FillOptimalAccuracy(int L, int M,
-				   struct dpmatrix_s *posterior,
-				   struct dpmatrix_s *mx,
-				   struct p7trace_s **ret_tr);
+           struct dpmatrix_s *posterior,
+           struct dpmatrix_s *mx,
+           struct p7trace_s **ret_tr);
 
 extern void  P7OptimalAccuracyTrace(int L, int M,
-				    struct dpmatrix_s *posterior,
-				    struct dpmatrix_s *mx,
-				    struct p7trace_s **ret_tr);
+            struct dpmatrix_s *posterior,
+            struct dpmatrix_s *mx,
+            struct p7trace_s **ret_tr);
 
 #endif
 

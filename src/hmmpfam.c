@@ -2,19 +2,19 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
  ************************************************************/
 
 /* hmmpfam.c
- * SRE, Mon Aug 25 17:03:14 1997 [Denver] 
+ * SRE, Mon Aug 25 17:03:14 1997 [Denver]
  *
  * Search a single sequence against an HMM database.
  */
 
-#include "config.h"		/* compile-time configuration constants */
+#include "config.h"    /* compile-time configuration constants */
 #include "squidconf.h"
 
 #include <stdio.h>
@@ -25,10 +25,10 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include "squid.h"		/* general sequence analysis library    */
-#include "structs.h"		/* data structures, macros, #define's   */
-#include "funcs.h"		/* function declarations                */
-#include "globals.h"		/* alphabet global variables            */
+#include "squid.h"    /* general sequence analysis library    */
+#include "structs.h"    /* data structures, macros, #define's   */
+#include "funcs.h"    /* function declarations                */
+#include "globals.h"    /* alphabet global variables            */
 
 static char banner[] = "hmmpfam - search one or more sequences against HMM database";
 
@@ -60,11 +60,11 @@ static char experts[] = "\
 
 
 static struct opt_s OPTIONS[] = {
-  { "-h",        TRUE,  sqdARG_NONE }, 
+  { "-h",        TRUE,  sqdARG_NONE },
   { "-n",        TRUE,  sqdARG_NONE },
-  { "-A",        TRUE,  sqdARG_INT  },  
-  { "-E",        TRUE,  sqdARG_FLOAT},  
-  { "-T",        TRUE,  sqdARG_FLOAT},  
+  { "-A",        TRUE,  sqdARG_INT  },
+  { "-E",        TRUE,  sqdARG_FLOAT},
+  { "-T",        TRUE,  sqdARG_FLOAT},
   { "-Z",        TRUE,  sqdARG_INT  },
   { "--acc",     FALSE, sqdARG_NONE },
   { "--compat",  FALSE, sqdARG_NONE },
@@ -76,18 +76,18 @@ static struct opt_s OPTIONS[] = {
   { "--domT",    FALSE, sqdARG_FLOAT},
   { "--forward", FALSE, sqdARG_NONE },
   { "--informat",FALSE, sqdARG_STRING},
-  { "--null2",   FALSE, sqdARG_NONE },  
+  { "--null2",   FALSE, sqdARG_NONE },
   { "--xnu",     FALSE, sqdARG_NONE },
 };
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
-static void main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo, 
-			     struct threshold_s *thresh, int do_xnu, int do_forward, int do_null2,
-			     struct tophit_s *ghit, struct tophit_s *dhit, int *nhmm);
-static void main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo, 
-			       struct threshold_s *thresh, int do_xnu, 
-			       int do_forward, int do_null2, int num_threads,
-			       struct tophit_s *ghit, struct tophit_s *dhit, int *nhmm);
+static void main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
+           struct threshold_s *thresh, int do_xnu, int do_forward, int do_null2,
+           struct tophit_s *ghit, struct tophit_s *dhit, int *nhmm);
+static void main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
+             struct threshold_s *thresh, int do_xnu,
+             int do_forward, int do_null2, int num_threads,
+             struct tophit_s *ghit, struct tophit_s *dhit, int *nhmm);
 
 
 /* POSIX threads version:
@@ -101,15 +101,15 @@ struct workpool_s {
   char          *hmmfile;       /* name of HMM file                */
   unsigned char *dsq;           /* digitized query sequence        */
   char  *seqname;               /* sequence name                   */
-  int    L;			/* length of dsq                   */
-  int    do_forward;		/* TRUE to score using Forward     */
-  int    do_null2;		/* TRUE to apply null2 correction  */
-  struct threshold_s *thresh;   /* score/evalue cutoff information */ 
-  
+  int    L;      /* length of dsq                   */
+  int    do_forward;    /* TRUE to score using Forward     */
+  int    do_null2;    /* TRUE to apply null2 correction  */
+  struct threshold_s *thresh;   /* score/evalue cutoff information */
+
   /* Shared (mutex-protected) input resources:
    */
   HMMFILE *hmmfp;               /* ptr to open HMM file           */
-  int nhmm;			/* number of HMMs searched so far */
+  int nhmm;      /* number of HMMs searched so far */
   pthread_mutex_t input_lock;   /* mutex for locking input        */
 
   /* Shared (mutex-protected) output resources:
@@ -124,12 +124,12 @@ struct workpool_s {
   int        num_threads;       /* number of threads   */
 };
 
-static struct workpool_s *workpool_start(char *hmmfile, HMMFILE *hmmfp, 
-					 unsigned char *dsq, char *seqname, int L,
-					 int do_forward, int do_null2, 
-					 struct threshold_s *thresh,
-					 struct tophit_s *ghit, struct tophit_s *dhit, 
-					 int num_threads);
+static struct workpool_s *workpool_start(char *hmmfile, HMMFILE *hmmfp,
+           unsigned char *dsq, char *seqname, int L,
+           int do_forward, int do_null2,
+           struct threshold_s *thresh,
+           struct tophit_s *ghit, struct tophit_s *dhit,
+           int num_threads);
 static void  workpool_stop(struct workpool_s *wpool);
 static void  workpool_free(struct workpool_s *wpool);
 static void *worker_thread(void *ptr);
@@ -139,77 +139,73 @@ static void *worker_thread(void *ptr);
 
 
 int
-main(int argc, char **argv) 
+main(int argc, char **argv)
 {
-  char            *hmmfile;	/* file to read HMMs from                  */
+  char            *hmmfile;  /* file to read HMMs from                  */
   HMMFILE         *hmmfp;       /* opened hmmfile for reading              */
-  char            *seqfile;     /* file to read target sequence from       */ 
+  char            *seqfile;     /* file to read target sequence from       */
   SQFILE          *sqfp;        /* opened seqfile for reading              */
-  int              format;	/* format of seqfile                       */
-  char              *seq;	/* target sequence                         */
-  SQINFO             sqinfo;	/* optional info for seq                   */
-  struct fancyali_s *ali;	/* an alignment for display                */
-  struct tophit_s   *ghit;      /* list of top hits and alignments for seq  */
-  struct tophit_s   *dhit;	/* list of top hits/alignments for domains  */
+  int              format;  /* format of seqfile                       */
+  char              *seq;  /* target sequence                         */
+  SQINFO             sqinfo;  /* optional info for seq                   */
+  struct fancyali_s *ali;  /* an alignment for display                */
 
-  float   sc;			/* log-odds score in bits                  */
-  double  pvalue;		/* pvalue of an HMM score                  */
-  double  evalue;		/* evalue of an HMM score                  */
-  double  motherp;		/* pvalue of a whole seq HMM score         */
-  float   mothersc;		/* score of a whole seq parent of domain   */
-  int     sqfrom, sqto;		/* coordinates in sequence                 */
-  int     hmmfrom, hmmto;	/* coordinate in HMM                       */
+  float   sc;      /* log-odds score in bits                  */
+  double  pvalue;    /* pvalue of an HMM score                  */
+  double  evalue;    /* evalue of an HMM score                  */
+  double  motherp;    /* pvalue of a whole seq HMM score         */
+  float   mothersc;    /* score of a whole seq parent of domain   */
+  int     sqfrom, sqto;    /* coordinates in sequence                 */
+  int     hmmfrom, hmmto;  /* coordinate in HMM                       */
   char   *name, *acc, *desc;    /* hit HMM name, accession, description            */
-  int     hmmlen;		/* length of HMM hit                       */
-  int     nhmm;			/* number of HMMs searched                 */
-  int     domidx;		/* number of this domain                   */
-  int     ndom;			/* total # of domains in this seq          */
-  int     namewidth;		/* max width of printed HMM name           */
-  int     descwidth;		/* max width of printed description        */
+  int     hmmlen;    /* length of HMM hit                       */
+  int     nhmm;      /* number of HMMs searched                 */
+  int     domidx;    /* number of this domain                   */
+  int     ndom;      /* total # of domains in this seq          */
 
-  int    Alimit;		/* A parameter limiting output alignments   */
+  int    Alimit;    /* A parameter limiting output alignments   */
   struct threshold_s thresh;    /* contains all threshold (cutoff) info     */
 
   char *optname;                /* name of option found by Getopt()         */
   char *optarg;                 /* argument found by Getopt()               */
   int   optind;                 /* index in argv[]                          */
-  int   do_forward;		/* TRUE to use Forward() not Viterbi()      */
-  int   do_nucleic;		/* TRUE to do DNA/RNA instead of protein    */
-  int   do_null2;		/* TRUE to adjust scores with null model #2 */
-  int   do_xnu;			/* TRUE to do XNU filtering                 */
-  int   be_backwards;		/* TRUE to be backwards-compatible in output*/
-  int   show_acc;		/* TRUE to sub HMM accessions for names     */
+  int   do_forward;    /* TRUE to use Forward() not Viterbi()      */
+  int   do_nucleic;    /* TRUE to do DNA/RNA instead of protein    */
+  int   do_null2;    /* TRUE to adjust scores with null model #2 */
+  int   do_xnu;      /* TRUE to do XNU filtering                 */
+  int   be_backwards;    /* TRUE to be backwards-compatible in output*/
+  int   show_acc;    /* TRUE to sub HMM accessions for names     */
   int   i;
   int   nreported;
 
-  int   num_threads;            /* number of worker threads */   
+  int   num_threads;            /* number of worker threads */
 
-  /*********************************************** 
+  /***********************************************
    * Parse command line
    ***********************************************/
-  
-  format      = SQFILE_UNKNOWN;	/* default: autodetect format w/ Babelfish */
+
+  format      = SQFILE_UNKNOWN;  /* default: autodetect format w/ Babelfish */
   do_forward  = FALSE;
   do_nucleic  = FALSE;
   do_null2    = TRUE;
   do_xnu      = FALSE;
-  be_backwards= FALSE; 
+  be_backwards= FALSE;
   show_acc    = FALSE;
-  
+
   num_threads     = sysconf(_SC_NPROCESSORS_ONLN);
 
-  Alimit         = INT_MAX;	/* no limit on alignment output     */
-  thresh.globE   = 10.0;	/* use a reasonable Eval threshold; */
-  thresh.globT   = -FLT_MAX;	/*   but no bit threshold,          */
-  thresh.domT    = -FLT_MAX;	/*   no domain bit threshold,       */
+  Alimit         = INT_MAX;  /* no limit on alignment output     */
+  thresh.globE   = 10.0;  /* use a reasonable Eval threshold; */
+  thresh.globT   = -FLT_MAX;  /*   but no bit threshold,          */
+  thresh.domT    = -FLT_MAX;  /*   no domain bit threshold,       */
   thresh.domE    = FLT_MAX;     /*   and no domain Eval threshold.  */
-  thresh.autocut = CUT_NONE;	/*   and no Pfam cutoffs used.      */
-  thresh.Z       = 0;		/* Z not preset, so determined by # of HMMs */
+  thresh.autocut = CUT_NONE;  /*   and no Pfam cutoffs used.      */
+  thresh.Z       = 0;    /* Z not preset, so determined by # of HMMs */
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
                 &optind, &optname, &optarg))  {
-    if      (strcmp(optname, "-n")        == 0) do_nucleic     = TRUE; 
-    else if (strcmp(optname, "-A")        == 0) Alimit         = atoi(optarg);  
+    if      (strcmp(optname, "-n")        == 0) do_nucleic     = TRUE;
+    else if (strcmp(optname, "-A")        == 0) Alimit         = atoi(optarg);
     else if (strcmp(optname, "-E")        == 0) thresh.globE   = atof(optarg);
     else if (strcmp(optname, "-T")        == 0) thresh.globT   = atof(optarg);
     else if (strcmp(optname, "-Z")        == 0) thresh.Z       = atoi(optarg);
@@ -223,11 +219,11 @@ main(int argc, char **argv)
     else if (strcmp(optname, "--domT")    == 0) thresh.domT    = atof(optarg);
     else if (strcmp(optname, "--forward") == 0) do_forward     = TRUE;
     else if (strcmp(optname, "--null2")   == 0) do_null2       = FALSE;
-    else if (strcmp(optname, "--xnu")     == 0) do_xnu         = TRUE; 
+    else if (strcmp(optname, "--xnu")     == 0) do_xnu         = TRUE;
     else if (strcmp(optname, "--informat") == 0) {
       format = String2SeqfileFormat(optarg);
-      if (format == SQFILE_UNKNOWN) 
-	Die("unrecognized sequence file format \"%s\"", optarg);
+      if (format == SQFILE_UNKNOWN)
+  Die("unrecognized sequence file format \"%s\"", optarg);
     }
     else if (strcmp(optname, "-h")      == 0) {
       HMMERBanner(stdout, banner);
@@ -240,7 +236,7 @@ main(int argc, char **argv)
     Die("Incorrect number of arguments.\n%s\n", usage);
 
   hmmfile = argv[optind++];
-  seqfile = argv[optind++]; 
+  seqfile = argv[optind++];
 
   /* Try to work around inability to autodetect from a pipe or .gz:
    * assume FASTA format
@@ -249,7 +245,7 @@ main(int argc, char **argv)
       (Strparse("^.*\\.gz$", seqfile, 0) || strcmp(seqfile, "-") == 0))
     format = SQFILE_FASTA;
 
-  /*********************************************** 
+  /***********************************************
    * Open sequence database (must be in curr directory);
    * get target sequence.
    ***********************************************/
@@ -257,20 +253,20 @@ main(int argc, char **argv)
   if (do_nucleic) SetAlphabet(hmmNUCLEIC);
   else            SetAlphabet(hmmAMINO);
 
-  if (do_nucleic && do_xnu) 
+  if (do_nucleic && do_xnu)
     Die("You can't use -n and --xnu together: I can't xnu DNA data.");
 
   if ((sqfp = SeqfileOpen(seqfile, format, NULL)) == NULL)
     Die("Failed to open sequence file %s\n%s\n", seqfile, usage);
 
-  /*********************************************** 
+  /***********************************************
    * Open HMM database (might be in HMMERDB or current directory)
    ***********************************************/
 
   if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
     Die("Failed to open HMM database %s\n%s", hmmfile, usage);
 
-  /*********************************************** 
+  /***********************************************
    * Show the banner
    ***********************************************/
 
@@ -279,12 +275,13 @@ main(int argc, char **argv)
   printf(   "Sequence file:            %s\n", seqfile);
   printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
 
-  /*********************************************** 
+  /***********************************************
    * Search each HMM against each sequence
    ***********************************************/
 
-  while (ReadSeq(sqfp, format, &seq, &sqinfo)) 
-    {
+  while (ReadSeq(sqfp, format, &seq, &sqinfo)){
+      struct tophit_s   *ghit;      /* list of top hits and alignments for seq  */
+      struct tophit_s   *dhit;  /* list of top hits/alignments for domains  */
       ghit = AllocTophits(20);   /* keeps full seq scores */
       dhit = AllocTophits(20);   /* keeps domain scores   */
 
@@ -292,36 +289,38 @@ main(int argc, char **argv)
        *    Significant scores+alignments accumulate in ghit, dhit.
        */
       if (num_threads > 1)
-	main_loop_threaded(hmmfile, hmmfp, seq, &sqinfo, 
-			   &thresh, do_xnu, do_forward, do_null2, num_threads,
-			   ghit, dhit, &nhmm);
-      else 
-	main_loop_serial(hmmfile, hmmfp, seq, &sqinfo, 
-			 &thresh, do_xnu, do_forward, do_null2, 
-			 ghit, dhit, &nhmm);
+  main_loop_threaded(hmmfile, hmmfp, seq, &sqinfo,
+         &thresh, do_xnu, do_forward, do_null2, num_threads,
+         ghit, dhit, &nhmm);
+      else
+  main_loop_serial(hmmfile, hmmfp, seq, &sqinfo,
+       &thresh, do_xnu, do_forward, do_null2,
+       ghit, dhit, &nhmm);
 
-				/* set Z for good now that we're done */
-      if (!thresh.Z) thresh.Z = nhmm;	
+        /* set Z for good now that we're done */
+      if (!thresh.Z) thresh.Z = nhmm;
 
       /* 2. (Done searching all HMMs for this query seq; start output)
        *    Report the overall sequence hits, sorted by significance.
        */
       if (be_backwards)
-	{
-	  printf("Query:  %s  %s\n", sqinfo.name, 
-		 sqinfo.flags & SQINFO_DESC ? sqinfo.desc : "");
-	}
+  {
+    printf("Query:  %s  %s\n", sqinfo.name,
+     (sqinfo.flags & SQINFO_DESC) ? sqinfo.desc : "");
+  }
       else
-	{
-	  printf("\nQuery sequence: %s\n", sqinfo.name);
-	  printf("Accession:      %s\n", sqinfo.flags &SQINFO_ACC ? sqinfo.acc  : "[none]");
-	  printf("Description:    %s\n", sqinfo.flags &SQINFO_DESC? sqinfo.desc : "[none]");
-	}
-      /* We'll now sort the global hit list by evalue... 
-       * (not score! that was bug #12. in hmmpfam, score and evalue are not 
+  {
+    printf("\nQuery sequence: %s\n", sqinfo.name);
+    printf("Accession:      %s\n", (sqinfo.flags &SQINFO_ACC)  ? sqinfo.acc  : "[none]");
+    printf("Description:    %s\n", (sqinfo.flags &SQINFO_DESC) ? sqinfo.desc : "[none]");
+  }
+      /* We'll now sort the global hit list by evalue...
+       * (not score! that was bug #12. in hmmpfam, score and evalue are not
        *  monotonic.)
        */
-      FullSortTophits(ghit);	
+      FullSortTophits(ghit);
+      int     namewidth;    /* max width of printed HMM name           */
+      int     descwidth;    /* max width of printed description        */
       namewidth = MAX(8, TophitsMaxName(ghit)); /* must print whole name, no truncation  */
       descwidth = MAX(52-namewidth, 11);        /* may truncate desc, but avoid neg len! */
 
@@ -329,53 +328,53 @@ main(int argc, char **argv)
       printf("%-*s %-*s %7s %10s %3s\n", namewidth, "Model", descwidth, "Description", "Score", "E-value", " N ");
       printf("%-*s %-*s %7s %10s %3s\n", namewidth, "--------", descwidth, "-----------", "-----", "-------", "---");
       for (i = 0, nreported = 0; i < ghit->num; i++)
-	{
-	  char *safedesc;
-	  GetRankedHit(ghit, i, 
-		       &pvalue, &sc, NULL, NULL,
-		       &name, &acc, &desc,
-		       NULL, NULL, NULL,           /* seq positions */
-		       NULL, NULL, NULL,           /* HMM positions */
-		       NULL, &ndom,                /* domain info   */
-		       NULL);	                   /* alignment info*/
+  {
+    char *safedesc;
+    GetRankedHit(ghit, i,
+           &pvalue, &sc, NULL, NULL,
+           &name, &acc, &desc,
+           NULL, NULL, NULL,           /* seq positions */
+           NULL, NULL, NULL,           /* HMM positions */
+           NULL, &ndom,                /* domain info   */
+           NULL);                     /* alignment info*/
 
-	  evalue = pvalue * (double) thresh.Z;
+    evalue = pvalue * (double) thresh.Z;
 
-	  /* safedesc is a workaround for an apparent Linux printf()
-	   * bug with the *.*s format. dbmalloc crashes with a memchr() ptr out of bounds
-	   * flaw if the malloc'ed space for desc is short. The workaround
+    /* safedesc is a workaround for an apparent Linux printf()
+     * bug with the *.*s format. dbmalloc crashes with a memchr() ptr out of bounds
+     * flaw if the malloc'ed space for desc is short. The workaround
            * is to make sure the ptr for *.* has a big malloc space.
-	   */
-	  if (desc != NULL && strlen(desc) < 80) 
-	    {
-	      safedesc = MallocOrDie(sizeof(char) * 80);
-	      strcpy(safedesc, desc);
-	    }
-	  else safedesc = Strdup(desc);
+     */
+    if (desc != NULL && strlen(desc) < 80)
+      {
+        safedesc = MallocOrDie(sizeof(char) * 80);
+        strcpy(safedesc, desc);
+      }
+    else safedesc = Strdup(desc);
 
-	  /* sneaky trick warning:
-	   * if we're using dynamic Pfam score cutoffs (GA, TC, NC),
-	   * then the list of hits is already correct and does not
-	   * need any score cutoffs. Unset the thresholds. They'll
+    /* sneaky trick warning:
+     * if we're using dynamic Pfam score cutoffs (GA, TC, NC),
+     * then the list of hits is already correct and does not
+     * need any score cutoffs. Unset the thresholds. They'll
            * be reset in the main_loop if we still have sequences
            * to process.
-	   */
-	  if (thresh.autocut != CUT_NONE) {
-	    thresh.globE = thresh.domE = FLT_MAX;
-	    thresh.globT = thresh.domT = -FLT_MAX;
-	  }
+     */
+    if (thresh.autocut != CUT_NONE) {
+      thresh.globE = thresh.domE = FLT_MAX;
+      thresh.globT = thresh.domT = -FLT_MAX;
+    }
 
-	  if (evalue <= thresh.globE && sc >= thresh.globT) 
-	    {
-	      printf("%-*s %-*.*s %7.1f %10.2g %3d\n", 
-		     namewidth, 
-		     (show_acc && acc != NULL) ?  acc : name,
-		     descwidth, descwidth, safedesc != NULL ? safedesc : "",
-		     sc, evalue, ndom);
-	      nreported++;
-	    }
-	  free(safedesc);
-	}
+    if (evalue <= thresh.globE && sc >= thresh.globT)
+      {
+        printf("%-*s %-*.*s %7.1f %10.2g %3d\n",
+         namewidth,
+         (show_acc && acc != NULL) ?  acc : name,
+         descwidth, descwidth, safedesc != NULL ? safedesc : "",
+         sc, evalue, ndom);
+        nreported++;
+      }
+    free(safedesc);
+  }
       if (nreported == 0) printf("\t[no hits above thresholds]\n");
 
       /* 3. Report domain hits (sorted on sqto coordinate)
@@ -385,38 +384,38 @@ main(int argc, char **argv)
 
       printf("\nParsed for domains:\n");
       printf("%-*s %7s %5s %5s    %5s %5s    %7s %8s\n",
-	     namewidth, "Model", "Domain ", "seq-f", "seq-t", "hmm-f", "hmm-t", "score", "E-value");
+       namewidth, "Model", "Domain ", "seq-f", "seq-t", "hmm-f", "hmm-t", "score", "E-value");
       printf("%-*s %7s %5s %5s    %5s %5s    %7s %8s\n",
-	     namewidth, "--------", "-------", "-----", "-----", "-----", "-----", "-----", "-------");
-      
+       namewidth, "--------", "-------", "-----", "-----", "-----", "-----", "-----", "-------");
+
       for (i = 0, nreported = 0; i < dhit->num; i++)
-	{
-	  GetRankedHit(dhit, i, 
-		       &pvalue, &sc, &motherp, &mothersc,
-		       &name, &acc, NULL,
-		       &sqfrom, &sqto, NULL, 
-		       &hmmfrom, &hmmto, &hmmlen, 
-		       &domidx, &ndom,
-		       NULL);
-	  evalue = pvalue * (double) thresh.Z;
-	  
-				/* Does the "mother" (complete) sequence satisfy global thresholds? */
-	  if (motherp * (double)thresh. Z > thresh.globE || mothersc < thresh.globT) 
-	    continue;
-	  else if (evalue <= thresh.domE && sc >= thresh.domT) {
-	    printf("%-*s %3d/%-3d %5d %5d %c%c %5d %5d %c%c %7.1f %8.2g\n",
-		   namewidth, 
-		   (show_acc && acc != NULL) ?  acc : name,
-		   domidx, ndom,
-		   sqfrom, sqto, 
-		   sqfrom == 1 ? '[' : '.', sqto == sqinfo.len ? ']' : '.',
-		   hmmfrom, hmmto,
-		   hmmfrom == 1 ? '[':'.',  hmmto == hmmlen ? ']' : '.',
-		   sc, evalue);
-	    nreported++;
-	  }
-	}
-      if (nreported == 0) printf("\t[no hits above thresholds]\n");      
+  {
+    GetRankedHit(dhit, i,
+           &pvalue, &sc, &motherp, &mothersc,
+           &name, &acc, NULL,
+           &sqfrom, &sqto, NULL,
+           &hmmfrom, &hmmto, &hmmlen,
+           &domidx, &ndom,
+           NULL);
+    evalue = pvalue * (double) thresh.Z;
+
+        /* Does the "mother" (complete) sequence satisfy global thresholds? */
+    if (motherp * (double)thresh. Z > thresh.globE || mothersc < thresh.globT)
+      continue;
+    else if (evalue <= thresh.domE && sc >= thresh.domT) {
+      printf("%-*s %3d/%-3d %5d %5d %c%c %5d %5d %c%c %7.1f %8.2g\n",
+       namewidth,
+       (show_acc && acc != NULL) ?  acc : name,
+       domidx, ndom,
+       sqfrom, sqto,
+       sqfrom == 1 ? '[' : '.', sqto == sqinfo.len ? ']' : '.',
+       hmmfrom, hmmto,
+       hmmfrom == 1 ? '[':'.',  hmmto == hmmlen ? ']' : '.',
+       sc, evalue);
+      nreported++;
+    }
+  }
+      if (nreported == 0) printf("\t[no hits above thresholds]\n");
 
 
       /* 3. Alignment output, also by domain.
@@ -425,45 +424,45 @@ main(int argc, char **argv)
        *    also by domE (evalue threshold), domT (score theshold).
        */
       if (Alimit != 0)
-	{
-	  printf("\nAlignments of top-scoring domains:\n");
-	  for (i = 0, nreported = 0; i < dhit->num; i++)
-	    {
-	      if (nreported == Alimit) break; /* limit to Alimit output alignments */
-	      GetRankedHit(dhit, i, 
-			   &pvalue, &sc, &motherp, &mothersc,
-			   &name, &acc, NULL,
-			   &sqfrom, &sqto, NULL,              /* seq position info  */
-			   &hmmfrom, &hmmto, &hmmlen,         /* HMM position info  */
-			   &domidx, &ndom,                    /* domain info        */
-			   &ali);	                      /* alignment info     */
-	      evalue = pvalue * (double) thresh.Z;
+  {
+    printf("\nAlignments of top-scoring domains:\n");
+    for (i = 0, nreported = 0; i < dhit->num; i++)
+      {
+        if (nreported == Alimit) break; /* limit to Alimit output alignments */
+        GetRankedHit(dhit, i,
+         &pvalue, &sc, &motherp, &mothersc,
+         &name, &acc, NULL,
+         &sqfrom, &sqto, NULL,              /* seq position info  */
+         &hmmfrom, &hmmto, &hmmlen,         /* HMM position info  */
+         &domidx, &ndom,                    /* domain info        */
+         &ali);                        /* alignment info     */
+        evalue = pvalue * (double) thresh.Z;
 
-	      if (motherp * (double) thresh.Z > thresh.globE || mothersc < thresh.globT) 
-		continue;
-	      else if (evalue <= thresh.domE && sc >= thresh.domT) 
-		{
-		  printf("%s: domain %d of %d, from %d to %d: score %.1f, E = %.2g\n", 
-			 (show_acc && acc != NULL) ?  acc : name,
-			 domidx, ndom, sqfrom, sqto, sc, evalue);
-		  PrintFancyAli(stdout, ali);
-		  nreported++;
-		}
-	    }
-	  if (nreported == 0)      printf("\t[no hits above thresholds]\n");
-	  if (nreported == Alimit) printf("\t[output cut off at A = %d top alignments]\n", Alimit);
-	}
+        if (motherp * (double) thresh.Z > thresh.globE || mothersc < thresh.globT)
+    continue;
+        else if (evalue <= thresh.domE && sc >= thresh.domT)
+    {
+      printf("%s: domain %d of %d, from %d to %d: score %.1f, E = %.2g\n",
+       (show_acc && acc != NULL) ?  acc : name,
+       domidx, ndom, sqfrom, sqto, sc, evalue);
+      PrintFancyAli(stdout, ali);
+      nreported++;
+    }
+      }
+    if (nreported == 0)      printf("\t[no hits above thresholds]\n");
+    if (nreported == Alimit) printf("\t[output cut off at A = %d top alignments]\n", Alimit);
+  }
 
 
       printf("//\n");
-      FreeSequence(seq, &sqinfo); 
+      FreeSequence(seq, &sqinfo);
       FreeTophits(ghit);
       FreeTophits(dhit);
 
       HMMFileRewind(hmmfp);
     }
 
-  /*********************************************** 
+  /***********************************************
    * Clean-up and exit.
    ***********************************************/
   SeqfileClose(sqfp);
@@ -478,8 +477,8 @@ main(int argc, char **argv)
  * Date:     SRE, Fri Aug  7 13:46:48 1998 [St. Louis]
  *
  * Purpose:  Search a sequence against an HMM database;
- *           main loop for the serial version. 
- *           
+ *           main loop for the serial version.
+ *
  *           On return, ghit and dhit contain info for all hits
  *           that satisfy the set thresholds. If an evalue
  *           cutoff is used at all, the lists will be overestimated --
@@ -487,7 +486,7 @@ main(int argc, char **argv)
  *           we know the final Z. (Thus the main program must recheck
  *           thresholds before printing any results.) If only
  *           score cutoffs are used, then the lists are correct,
- *           and may be printed exactly as they come (after 
+ *           and may be printed exactly as they come (after
  *           appropriate sorting, anyway). This is especially
  *           important for dynamic thresholding using Pfam
  *           score cutoffs -- the main caller cannot afford to
@@ -512,21 +511,19 @@ main(int argc, char **argv)
  * Returns:  (void)
  */
 static void
-main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo, 
-		 struct threshold_s *thresh, int do_xnu, int do_forward, int do_null2,
-		 struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nhmm) 
+main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
+     struct threshold_s *thresh, int do_xnu, int do_forward, int do_null2,
+     struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nhmm)
 {
   unsigned char     *dsq;       /* digitized sequence                      */
-  int                nhmm;	/* number of HMMs searched                 */
-  struct plan7_s    *hmm;       /* current HMM to search with              */ 
-  struct p7trace_s  *tr;	/* traceback of alignment                  */
+  int                nhmm;  /* number of HMMs searched                 */
+  struct plan7_s    *hmm;       /* current HMM to search with              */
+  struct p7trace_s  *tr;  /* traceback of alignment                  */
   struct dpmatrix_s *mx;        /* growable DP matrix                      */
-  float   sc;                   /* an alignment score                      */ 
-  double  pvalue;		/* pvalue of an HMM score                  */
-  double  evalue;		/* evalue of an HMM score                  */
-    
-  tr = NULL; 
-  
+  float   sc;                   /* an alignment score                      */
+
+  tr = NULL;
+
   /* Prepare sequence.
    */
   SQD_DPRINTF1(("main_loop_serial:\n"));
@@ -534,11 +531,11 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
   dsq = DigitizeSequence(seq, sqinfo->len);
   if (do_xnu && Alphabet_type == hmmAMINO) XNU(dsq, sqinfo->len);
 
-  /* 
+  /*
    * We'll create for at least N=300xM=300, and thus consume at least 1 MB,
    * regardless of RAMLIMIT -- this helps us avoid reallocating some weird
    * asymmetric matrices.
-   * 
+   *
    * We're growable in both M and N, because inside of P7SmallViterbi,
    * we're going to be calling P7Viterbi on subpieces that vary in size,
    * and for different models.
@@ -547,27 +544,27 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
 
   nhmm = 0;
   while (HMMFileRead(hmmfp, &hmm)) {
-    if (hmm == NULL) 
+    if (hmm == NULL)
       Die("HMM file %s may be corrupt or in incorrect format; parse failed", hmmfile);
     P7Logoddsify(hmm, !(do_forward));
     SQD_DPRINTF1(("   ... working on HMM %s\n", hmm->name));
     SQD_DPRINTF1(("   ... mx is now M=%d by N=%d\n", mx->maxM, mx->maxN));
 
-    if (! SetAutocuts(thresh, hmm)) 
+    if (! SetAutocuts(thresh, hmm))
       Die("HMM %s did not contain the GA, TC, or NC cutoffs you needed",
-	  hmm->name);
+    hmm->name);
 
     /* Score sequence, do alignment (Viterbi), recover trace
      */
 
-#ifdef ALTIVEC 
-    
+#ifdef ALTIVEC
+
     /* By default we call an Altivec routine that doesn't save the full
      * trace. This also means the memory usage is just proportional to the
      * model (hmm->M), so we don't need to check if space is OK unless
-     * we need the trace.   
-     */   
-    
+     * we need the trace.
+     */
+
     if(do_forward && do_null2)
     {
         /* Need the trace - first check space */
@@ -590,10 +587,10 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
     }
 
 #else /* not altivec */
-    
+
     if (P7ViterbiSpaceOK(sqinfo->len, hmm->M, mx))
     {
-        SQD_DPRINTF1(("   ... using normal P7Viterbi(); size ~%d MB\n", 
+        SQD_DPRINTF1(("   ... using normal P7Viterbi(); size ~%d MB\n",
                       P7ViterbiSize(sqinfo->len, hmm->M)));
         sc = P7Viterbi(dsq, sqinfo->len, hmm, mx, &tr);
     }
@@ -605,33 +602,33 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
     }
 
 #endif
-    
+
     /* Implement do_forward; we'll override the whole_sc with a P7Forward()
      * calculation.
      * HMMER is so trace- (alignment-) dependent that this gets a bit hacky.
-     * Some important implications: 
+     * Some important implications:
      *   1) if --do_forward is selected, the domain (Viterbi) scores do not
      *      necessarily add up to the whole sequence (Forward) score.
      *   2) The implementation of null2 for a Forward score is undefined,
-     *      since the null2 correction is trace-dependent. As a total hack, 
+     *      since the null2 correction is trace-dependent. As a total hack,
      *      we use a null2 correction derived from the whole trace
      *      (which was the behavior of HMMER 2.1.1 and earlier, anyway).
      *      This could put the sum of domain scores and whole seq score even
-     *      further in disagreement. 
-     * 
-     * Note that you can't move the Forward calculation into 
+     *      further in disagreement.
+     *
+     * Note that you can't move the Forward calculation into
      * PostprocessSignificantHit(). The Forward score will exceed the
      * Viterbi score, so you can't apply thresholds until you
      * know the Forward score. Also, since PostprocessSignificantHit()
      * is wrapped by a mutex in the threaded implementation,
      * you'd destroy all useful parallelism if PostprocessSignificantHit()
-     * did anything compute intensive. 
+     * did anything compute intensive.
      */
-    if (do_forward) 
+    if (do_forward)
     {
-        
+
         sc = P7Forward(dsq, sqinfo->len, hmm, NULL);
-        if (do_null2) 
+        if (do_null2)
         {
             /* We need the trace - recalculate it if we didn't already do it */
 #ifdef ALTIVEC
@@ -647,13 +644,15 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
                     /* Low-memory C version */
                     P7SmallViterbi(dsq, sqinfo->len, hmm, mx, &tr);
                 }
-            }                
-#endif            
+            }
+#endif
             sc -= TraceScoreCorrection(hmm, tr, dsq);
         }
-	}
+  }
     /* Store scores/pvalue for each HMM aligned to this sequence, overall
      */
+   double  pvalue;    /* pvalue of an HMM score                  */
+   double  evalue;    /* evalue of an HMM score                  */
     pvalue = PValue(hmm, sc);
     evalue = thresh->Z ? (double) thresh->Z * pvalue : (double) nhmm * pvalue;
     if (sc >= thresh->globT && evalue <= thresh->globE) {
@@ -673,20 +672,20 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
             }
         }
 #endif
-        sc = PostprocessSignificantHit(ghit, dhit, 
-                                       tr, hmm, dsq, sqinfo->len, 
+        sc = PostprocessSignificantHit(ghit, dhit,
+                                       tr, hmm, dsq, sqinfo->len,
                                        sqinfo->name, NULL, NULL, /* won't need acc or desc even if we have 'em */
                                        do_forward, sc,
                                        do_null2,
                                        thresh,
-                                       TRUE); 
+                                       TRUE);
         /* TRUE -> hmmpfam mode */
     }
     if(tr != NULL)
         P7FreeTrace(tr);
-    
+
     tr = NULL;
-    
+
     FreePlan7(hmm);
     nhmm++;
   }
@@ -700,12 +699,12 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
 
 /*****************************************************************
  * POSIX threads implementation.
- * 
+ *
  * API:
  *      workpool_start()   (makes a workpool_s structure. Starts calculations.)
  *      workpool_stop()    (waits for threads to finish.)
  *      workpool_free()    (destroys the structure)
- *      
+ *
  * Threads:
  *      worker_thread()    (the actual parallelized worker thread).
  *****************************************************************/
@@ -713,8 +712,8 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
  * Date:     SRE, Wed Feb 27 11:10:13 2002 [St. Louis]
  *
  * Purpose:  Search a sequence against an HMM database;
- *           main loop for the threaded version. 
- *           
+ *           main loop for the threaded version.
+ *
  *           On return, ghit and dhit contain info for all hits
  *           that satisfy the set thresholds. If an evalue
  *           cutoff is used at all, the lists will be overestimated --
@@ -722,7 +721,7 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
  *           we know the final Z. (Thus the main program must recheck
  *           thresholds before printing any results.) If only
  *           score cutoffs are used, then the lists are correct,
- *           and may be printed exactly as they come (after 
+ *           and may be printed exactly as they come (after
  *           appropriate sorting, anyway). This is especially
  *           important for dynamic thresholding using Pfam
  *           score cutoffs -- the main caller cannot afford to
@@ -747,13 +746,13 @@ main_loop_serial(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
  * Returns:  (void)
  */
 static void
-main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo, 
-		   struct threshold_s *thresh, int do_xnu, int do_forward, int do_null2,
-		   int num_threads,
-		   struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nhmm) 
+main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
+       struct threshold_s *thresh, int do_xnu, int do_forward, int do_null2,
+       int num_threads,
+       struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nhmm)
 {
   unsigned char     *dsq;       /* digitized sequence      */
-  int                nhmm;	/* number of HMMs searched */
+  int                nhmm;  /* number of HMMs searched */
   struct workpool_s *wpool;     /* pool of worker threads  */
 
   /* Prepare sequence.
@@ -761,9 +760,9 @@ main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
   dsq = DigitizeSequence(seq, sqinfo->len);
   if (do_xnu && Alphabet_type == hmmAMINO) XNU(dsq, sqinfo->len);
 
-  wpool = workpool_start(hmmfile, hmmfp, dsq, sqinfo->name, sqinfo->len, 
-			 do_forward, do_null2, thresh,
-			 ghit, dhit, num_threads);
+  wpool = workpool_start(hmmfile, hmmfp, dsq, sqinfo->name, sqinfo->len,
+       do_forward, do_null2, thresh,
+       ghit, dhit, num_threads);
   workpool_stop(wpool);
   nhmm = wpool->nhmm;
   workpool_free(wpool);
@@ -786,7 +785,7 @@ main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
  *           do_null2   - TRUE to apply null2 ad hoc correction
  *           threshold  - evalue/score threshold settings
  *           ghit       - per-seq hit list
- *           dhit       - per-domain hit list             
+ *           dhit       - per-domain hit list
  *           num_threads- number of worker threads to run.
  *
  * Returns:  ptr to struct workpool_s.
@@ -795,9 +794,9 @@ main_loop_threaded(char *hmmfile, HMMFILE *hmmfp, char *seq, SQINFO *sqinfo,
  */
 static struct workpool_s *
 workpool_start(char *hmmfile, HMMFILE *hmmfp, unsigned char *dsq, char *seqname, int L,
-	       int do_forward, int do_null2, struct threshold_s *thresh,
-	       struct tophit_s *ghit, struct tophit_s *dhit, 
-	       int num_threads)
+         int do_forward, int do_null2, struct threshold_s *thresh,
+         struct tophit_s *ghit, struct tophit_s *dhit,
+         int num_threads)
 {
   struct workpool_s *wpool;
   pthread_attr_t    attr;
@@ -826,21 +825,14 @@ workpool_start(char *hmmfile, HMMFILE *hmmfp, unsigned char *dsq, char *seqname,
 
   wpool->num_threads= num_threads;
 
-  /* Create slave threads. See comments in hmmcalibrate.c at 
+  /* Create slave threads. See comments in hmmcalibrate.c at
    * this step regarding concurrency and system scope.
    */
   pthread_attr_init(&attr);
-#ifndef __sgi
-#ifdef HAVE_PTHREAD_ATTR_SETSCOPE
   pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-#endif
-#endif
-#ifdef HAVE_PTHREAD_SETCONCURRENCY
-  pthread_setconcurrency(num_threads+1);
-#endif
   for (i = 0; i < num_threads; i++)
     if ((rtn = pthread_create(&(wpool->thread[i]), &attr,
-			      worker_thread , (void *) wpool)) != 0)
+            worker_thread , (void *) wpool)) != 0)
       Die("Failed to create thread %d; return code %d\n", i, rtn);
 
   pthread_attr_destroy(&attr);
@@ -860,7 +852,7 @@ static void
 workpool_stop(struct workpool_s *wpool)
 {
   int i;
-				/* wait for threads to stop */
+        /* wait for threads to stop */
   for (i = 0; i < wpool->num_threads; i++)
     if (pthread_join(wpool->thread[i],NULL) != 0)
       Die("pthread_join failed");
@@ -902,32 +894,29 @@ worker_thread(void *ptr)
   struct workpool_s *wpool;     /* our working threads structure   */
   struct plan7_s    *hmm;       /* an HMM to search with           */
   struct p7trace_s  *tr;        /* traceback from an alignment     */
-  float  sc;			/* score of an alignment           */
-  int    rtn;			/* a return code from pthreads lib */
-  double pvalue;		/* P-value of score                */
-  double evalue;		/* E-value of a score              */
-  struct threshold_s thresh;	/* a local copy of thresholds      */
+  float  sc;      /* score of an alignment           */
+  struct threshold_s thresh;  /* a local copy of thresholds      */
   struct dpmatrix_s *mx;        /* growable DP matrix              */
 
   tr = NULL;
-  
+
   wpool = (struct workpool_s *) ptr;
   /* Because we might dynamically change the thresholds using
    * Pfam GA/NC/TC cutoffs, we make a local copy of the threshold
    * structure in this thread.
-   */ 
+   */
   thresh.globT   = wpool->thresh->globT;
   thresh.globE   = wpool->thresh->globE;
   thresh.domT    = wpool->thresh->domT;
   thresh.domE    = wpool->thresh->domE;
   thresh.autocut = wpool->thresh->autocut;
   thresh.Z       = wpool->thresh->Z;
-  
-  /* 
+
+  /*
    * We'll create for at least N=300xM=300, and thus consume at least 1 MB,
    * regardless of RAMLIMIT -- this helps us avoid reallocating some weird
    * asymmetric matrices.
-   * 
+   *
    * We're growable in both M and N, because inside of P7SmallViterbi,
    * we're going to be calling P7Viterbi on subpieces that vary in size,
    * and for different models.
@@ -939,20 +928,21 @@ worker_thread(void *ptr)
     /* 1. acquire lock on HMM input, and get
      *    the next HMM to work on.
      */
-				/* acquire a lock */
+        /* acquire a lock */
+        int    rtn;      /* a return code from pthreads lib */
     if ((rtn = pthread_mutex_lock(&(wpool->input_lock))) != 0)
       Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
-    
-    if (! HMMFileRead(wpool->hmmfp, &hmm)) 
-      {	/* we're done. release lock, exit thread */
-	if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
-	  Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-	FreePlan7Matrix(mx);
-	pthread_exit(NULL);
+
+    if (! HMMFileRead(wpool->hmmfp, &hmm))
+      {  /* we're done. release lock, exit thread */
+  if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
+    Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+  FreePlan7Matrix(mx);
+  pthread_exit(NULL);
       }
     wpool->nhmm++;
     SQD_DPRINTF1(("a thread is working on %s\n", hmm->name));
-				/* release the lock */
+        /* release the lock */
     if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
       Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
 
@@ -960,21 +950,21 @@ worker_thread(void *ptr)
       Die("HMM file %s may be corrupt or in incorrect format; parse failed", wpool->hmmfile);
     P7Logoddsify(hmm, !(wpool->do_forward));
 
-    if (!SetAutocuts(&thresh, hmm)) 
+    if (!SetAutocuts(&thresh, hmm))
       Die("HMM %s did not have the right GA, NC, or TC cutoffs", hmm->name);
 
     /* 2. We have an HMM in score form.
      *    Score the sequence.
      */
-    
-#ifdef ALTIVEC 
-    
+
+#ifdef ALTIVEC
+
     /* By default we call an Altivec routine that doesn't save the full
      * trace. This also means the memory usage is just proportional to the
      * model (hmm->M), so we don't need to check if space is OK unless
-     * we need the trace.   
-     */   
-    
+     * we need the trace.
+     */
+
     if(wpool->do_forward && wpool->do_null2)
     {
         /* Need the trace - first check space */
@@ -997,7 +987,7 @@ worker_thread(void *ptr)
     }
 
 #else /* not altivec */
-    
+
     if (P7ViterbiSpaceOK(wpool->L, hmm->M, mx))
     {
         sc = P7Viterbi(wpool->dsq, wpool->L, hmm, mx, &tr);
@@ -1008,12 +998,12 @@ worker_thread(void *ptr)
     }
 
 #endif
-    
+
     /* The Forward score override (see comments in serial vers)
      */
     if (wpool->do_forward) {
       sc  = P7Forward(wpool->dsq, wpool->L, hmm, NULL);
-      if (wpool->do_null2)  
+      if (wpool->do_null2)
       {
 #ifdef ALTIVEC
           if(tr == NULL)
@@ -1027,23 +1017,25 @@ worker_thread(void *ptr)
               {
                   /* Low-memory C version */
                   sc = P7SmallViterbi(wpool->dsq, wpool->L, hmm, mx, &tr);
-              }            
+              }
           }
 #endif
           sc -= TraceScoreCorrection(hmm, tr, wpool->dsq);
       }
     }
-    
+
     /* 3. Save the output in tophits structures, after acquiring a lock
      */
     if ((rtn = pthread_mutex_lock(&(wpool->output_lock))) != 0)
       Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
     SQD_DPRINTF1(("model %s scores %f\n", hmm->name, sc));
-    
+
+    double pvalue;    /* P-value of score                */
+    double evalue;    /* E-value of a score              */
     pvalue = PValue(hmm, sc);
     evalue = thresh.Z ? (double) thresh.Z * pvalue : (double) wpool->nhmm * pvalue;
-    if (sc >= thresh.globT && evalue <= thresh.globE) 
-    { 
+    if (sc >= thresh.globT && evalue <= thresh.globE)
+    {
 #ifdef ALTIVEC
         if(tr == NULL)
         {
@@ -1056,27 +1048,27 @@ worker_thread(void *ptr)
             {
                 /* Low-memory C version */
                 sc = P7SmallViterbi(wpool->dsq, wpool->L, hmm, mx, &tr);
-            }            
+            }
         }
-#endif        
-        sc = PostprocessSignificantHit(wpool->ghit, wpool->dhit, 
-                                       tr, hmm, wpool->dsq, wpool->L, 
-                                       wpool->seqname, 
+#endif
+        sc = PostprocessSignificantHit(wpool->ghit, wpool->dhit,
+                                       tr, hmm, wpool->dsq, wpool->L,
+                                       wpool->seqname,
                                        NULL, NULL, /* won't need seq's acc or desc */
                                        wpool->do_forward, sc,
                                        wpool->do_null2,
                                        &thresh,
-                                       TRUE); 
+                                       TRUE);
         /* TRUE -> hmmpfam mode */
     }
     if ((rtn = pthread_mutex_unlock(&(wpool->output_lock))) != 0)
         Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-    
+
     if(tr != NULL)
         P7FreeTrace(tr);
-    
+
     tr = NULL;
-    
+
     FreePlan7(hmm);
 
   } /* end 'infinite' loop over HMMs in this thread */

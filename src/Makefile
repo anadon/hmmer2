@@ -1,21 +1,17 @@
-CC       = gcc
-CFLAGS   = -pipe -Wall -Wextra -fPIC
-CPPFLAGS = -D_FORTIFY_SOURCE=2 -fPIC -O1
-LDFLAGS  = -Wl,-O2,--sort-common,--as-needed,-z,relro
-DEFS     = -DHAVE_CONFIG_H
-LIBS     =  -lm -pthread
+CC     = gcc
+CFLAGS = -pipe -Wall -Wextra -fPIC -D_FORTIFY_SOURCE=2 -O1 -g
+LIBS   = -lm -pthread
 
 ## archiving command, and ranlib command if you need one.
-#  In general, you shouldn't need to change these, and they're
-#  only used for building the testsuite anyway... e.g. we
-#  make a "libhmmer.a" library for building the testsuite.
+#	In general, you shouldn't need to change these, and they're
+#	only used for building the testsuite anyway... e.g. we
+#	make a "libhmmer.a" library for building the testsuite.
 #
-#AR     = /usr/bin/ar rcv
+#AR		 = /usr/bin/ar rcv
 #RANLIB = ranlib
 
 
-SHELL    = /bin/sh
-MYLIBS   = -lsquid
+MYLIBS	 = -lsquid
 MYLIBDIR = -L../squid
 MYINCDIR = -I../squid
 
@@ -29,7 +25,7 @@ PROGS = hmmalign\
 	hmmpfam\
 	hmmsearch\
 
-OBJS =  alphabet.o\
+OBJS =	alphabet.o\
 	core_algorithms.o\
 	debug.o\
 	display.o\
@@ -53,7 +49,7 @@ OBJS =  alphabet.o\
 	tophits.o\
 	trace.o
 
-HDRS =  config.h\
+HDRS =	config.h\
 	funcs.h\
 	globals.h\
 	lsjfuncs.h\
@@ -61,28 +57,28 @@ HDRS =  config.h\
 	structs.h
 
 .c.o:
-	${CC} ${CFLAGS} ${CPPFLAGS} ${DEFS} ${PTHREAD_CFLAGS} ${MYINCDIR} ${LIBS} -c $<
+	${CC} ${CFLAGS} ${PTHREAD_CFLAGS} ${MYINCDIR} ${LIBS} -c $<
 
 #################################################################
 ## Targets defining how to make HMMER executables.
 ##
-all: 	$(PROGS)
+all:	 $(PROGS)
 
 ${PROGS}: %: %.o ${OBJS}
-	${CC} ${CFLAGS} ${DEFS} ${LDFLAGS} ${MYLIBDIR} -o $@ $@.o ${OBJS} ${MYLIBS} ${PTHREAD_LIBS} ${LIBS}
+	${CC} ${CFLAGS} ${MYLIBDIR} -o $@ $@.o ${OBJS} ${MYLIBS} ${PTHREAD_LIBS} ${LIBS}
 
 
 #################################################################
 ## Targets used in making HMMER module for testsuite compilation.
 ##
-module: libhmmer.so
+module: libhmmer2.so
 
-libhmmer.so: $(OBJS)
+libhmmer2.so: $(OBJS)
 #	$(AR) libhmmer.a $(OBJS)
 #	$(RANLIB) libhmmer.a
 #	chmod 644 libhmmer.a
-	gcc -shared $(OBJS) -o libhmmer.so
+	gcc -shared $(OBJS) -o libhmmer2.so
 
 
 clean:
-	-rm -f *.o *~ Makefile.bak core $(PROGS) TAGS gmon.out libhmmer.a
+	-rm -f *.o *~ Makefile.bak core $(PROGS) TAGS gmon.out libhmmer2.so

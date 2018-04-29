@@ -1,10 +1,7 @@
 CC        = gcc
-CFLAGS    = -march=native -Ofast -pipe --param=ssp-buffer-size=4
-CPPFLAGS  = -D_FORTIFY_SOURCE=2
-LDFLAGS   = -Wl,-O2,--sort-common,--as-needed,-z,relro
-DEFS      = -DHAVE_CONFIG_H
+CFLAGS    = -march=native -O1 -g -pipe --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2
 LIBS      =  -lm -pthread
-MYLIBS    = -lhmmer -lsquid
+MYLIBS    = -lhmmer2 -lsquid
 
 SHELL     = /bin/bash
 
@@ -22,12 +19,12 @@ SHIVA = alignalign_test\
 #######
 
 .c.o:
-	$(CC) $(CFLAGS) $(PTHREAD_CFLAGS) ${CPPFLAGS} $(DEFS) -I../squid -I../src -c $<
+	$(CC) $(CFLAGS) $(PTHREAD_CFLAGS) $(DEFS) -I../squid -I../src -c $<
 
 all: 	$(SHIVA)
 
 $(SHIVA): %: %.o
-	$(CC) $(CFLAGS) $(PTHREAD_CFLAGS) ${LDFLAGS} $(DEFS) -o $@ -L../squid -L../src $@.o $(MYLIBS) $(PTHREAD_LIBS) $(LIBS)
+	$(CC) $(CFLAGS) $(PTHREAD_CFLAGS) $(DEFS) -o $@ -I../squid -I../src -L../squid -L../src $@.o $(MYLIBS) $(PTHREAD_LIBS) $(LIBS)
 
 #######
 ## `make check` actually runs the tests.
