@@ -1,14 +1,3 @@
-CC     = gcc
-CFLAGS = -pipe -Wall -Wextra -fPIC -D_FORTIFY_SOURCE=2 -O1 -g
-LIBS   = -lm -pthread
-
-## archiving command, and ranlib command if you need one.
-#	In general, you shouldn't need to change these, and they're
-#	only used for building the testsuite anyway... e.g. we
-#	make a "libhmmer.a" library for building the testsuite.
-#
-#AR		 = /usr/bin/ar rcv
-#RANLIB = ranlib
 
 
 MYLIBS	 = -lsquid

@@ -3,13 +3,13 @@
 # SVN $Id: Makefile.in 1721 2006-11-29 21:51:21Z eddys $
 #
 # Note: The autoconf variables in this file must be coordinated
-#       with HMMER. HMMER creates a Makefile from this 
+#       with HMMER. HMMER creates a Makefile from this
 #       Makefile.in using its own configure script, not SQUID's.
 #################################################################
 # HMMER - Biological sequence analysis with profile HMMs
 # Copyright (C) 1992-2006 HHMI Janelia Farm
 # All Rights Reserved
-# 
+#
 #     This source code is distributed under the terms of the
 #     GNU General Public License. See the files COPYING and LICENSE
 #     for details.
@@ -29,9 +29,6 @@ DATAROOTDIR = ${prefix}/share
 
 ## your compiler and compiler flags
 #
-CC       = gcc
-CFLAGS   = -march=native -Ofast -pipe --param=ssp-buffer-size=4
-CPPFLAGS = -D_FORTIFY_SOURCE=2
 LDFLAGS  = -Wl,-O2,--sort-common,--as-needed,-z,relro
 DEFS     = -DHAVE_CONFIG_H
 LIBS     =  -lm
@@ -75,9 +72,9 @@ MANS =  afetch\
 	shuffle\
 	sreformat\
 
-READMES = README INSTALL Makefile.in 
+READMES = README INSTALL Makefile.in
 
-SCRIPTS = 
+SCRIPTS =
 
 PRECONFHDRS = \
 	squid.h.in\
@@ -141,18 +138,18 @@ OBJS =	a2m.o\
 # Targets that actually build the squid executables
 all: $(PROGS) libsquid.a
 
-$(PROGS): %: %_main.o ${OBJS} 
-	${CC} ${CFLAGS} ${LDFLAGS} ${PVMLIBDIR} ${DEFS} -o $@ $@_main.o ${OBJS} ${PVMLIBS} ${LIBS}
+$(PROGS): %: %_main.o ${OBJS}
+	${CC} ${CFLAGS} ${LDFLAGS} ${DEFS} -o $@ $@_main.o ${OBJS} ${PVMLIBS} ${LIBS}
 
 .c.o:
-	${CC} ${CFLAGS} ${CPPFLAGS} ${PVMINCDIR} ${DEFS} -c $<		
+	${CC} ${CFLAGS} ${CPPFLAGS} ${DEFS} -c $<		
 
 ################################################################
 
 
 ################################################################
 # Targets expected by packages (e.g. HMMER) that
-# include SQUID as a module. 
+# include SQUID as a module.
 #
 module: libsquid.a
 
@@ -181,18 +178,16 @@ install:  $(PROGS) libsquid.a
 	done
 
 
-check:	libsquid.a 
+check:	libsquid.a
 	(cd testsuite; make CC="$(CC)" CFLAGS="$(CFLAGS)")
 	(cd testsuite; make check)
 
 
 clean:
-	-rm -f *.o *~ core TAGS llib-lsquid.ln ccmalloc.log $(PROGS) 
+	-rm -f *.o *~ core TAGS llib-lsquid.ln ccmalloc.log $(PROGS)
 	-rm -f libsquid.a
 	(cd testsuite; make clean)
 
 
 TAGS:
 	etags -t *.h *.c Makefile.in
-
-

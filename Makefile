@@ -12,8 +12,8 @@ export MANDIR      = ${prefix}/share/man
 export PROGSUFFIX = 2
 export MANSUFFIX = 1
 
-export CC     = gcc
-
+export CFLAGS = -pipe -Wall -Wextra -fPIC -O3
+export LIBS   = -lm -pthread
 
 # The program lists below for HMMER are not necessarily
 # a complete manifest. They are the list of stable programs that the
