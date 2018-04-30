@@ -9,10 +9,8 @@
  ************************************************************/
 
 /* hmmalign.c
- * SRE, Thu Dec 18 16:05:29 1997 [St. Louis]
  *
  * main() for aligning a set of sequences to an HMM.
- * CVS $Id: hmmalign.c 912 2003-10-03 19:12:59Z eddy $
  */
 
 #include "config.h"    /* compile-time configuration constants */
@@ -342,6 +340,3 @@ include_alignment(char *seqfile, struct plan7_s *hmm, int do_mapped,
   /* Return */
   return;
 }
-
-
-

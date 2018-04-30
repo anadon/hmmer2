@@ -9,8 +9,9 @@
  *****************************************************************/
 
 /* infocontent.c
+ *
  * for evolving models to a specified information content
- * CVS $Id: infocontent.c 978 2004-12-12 00:02:44Z eddy $
+ *
  * Original author: Dawn J. Brooks (dbrooks@genetics.wustl.edu); 2004.
  */
 
@@ -159,42 +160,6 @@ AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile) {
   return;
 }
 
-/* Function: PrintAveInfoContent()
- *
- * Purpose: print out average information content of the match positions of an
- *      hmm
- *
- * Args:    hmm  - the model
- *
- * Return: (void)
- */
-/*
-//REPORTED UNUSED***************************************************************
-void
-PrintAveInfoContent (struct plan7_s *hmm)
-{
-  float background;   // background entropy
-  float match;     // entropy observed in hmm match states
-  float observed;   // ave information content of match emissions
-  double *temp_emits;   // match state emits
-  int i;     // residues
-  int k;     // model nodes
-
-  temp_emits = (double*) MallocOrDie(sizeof(double) * hmm->M * Alphabet_size);
-  background = CalculateBackgroundEntropy();
-
-    // calculate average information content of MATCH emissions
-  for (k = 1; k <= hmm -> M; k++)
-    for (i = 0; i  < Alphabet_size; i++)
-      temp_emits[(k-1) * Alphabet_size + i] = hmm-> mat[k][i];
-
-  match = CalculateEmitsEntropy(temp_emits, hmm -> M);
-  observed = background - match;
-
-  printf ("average end information content is %f\n", observed);
-  return;
-}
-//*/
 
 /* Function: CalculateBackgroundEntropy()
  *

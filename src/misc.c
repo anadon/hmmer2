@@ -9,7 +9,6 @@
  ************************************************************/
 
 /* misc.c
- * SRE, Thu Jul 15 18:49:19 1993
  *
  * Functions that I don't know quite where to put yet.
  */
@@ -107,35 +106,6 @@ Getword(FILE *fp, int type) {
 
   return sptr;
 }
-
-
-/* Function: Getline()
- *
- * Purpose:  Get the next non-blank, non-comment line from an open file.
- *           A comment line has '#' as the first non-whitespace character.
- *           Returns NULL if no line is found.
- *           Syntax is the same as fgets().
- *
- * Args:     s  - allocated storage for line
- *           n  - number of characters allocated for s
- *           fp - open FILE *
- *
- * Return:   Either s, or NULL if no new line is found.
- */
-/*
-//REPORTED UNUSED***************************************************************
-char *
-Getline(char *s, int n, FILE *fp)
-{
-  char *first;
-
-  do {
-    if (fgets(s, n, fp) == NULL) return NULL;
-    first = s; while (isspace((int) (*first))) first++;
-  } while (*first == '#' || *first == '\0');
-  return s;
-}
-//*/
 
 
 /* Function: SetAutocuts()

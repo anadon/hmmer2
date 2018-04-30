@@ -9,8 +9,6 @@
  ************************************************************/
 
 /* fast_algorithms.c
- * SRE, Sun Nov 10 08:54:48 2002 [AA 3080, Denver to StL]
- * CVS $Id: fast_algorithms.c 998 2005-01-26 22:11:49Z eddy $
  *
  * Optimized routines to replace slower implementations in core_algorithms.c.
  *
@@ -443,42 +441,6 @@ ResizePlan7Matrix(struct dpmatrix_s *mx, int N, int M,
   if (dmx != NULL) *dmx = mx->dmx;
 }
 
-
-/* Function: P7Viterbi()
- *
- * Purpose:  The Viterbi dynamic programming algorithm; Altivec implementation
- *           by Erik Lindahl, Stanford University, 2002.
- *
- * Args:     dsq    - sequence in digitized form
- *           L      - length of dsq
- *           hmm    - the model
- *           mx     - DP matrix (may get grown here)
- *           ret_tr - RETURN: traceback; pass NULL if it's not wanted
- *
- * Return:   log P(S|M)/P(S|R), as a bit score
- */
-/* This first version of P7Viterbi has been accelerated with Altivec vectorization.
- * On Apple hardware, it is up to a factor 10 faster than the old non-altivec version.
- */
-/*
-//UNUSED************************************************************************
-typedef union
-{
-    vector signed int v;
-    int i[4];
-} ivector;
-//*/
-
-/*
-//REPORTED UNUSED***************************************************************
-void
-printivec(vector signed int z)
-{
-    ivector q;
-    q.v=z;
-    printf("%d  %d  %d  %d\n",q.i[0],q.i[1],q.i[2],q.i[3]);
-}
-//*/
 
 float
 P7Viterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx, struct p7trace_s **ret_tr) {

@@ -366,49 +366,7 @@ PrintXMGRHistogram(FILE *fp, struct histogram_s *h) {
     fprintf(fp, "&\n");
   }
 }
-//*/
 
-/* Function: PrintXMGRDistribution()
- * Date:     SRE, Wed Nov 12 11:02:09 1997 [St. Louis]
- *
- * Purpose:  Print an XMGR data file that contains two data sets:
- *               - xy data for the observed distribution P(S<x)
- *               - xy data for the theoretical distribution P(S<x)
- */
-/*
-//REPORTED UNUSED***************************************************************
-void
-PrintXMGRDistribution(FILE *fp, struct histogram_s *h)
-{
-  int sc;      // integer score in histogram structure
-  int cum;      // cumulative count
-  double val;
-
-  // First data set is the observed distribution;
-  // histogram bin x contains # of scores between x and x+1,
-  // hence the sc+1 offset.
-
-  for (cum = 0, sc = h->lowscore; sc <= h->highscore; sc++)
-    {
-      cum += h->histogram[sc - h->min];
-      fprintf(fp, "%-6d %f\n", sc + 1, (float) cum / (float) h->total);
-    }
-  fprintf(fp, "&\n");
-
-  // Second data set is the theoretical histogram
-
-  if (h->fit_type != HISTFIT_NONE)
-    {
-      for (sc = h->lowscore; sc <= h->highscore; sc++)
-  {
-    val = (1. - ExtremeValueP((float) sc, h->param[EVD_MU],
-            h->param[EVD_LAMBDA]));
-    fprintf(fp, "%-6d %f\n", sc, val);
-  }
-      fprintf(fp, "&\n");
-    }
-}
-//*/
 
 /* Function: PrintXMGRRegressionLine()
  * Date:     SRE, Wed Nov 12 11:02:19 1997 [St. Louis]
@@ -807,84 +765,6 @@ GaussianFitHistogram(struct histogram_s *h, float high_hint) {
 }
 
 
-/* Function: GaussianSetHistogram()
- *
- * Purpose:  Instead of fitting the histogram to a Gaussian,
- *           simply set the Gaussian parameters from an external source.
- */
-/*
-//REPORTED UNUSED***************************************************************
-void
-GaussianSetHistogram(struct histogram_s *h, float mean, float sd)
-{
-  int   sc;
-  int   hsize, idx;
-  int   nbins;
-  float delta;
-
-  UnfitHistogram(h);
-  h->fit_type          = HISTFIT_GAUSSIAN;
-  h->param[GAUSS_MEAN] = mean;
-  h->param[GAUSS_SD]   = sd;
-
-  // Calculate the expected values for the histogram.
-
-  hsize     = h->max - h->min + 1;
-  h->expect = (float *) MallocOrDie(sizeof(float) * hsize);
-  for (idx = 0; idx < hsize; idx++)
-    h->expect[idx] = 0.;
-
-  // Note: ideally we'd use the Gaussian distribution function
-  // to find the histogram occupancy in the window sc..sc+1.
-  // However, the distribution function is hard to calculate.
-  // Instead, estimate the histogram by taking the density at sc+0.5.
-
-  for (sc = h->min; sc <= h->max; sc++)
-    {
-      delta = ((float)sc + 0.5) - h->param[GAUSS_MEAN];
-      h->expect[sc - h->min] =
-  (float) h->total * ((1. / (h->param[GAUSS_SD] * sqrt(2.*3.14159))) *
-      (exp(-1.*delta*delta / (2. * h->param[GAUSS_SD] * h->param[GAUSS_SD]))));
-    }
-
-  // Calculate the goodness-of-fit (within whole region)
-
-  h->chisq = 0.;
-  nbins    = 0;
-  for (sc = h->lowscore; sc <= h->highscore; sc++)
-    if (h->expect[sc-h->min] >= 5. && h->histogram[sc-h->min] >= 5)
-      {
-  delta = (float) h->histogram[sc-h->min] - h->expect[sc-h->min];
-  h->chisq += delta * delta / h->expect[sc-h->min];
-  nbins++;
-      }
-  // -1 d.f. for normalization
-  if (nbins > 1)
-    h->chip = (float) IncompleteGamma((double)(nbins-1)/2.,
-              (double) h->chisq/2.);
-  else
-    h->chip = 0.;
-}
-//*/
-
-
-/* Function: EVDDensity()
- * Date:     SRE, Sat Nov 15 19:37:52 1997 [St. Louis]
- *
- * Purpose:  Return the extreme value density P(S=x) at
- *           a given point x, for an EVD controlled by
- *           parameters mu and lambda.
- */
-/*
-//REPORTED UNUSED***************************************************************
-double
-EVDDensity(float x, float mu, float lambda)
-{
-  return (lambda * exp(-1. * lambda * (x - mu)
-           - exp(-1. * lambda * (x - mu))));
-}
-//*/
-
 /* Function: EVDDistribution()
  * Date:     SRE, Tue Nov 18 08:02:22 1997 [St. Louis]
  *
@@ -929,30 +809,6 @@ ExtremeValueP(float x, float mu, float lambda) {
 }
 
 
-/* Function: ExtremeValueP2()
- *
- * Purpose:  Calculate P(S>x) in a database of size N,
- *           using P(S>x) for a single sequence, according
- *           to a Poisson distribution.
- *
- * Args:     x      = score
- *           mu     = characteristic value of extreme value distribution
- *           lambda = decay constant of extreme value distribution
- *           N      = number of trials (number of sequences)
- *
- * Return:   P(S>x) for database of size N
- */
-/*
-//REPORTED UNUSED***************************************************************
-double
-ExtremeValueP2(float x, float mu, float lambda, int N)
-{
-  double y;
-  y = N * ExtremeValueP(x,mu,lambda);
-  if (y < 1e-7) return y;
-  else          return (1.0 - exp(-1. * y));
-}
-//*/
 
 /* Function: ExtremeValueE()
  *

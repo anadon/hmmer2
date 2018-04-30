@@ -9,14 +9,11 @@
  ************************************************************/
 
 /* lsjfuncs.c
- * LSJ, Wed Feb  4 15:03:58 CST 2004
  *
  * entropy targeting:
  * Code for setting effective sequence number (in hmmbuild) by
  * achieving a certain target entropy loss, relative to background
  * null distribution.
- *
- * CVS $Id: lsj_eweight.c 950 2004-06-16 14:46:04Z eddy $
  */
 
 #include "config.h"
@@ -171,54 +168,3 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
   eff_no = numb_seqs * scale;
   return(eff_no);
 }
-
-
-
-/************************************************/
-/* Functions just used in debugging/calibrating */
-/************************************************/
-
-/* Function: ModelContent() LSJ 10/14/03
- *
- * Purpose:  This is a highly mutable grab-bag function I use
- *           in benchmarking/debugging to examine model guts.
- *
- * Args:
- *           *ent1       - Column entropies for count data.
- *           *ent2       - Column entropies for count+prior data.
- *           M           - number of states in model
- *
- * Return:   (void)
- */
-/*
-//RECORDED UNUSED***************************************************************
-void ModelContent(float *ent1, float *ent2, int M)
-{
-  int i;
-  float sum1, sum2; //, sum3;
-  float mean1, mean2; //, mean3;
-
-  sum1  = 0;
-  sum2  = 0;
-  //sum3  = 0;
-  mean1 = 0;
-  mean2 = 0;
-  //mean3 = 0;
-
-  for(i = 1; i < M+1; i++){
-    sum1 += ent1[i];
-    sum2 += ent2[i];
-    //    sum3 += relent[i];
-
-    printf("%d\t%2.4f %2.4f %2.4f\n", i, ent1[i], ent2[i], (ent2[i] - ent1[i]));
-  }
-  mean1 = sum1/M;
-  mean2 = sum2/M;
-  //  mean3 = sum3/M;
-  //fprintf(fp, "Mean Relative Entropy/Column: %2.4f\n", mean3);
-
-  printf("Counts Mean Entropy/Column: %2.4f\n", mean1);
-  printf("Counts+Priors Mean Entropy/Column: %2.4f\n", mean2);
-  printf("Diff: %2.4f\n", (mean2-mean1));
-}
-//*/

@@ -9,12 +9,9 @@
  ************************************************************/
 
 /* hmmcalibrate.c
- * SRE, Fri Oct 31 09:25:21 1997 [St. Louis]
  *
  * Score an HMM against random sequence data sets;
  * set histogram fitting parameters.
- *
- * CVS $Id: hmmcalibrate.c 998 2005-01-26 22:11:49Z eddy $
  */
 
 #include "config.h"    /* compile-time configuration constants */

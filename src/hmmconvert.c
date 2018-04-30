@@ -9,12 +9,9 @@
  ************************************************************/
 
 /* hmmconvert.c
- * SRE, Thu Oct 30 08:56:22 1997; St. Louis
  *
  * main() for converting between HMM file formats, and
  * for converting HMMs to other software formats like GCG profiles.
- *
- * CVS $Id: hmmconvert.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"    /* compile-time configuration constants */

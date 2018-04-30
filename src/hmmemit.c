@@ -9,10 +9,8 @@
  ************************************************************/
 
 /* hmmemit.c
- * SRE, Sun Mar  8 14:11:24 1998 [St. Louis]
  *
  * main() for generating sequences from an HMM
- * CVS $Id: hmmemit.c 910 2003-10-02 16:39:41Z eddy $
  */
 
 #include "config.h"    /* compile-time configuration constants */

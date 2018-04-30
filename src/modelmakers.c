@@ -9,7 +9,6 @@
  *****************************************************************/
 
 /* modelmakers.c
- * SRE, Fri Nov 15 10:00:04 1996
  *
  * Construction of models from multiple alignments. Three versions:
  *    Handmodelmaker() -- use #=RF annotation to indicate match columns

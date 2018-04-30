@@ -1,7 +1,6 @@
 /* This is a throwaway wrapper program for doing quick
  * and dirty tests on sequence databases. Archives of past
  * versions are kept and logged in RCS.
- * RCS $Id: weetest.c 910 2003-10-02 16:39:41Z eddy $
  *
  * Compile with:
  *

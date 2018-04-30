@@ -1,8 +1,6 @@
 /* hmmbuild.c
- * main() for HMM construction from an alignment.
  *
- * SRE, Mon Nov 18 12:41:29 1996
- * SVN $Id: hmmbuild.c 1748 2006-12-05 18:24:23Z eddys $
+ * main() for HMM construction from an alignment.
  */
 
 #include "config.h"    /* compile-time configuration constants */

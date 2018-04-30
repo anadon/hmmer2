@@ -9,7 +9,6 @@
  ************************************************************/
 
 /* plan9.c
- * SRE, Wed Apr  8 07:35:30 1998
  *
  * alloc, free, and initialization of old Plan9 (HMMER 1.x) functions.
  * Rescued from the wreckage of HMMER 1.9m code.

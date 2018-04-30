@@ -9,11 +9,8 @@
  ************************************************************/
 
 /* hmmindex.c
- * SRE, Wed Aug  5 11:05:03 1998 [St. Louis]
  *
  * Create an SSI index file for an HMM database.
- *
- * CVS $Id: hmmindex.c 1740 2006-12-05 14:21:36Z eddys $
  */
 
 #include "config.h"

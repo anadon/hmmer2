@@ -10,7 +10,6 @@
 
 /* alphabet.c
  * Configuration of the global symbol alphabet information.
- * CVS $Id: alphabet.c 910 2003-10-02 16:39:41Z eddy $
  */
 
 #include "config.h"

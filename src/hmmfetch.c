@@ -9,12 +9,9 @@
  ************************************************************/
 
 /* hmmfetch.c
- * SRE, Wed Aug  5 14:26:51 1998 [St. Louis]
  *
  * Recover a specific HMM file from an HMM database, using
  * an SSI index (created with hmmindex).
- *
- * CVS $Id: hmmfetch.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"

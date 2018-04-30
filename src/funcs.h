@@ -9,7 +9,6 @@
  ************************************************************/
 
 /* funcs.h
- * SVN $Id: funcs.h 1740 2006-12-05 14:21:36Z eddys $
  *
  * Declarations of external functions in HMMER.
  */

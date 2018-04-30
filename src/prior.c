@@ -9,7 +9,6 @@
  *****************************************************************/
 
 /* prior.c
- * SRE, Mon Nov 18 15:44:08 1996
  *
  * Support for Dirichlet prior data structure, p7prior_s.
  */
@@ -41,41 +40,6 @@ P7FreePrior(struct p7prior_s *pri) {
   free(pri);
 }
 
-
-/* Function: P7LaplacePrior()
- *
- * Purpose:  Create a Laplace plus-one prior. (single component Dirichlets).
- *           Global alphabet info is assumed to have been set already.
- *
- * Args:     (void)
- *
- * Return:   prior. Allocated here; call FreePrior() to free it.
- */
-/*
-//REPORTED UNUSED***************************************************************
-struct p7prior_s *
-P7LaplacePrior(void)
-{
-  struct p7prior_s *pri;
-
-  pri = P7AllocPrior();
-  pri->strategy = PRI_DCHLET;
-
-  pri->tnum     = 1;
-  pri->tq[0]    = 1.;
-  FSet(pri->t[0], 8, 1.);
-
-  pri->mnum  = 1;
-  pri->mq[0] = 1.;
-  FSet(pri->m[0], Alphabet_size, 1.);
-
-  pri->inum  = 1;
-  pri->iq[0] = 1.;
-  FSet(pri->i[0], Alphabet_size, 1.);
-
-  return pri;
-}
-//*/
 
 /* Function: P7DefaultPrior()
  *

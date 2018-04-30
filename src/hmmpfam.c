@@ -9,7 +9,6 @@
  ************************************************************/
 
 /* hmmpfam.c
- * SRE, Mon Aug 25 17:03:14 1997 [Denver]
  *
  * Search a single sequence against an HMM database.
  */

@@ -12,8 +12,6 @@
  *
  * Data structures used in HMMER.
  * Also, a few miscellaneous macros and global variable declarations.
- *
- * CVS $Id: structs.h 1740 2006-12-05 14:21:36Z eddys $
  */
 
 #ifndef STRUCTSH_INCLUDED

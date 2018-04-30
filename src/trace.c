@@ -9,8 +9,6 @@
  ************************************************************/
 
 /* trace.c
- * SRE, Sat Nov 16 12:34:57 1996
- * RCS $Id: trace.c 910 2003-10-02 16:39:41Z eddy $
  *
  * Support for Plan 7 traceback data structure, p7trace_s.
  */

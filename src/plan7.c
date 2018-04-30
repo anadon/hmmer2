@@ -10,7 +10,6 @@
 
 
 /* plan7.c
- * SRE, Sat Nov 16 14:19:56 1996
  *
  * Support for Plan 7 HMM data structure, plan7_s.
  */
@@ -826,119 +825,6 @@ Plan7FSConfig(struct plan7_s *hmm, float pentry, float pexit) {
   hmm->flags       &= ~PLAN7_HASBITS; /* reconfig invalidates log-odds scores */
 }
 
-
-
-
-/* Function: Plan7ESTConfig()
- *
- * Purpose:  Configure a Plan7 model for EST Smith/Waterman
- *           analysis.
- *
- *           OUTDATED; DO NOT USE WITHOUT RECHECKING
- *
- * Args:     hmm        - hmm to configure.
- *           aacode     - 0..63 vector mapping genetic code to amino acids
- *           estmodel   - 20x64 translation matrix, w/ codon bias and substitution error
- *           dna2       - probability of a -1 frameshift in a triplet
- *           dna4       - probability of a +1 frameshift in a triplet
- */
-/*
-//REPORTED UNUSED***************************************************************
-
-void
-Plan7ESTConfig(struct plan7_s *hmm, int *aacode, float **estmodel,
-         float dna2, float dna4)
-{
-  int k;
-  int x;
-  float p;
-  float *tripnull;    // UNFINISHED!!!
-
-        // configure specials
-  hmm->xt[XTN][MOVE] = 1./351.;
-  hmm->xt[XTN][LOOP] = 350./351.;
-  hmm->xt[XTE][MOVE] = 1.;
-  hmm->xt[XTE][LOOP] = 0.;
-  hmm->xt[XTC][MOVE] = 1./351.;
-  hmm->xt[XTC][LOOP] = 350./351.;
-  hmm->xt[XTJ][MOVE] = 1.;
-  hmm->xt[XTJ][LOOP] = 0.;
-        // configure entry/exit
-  hmm->begin[1] = 0.5;
-  FSet(hmm->begin+2, hmm->M-1, 0.5 / ((float)hmm->M - 1.));
-  hmm->end[hmm->M] = 1.;
-  FSet(hmm->end, hmm->M-1, 0.5 / ((float)hmm->M - 1.));
-
-        // configure dna triplet/frameshift emissions
-  for (k = 1; k <= hmm->M; k++)
-    {
-        // translate aa to triplet probabilities
-      for (x = 0; x < 64; x++) {
-  p =  hmm->mat[k][aacode[x]] * estmodel[aacode[x]][x] * (1.-dna2-dna4);
-  hmm->dnam[x][k] = Prob2Score(p, tripnull[x]);
-
-  p = hmm->ins[k][aacode[x]] * estmodel[aacode[x]][x] * (1.-dna2-dna4);
-  hmm->dnai[x][k] = Prob2Score(p, tripnull[x]);
-      }
-      hmm->dnam[64][k] = 0;  // ambiguous codons score 0 (danger?)
-      hmm->dna2 = Prob2Score(dna2, 1.);
-      hmm->dna4 = Prob2Score(dna4, 1.);
-    }
-}
-//*/
-
-/* Function: PrintPlan7Stats()
- *
- * Purpose:  Given a newly constructed HMM and the tracebacks
- *           of the sequences it was trained on, print out all
- *           the interesting information at the end of hmmbuild
- *           runs that convinces the user we actually
- *           did something.
- *
- * Args:     fp   - where to send the output (stdout, usually)
- *           hmm  - the new HMM, probability form
- *           dsq  - digitized training seqs
- *           nseq - number of dsq's
- *           tr   - array of tracebacks for dsq
- *
- * Return:   (void)
- */
-/*
-//REPORTED UNUSED***************************************************************
-void
-PrintPlan7Stats(FILE *fp, struct plan7_s *hmm, unsigned char **dsq, int nseq,
-    struct p7trace_s **tr)
-{
-  int   idx;      // counter for sequences
-  float score;      // an individual trace score
-  float total, best, worst;  // for the avg. and range of the scores
-  float sqsum, stddev;    // for the std. deviation of the scores
-
-  P7Logoddsify(hmm, TRUE);  // make sure model scores are ready
-
-        // find individual trace scores
-  score = P7TraceScore(hmm, dsq[0], tr[0]);
-  total = best = worst = score;
-  sqsum = score * score;
-  for (idx = 1; idx < nseq; idx++) {
-    // P7PrintTrace(stdout, tr[idx], hmm, dsq[idx]);
-    score  = P7TraceScore(hmm, dsq[idx], tr[idx]);
-    total += score;
-    sqsum += score * score;
-    if (score > best)  best = score;
-    if (score < worst) worst = score;
-  }
-  if (nseq > 1) {
-    stddev = (sqsum - (total * total / (float) nseq)) / ((float) nseq - 1.);
-    stddev = (stddev > 0) ? sqrt(stddev) : 0.0;
-  } else stddev = 0.0;
-        // print out stuff.
-  fprintf(fp, "Average score:  %10.2f bits\n", total / (float) nseq);
-  fprintf(fp, "Minimum score:  %10.2f bits\n", worst);
-  fprintf(fp, "Maximum score:  %10.2f bits\n", best);
-  fprintf(fp, "Std. deviation: %10.2f bits\n", stddev);
-}
-//*/
 
 /* Function: DegenerateSymbolScore()
  *

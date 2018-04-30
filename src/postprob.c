@@ -12,9 +12,7 @@
 /* postprob.c
  * Author: Ian Holmes (ihh@sanger.ac.uk, Jun 5 1998)
  * Derived from core_algorithms.c (SRE, Nov 11 1996)
- * Incorporated SRE, Sat Nov  6 09:07:12 1999 [Cold Spring Harbor]
  *
- * RCS $Id: postprob.c 910 2003-10-02 16:39:41Z eddy $
  *****************************************************************
  * IHH's notes:
  *
@@ -78,43 +76,6 @@
 #include "squid.h"
 #include "structs.h"
 #include "funcs.h"
-
-/* Function: P7OptimalAccuracy()
- *
- * Purpose:  The optimal accuracy dynamic programming algorithm.
- *           Identical to Viterbi() except that posterior residue
- *           label probabilities are used as scores.
- *
- * Args:     dsq    - sequence in digitized form
- *           L      - length of dsq
- *           hmm    - the model
- *           ret_tr - RETURN: traceback; pass NULL if it's not wanted
- *
- * Return:   log ( sum_{residues} P(label|M,D) ), as a bit score
- *           (i.e. log of expected accuracy)
- */
-/*
-//REPORTED UNUSED***************************************************************
-float
-P7OptimalAccuracy(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **ret_tr)
-{
-  double sc;
-  struct dpmatrix_s *forward;
-  struct dpmatrix_s *backward;
-
-  (void) P7Forward(dsq, L, hmm, &forward);
-  (void) P7Backward(dsq, L, hmm, &backward);
-
-  P7EmitterPosterior(L, hmm, forward, backward, backward);           // Re-use backward matrix for posterior scores
-
-  sc = P7FillOptimalAccuracy(L, hmm->M, backward, forward, ret_tr);  // Re-use forward matrix for optimal accuracy scores
-
-  FreePlan7Matrix(forward);
-  FreePlan7Matrix(backward);
-
-  return sc;
-}
-//*/
 
 
 /* Function: P7Backward()
@@ -607,71 +568,3 @@ P7OptimalAccuracyTrace(int L,
   *ret_tr = tr;
 
 }
-
-
-/* Function: PostalCode()
- * Date:     SRE, Sun Nov  7 15:31:35 1999 [Cold Spring Harbor]
- *
- * Purpose:  Given a traceback and one of Ian's posterior
- *           probability matrices, calculate a string that
- *           represents the confidence values on each
- *           residue in the sequence.
- *
- *           The code string is 0..L-1  (L = len of target seq),
- *           so it's in the coordinate system of the sequence string;
- *           off by one from dsq; and convertible to the coordinate
- *           system of aseq using MakeAlignedString().
- *
- *           Values are 0-9,*
- *           for example, 9 means with >=90% posterior probabiility,
- *           residue i is aligned to the state k that it
- *           is assigned to in the given trace.
- *
- * Args:     L  - length of seq
- *           mx - posterior prob matrix: see P7EmitterPosterior()
- *           tr - a traceback to get a Postal code string for.
- *
- * Returns:  char * array of codes, 0..L-1
- *           Caller is responsible for free'ing it.
- */
-/*
-//RECORDED UNUSED***************************************************************
-static char
-score2postcode(int sc)
-{
-  char i;
-  i = (char) (Score2Prob(sc, 1.) * 10.);
-  return ((i > 9) ? '*' : '0'+i);
-}
-//*/
-
-/*
-//REPORTED UNUSED***************************************************************
-char *
-PostalCode(int L, struct dpmatrix_s *mx, struct p7trace_s *tr)
-{
-  int tpos;
-  int i;
-  int k;
-  char *postcode;
-
-  postcode = MallocOrDie((L+1) * sizeof(char));
-  for (tpos = 0; tpos < tr->tlen; tpos++)
-    {
-      i = tr->pos[tpos];
-      k = tr->nodeidx[tpos];
-      if (i == 0) continue;
-
-      switch (tr->statetype[tpos]) {
-      case STM: postcode[i-1] = score2postcode(mx->mmx[i][k]);   break;
-      case STI: postcode[i-1] = score2postcode(mx->imx[i][k]);   break;
-      case STN:  postcode[i-1] = score2postcode(mx->xmx[i][XMN]); break;
-      case STC: postcode[i-1] = score2postcode(mx->xmx[i][XMC]); break;
-      case STJ:  postcode[i-1] = score2postcode(mx->xmx[i][XMJ]); break;
-      }
-    }
-  postcode[L] = '\0';
-
-  return postcode;
-}
-//*/

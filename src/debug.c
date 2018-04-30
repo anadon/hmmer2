@@ -9,12 +9,9 @@
  *****************************************************************/
 
 /* debug.c
- * Thu Nov 21 09:58:05 1996
  *
  * Printing out or naming various useful things from HMMER
  * innards.
- *
- * CVS $Id: debug.c 910 2003-10-02 16:39:41Z eddy $
  */
 
 #include "config.h"
@@ -164,58 +161,6 @@ P7PrintTrace(FILE *fp, struct p7trace_s *tr, struct plan7_s *hmm, unsigned char 
   }
 }
 
-/* Function: P7PrintPrior()
- *
- * Purpose:  Print out a Plan 7 prior structure.
- */
-/*
-//REPORTED UNUSED***************************************************************
-void
-P7PrintPrior(FILE *fp, struct p7prior_s *pri)
-{
-  int q, x;      // counters for mixture component, element
-
-  if      (pri->strategy == PRI_DCHLET) fputs("Dirichlet\n", fp);
-  else if (pri->strategy == PRI_PAM)    fputs("PAM\n", fp);
-  else Die("No such strategy.");
-
-  if      (Alphabet_type == hmmAMINO)   fputs("Amino\n", fp);
-  else if (Alphabet_type == hmmNUCLEIC) fputs("Nucleic\n", fp);
-
-  // Transitions
-
-  fprintf(fp, "\n%d\n", pri->tnum);
-  for (q = 0; q < pri->tnum; q++)
-    {
-      fprintf(fp, "%.4f\n", pri->tq[q]);
-      for (x = 0; x < 7; x++)
-  fprintf(fp, "%.4f ", pri->t[q][x]);
-      fputs("\n", fp);
-    }
-
-  // Match emissions
-
-  fprintf(fp, "\n%d\n", pri->mnum);
-  for (q = 0; q < pri->mnum; q++)
-    {
-      fprintf(fp, "%.4f\n", pri->mq[q]);
-      for (x = 0; x < Alphabet_size; x++)
-  fprintf(fp, "%.4f ", pri->m[q][x]);
-      fputs("\n", fp);
-    }
-
-  // Insert emissions
-
-  fprintf(fp, "\n%d\n", pri->inum);
-  for (q = 0; q < pri->inum; q++)
-    {
-      fprintf(fp, "%.4f\n", pri->iq[q]);
-      for (x = 0; x < Alphabet_size; x++)
-  fprintf(fp, "%.4f ", pri->i[q][x]);
-      fputs("\n", fp);
-    }
-}
-//*/
 
 /* Function: TraceVerify()
  * Date:     SRE, Mon Feb  2 07:48:52 1998 [St. Louis]

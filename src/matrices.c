@@ -9,6 +9,7 @@
  *****************************************************************/
 
 /* matrices.c
+ *
  * for matrix manipulation
  * many functions borrowed from Elena Rivas matrix package (as noted)
  */

@@ -78,14 +78,3 @@
 #define PACKAGE_DATE "December 2006"
 #define PACKAGE_COPYRIGHT "Copyright (C) 1992-2006 HHMI Janelia Farm"
 #define PACKAGE_LICENSE "Freely distributed under the GNU General Public License (GPL)"
-
-
-#ifndef DEBUGLEVEL
-/* #undef DEBUGLEVEL */
-#endif
-
-/* --enable-lfs          Large File Summit (LFS) support for >2Gb files
- */
-/* #undef _LARGEFILE_SOURCE */
-/* #undef _LARGEFILE64_SOURCE */
-/* #undef _FILE_OFFSET_BITS */

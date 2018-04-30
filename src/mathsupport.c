@@ -10,13 +10,11 @@
 
 
 /* mathsupport.c
- * SRE, Mon Nov 11 15:07:33 1996
  *
  * Miscellaneous mathematical functions.
  * General functions are in the SQUID library sre_math.c.
  * These functions are too HMM-specific to warrant being in the
  * SQUID library.
- *
  */
 
 
@@ -219,34 +217,3 @@ Logp_cvec(float *cvec, int n, float *alpha) {
   lnp += Gammln(sum3 + 1.);
   return lnp;
 }
-
-
-/* Function: P_PvecGivenDirichlet()
- *
- * Purpose:  Calculate the log probability of a probability
- *           vector given a single Dirichlet component, alpha.
- *           Follows Sjolander (1996) appendix, lemma 2.
- *
- * Return:   log P(p | alpha)
- */
-/*
-//REPORTED UNUSED***************************************************************
-float
-P_PvecGivenDirichlet(float *p, int n, float *alpha)
-{
-  float sum;            // for Gammln(|alpha|) in Z
-  float logp;      // RETURN: log P(p|alpha)
-  int x;
-
-  sum = logp = 0.0;
-  for (x = 0; x < n; x++)
-    if (p[x] > 0.0)    // any param that is == 0.0 doesn't exist
-      {
-  logp += (alpha[x]-1.0) * log(p[x]);
-  logp -= Gammln(alpha[x]);
-  sum  += alpha[x];
-      }
-  logp += Gammln(sum);
-  return logp;
-}
-//*/

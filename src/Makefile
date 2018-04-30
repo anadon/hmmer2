@@ -10,7 +10,6 @@ HMMLIB = libhmmer$(PROGSUFFIX).so
 OBJS =	alphabet.o\
 	core_algorithms.o\
 	debug.o\
-	display.o\
 	emit.o\
 	emulation.o\
 	fast_algorithms.o\
@@ -27,7 +26,6 @@ OBJS =	alphabet.o\
 	plan9.o\
 	postprob.o\
 	prior.o\
-	threads.o\
 	tophits.o\
 	trace.o
 

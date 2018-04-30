@@ -9,8 +9,6 @@
  ************************************************************/
 
 /* emit.c
- * SRE, Sun Mar  8 12:26:58 1998
- * CVS $Id: emit.c 913 2003-10-04 18:26:49Z eddy $
  *
  * Generation of sequences/traces from an HMM.
  */

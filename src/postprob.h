@@ -12,7 +12,6 @@
 /* postprob.h
  * Author: Ian Holmes (ihh@sanger.ac.uk, Jun 5 1998)
  * Derived from core_algorithms.c (SRE, Nov 11 1996)
- * Incorporated SRE, Sat Nov  6 09:07:02 1999
  *
  * Functions for working with posterior probabilities,
  * including unfussed "backwards" and "optimal accuracy"
@@ -51,4 +50,3 @@ extern void  P7OptimalAccuracyTrace(int L, int M,
                                     struct p7trace_s **ret_tr);
 
 #endif
-

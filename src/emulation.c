@@ -9,11 +9,8 @@
  ************************************************************/
 
 /* emulation.c
- * SRE, Wed Jan 21 07:50:01 1998
  *
  * Interfaces between HMMER and other software packages.
- *
- * CVS $Id: emulation.c 878 2003-04-14 16:00:17Z eddy $
  */
 
 #include "config.h"

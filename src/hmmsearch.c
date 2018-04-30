@@ -9,7 +9,6 @@
  ************************************************************/
 
 /* hmmsearch.c
- * SRE, Tue Jan  7 17:19:20 1997 [St. Louis]
  *
  * Search a sequence database with a profile HMM.
  */
