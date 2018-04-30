@@ -20,15 +20,22 @@ o Getting HMMER
 
 
 o Installing HMMER
-   See the file INSTALL for brief instructions.
-   See the chapter Installation in the HMMER User's Guide (Userguide.pdf)
-   for more detailed instructions.
    See the file NOTES for notes particular to this release.
+
+   1. Compile, test, and install.
+      % make
+      % make check
+      % make install
+
+  The 'make check' runs a set of exercises. All should pass.
+
+  You will need to be root to do 'make install'. The default install
+  goes to /usr/bin/
 
    You should also read the following files:
    COPYING   -- copyright notice, and information on the free software license
    LICENSE   -- Full text of the GNU Public License, version 2 (see COPYING)
- 
+
 
 o Getting started with HMMER
    See the Tutorial section of the User's Guide (Userguide.pdf)
