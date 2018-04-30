@@ -1350,10 +1350,7 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
   int          *endlist;        /* stack of end points on sequence to work on */
   int          *startlist;      /* stack of start points on sequence to work on */
   int          lpos;            /* position in endlist, startlist */
-  int          k2 = 0;  /* mid in model      */
-  char         t2 = 0;  /* start, mid, end in state type */
-  int          s2;  /* start, mid, end in sequence   */
-  float        ret_sc;    /* optimal score over complete seq */
+  float        ret_sc = 0.0;    /* optimal score over complete seq */
   int          tlen;    /* length needed for trace */
   int          i, k, tpos;  /* index in sequence, model, trace */
 
@@ -1377,62 +1374,57 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
   tassign[1]      = STS;  /* temporary boundary condition! will become N or M */
   tassign[L]      = STT;  /* temporary boundary condition! will become M or C */
 
-  t2 = k2 = 0;
 
   /* Recursive divide-and-conquer alignment.
    */
-  while (lpos >= 0)
-    {
-      int k1, k3; /* start, end in model      */
-      char t1, t3;  /* start, end in state type */
-      int s1, s3;  /* start, end in sequence   */
-        /* Pop a segment off the stack */
-      s1 = startlist[lpos];
-      k1 = kassign[s1];
-      t1 = tassign[s1];
-      s3 = endlist[lpos];
-      k3 = kassign[s3];
-      t3 = tassign[s3];
-      lpos--;
+  while (lpos >= 0){
+    //NOTE: k2, t2, and s2 are initialized by reference.
+    int k1, k2, k3; /* start, middle, and end in model      */
+    char t1, t2, t3;  /* start, middle, and end in state type */
+    int s1, s2, s3;  /* start, middle, and end in sequence   */
+      /* Pop a segment off the stack */
+    s1 = startlist[lpos];
+    k1 = kassign[s1];
+    t1 = tassign[s1];
+    s3 = endlist[lpos];
+    k3 = kassign[s3];
+    t3 = tassign[s3];
+    lpos--;
 
-      /* find optimal midpoint of segment */
-      float sc;    /* score of segment optimal alignment */
-      sc = get_wee_midpt(hmm, dsq, L, k1, t1, s1, k3, t3, s3, &k2, &t2, &s2);
-      kassign[s2] = k2;
-      tassign[s2] = t2;
-                               /* score is valid on first pass */
-      if (t1 == STS && t3 == STT) ret_sc = sc;
+    /* find optimal midpoint of segment */
+    float sc;    /* score of segment optimal alignment */
+    sc = get_wee_midpt(hmm, dsq, L, k1, t1, s1, k3, t3, s3, &k2, &t2, &s2);
+    kassign[s2] = k2;
+    tassign[s2] = t2;
+                             /* score is valid on first pass */
+    if (t1 == STS && t3 == STT) ret_sc = sc;
 
-        /* push N-terminal segment on stack */
-      if (t2 != STN && (s2 - s1 > 1 || (s2 - s1 == 1 && t1 == STS)))
-  {
-    lpos++;
-    startlist[lpos] = s1;
-    endlist[lpos]   = s2;
-  }
-        /* push C-terminal segment on stack */
-      if (t2 != STC && (s3 - s2 > 1 || (s3 - s2 == 1 && t3 == STT)))
-  {
-          lpos++;
-          startlist[lpos] = s2;
-          endlist[lpos]   = s3;
-  }
+      /* push N-terminal segment on stack */
+    if (t2 != STN && (s2 - s1 > 1 || (s2 - s1 == 1 && t1 == STS))){
+      lpos++;
+      startlist[lpos] = s1;
+      endlist[lpos]   = s2;
+    }
+    /* push C-terminal segment on stack */
+    if (t2 != STC && (s3 - s2 > 1 || (s3 - s2 == 1 && t3 == STT))){
+      lpos++;
+      startlist[lpos] = s2;
+      endlist[lpos]   = s3;
+    }
 
-      if (t2 == STN)
-  {      /* if we see STN midpoint, we know the whole N-term is STN */
-    for (; s2 >= s1; s2--) {
-      kassign[s2] = 1;
-      tassign[s2] = STN;
+    if (t2 == STN){ //if we see STN midpoint, we know the whole N-term is STN
+      for (; s2 >= s1; s2--) {
+        kassign[s2] = 1;
+        tassign[s2] = STN;
+      }
+    }
+    if (t2 == STC){ //if we see STC midpoint, we know whole C-term is STC
+      for (; s2 <= s3; s2++) {
+        kassign[s2] = hmm->M;
+        tassign[s2] = STC;
+      }
     }
   }
-      if (t2 == STC)
-  {      /* if we see STC midpoint, we know whole C-term is STC */
-    for (; s2 <= s3; s2++) {
-      kassign[s2] = hmm->M;
-      tassign[s2] = STC;
-    }
-  }
-    }
 
   /*****************************************************************
    * Construct a traceback structure from kassign/tassign by interpolating
@@ -1447,15 +1439,14 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
    *****************************************************************/
 
   tlen = L + 6;
-  for (i = 1; i < L; i++)
-    {
-      if (tassign[i] == STM && tassign[i+1] == STM)
-  tlen += kassign[i+1] - kassign[i] - 1;
-      if (tassign[i] == STN && tassign[i+1] == STM)
-  tlen += kassign[i+1] - 1;
-      if (tassign[i] == STM && tassign[i+1] == STC)
-  tlen += hmm->M - kassign[i];
-    }
+  for (i = 1; i < L; i++){
+    if (tassign[i] == STM && tassign[i+1] == STM)
+      tlen += kassign[i+1] - kassign[i] - 1;
+    if (tassign[i] == STN && tassign[i+1] == STM)
+      tlen += kassign[i+1] - 1;
+    if (tassign[i] == STM && tassign[i+1] == STC)
+      tlen += hmm->M - kassign[i];
+  }
   if (tassign[1] == STM) tlen += kassign[1] - 1;
   if (tassign[L] == STM) tlen += hmm->M - kassign[L];
   P7AllocTrace(tlen, &tr);
@@ -1468,87 +1459,84 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
   tr->pos[1]       = 0;
   tpos = 2;
 
-  for (i = 1; i <= L; i++)
-    {
-      switch(tassign[i]) {
+  for (i = 1; i <= L; i++){
+    switch(tassign[i]) {
       case STM:
         /* check for first match state */
-  if (tr->statetype[tpos-1] == STN) {
-    tr->statetype[tpos] = STB;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-    tpos++;
-        /* check for wing unfolding */
-    if (Prob2Score(hmm->begin[kassign[i]], hmm->p1) + INTSCALE <= hmm->bsc[kassign[i]])
-      for (k = 1; k < kassign[i]; k++) {
-        tr->statetype[tpos] = STD;
-        tr->nodeidx[tpos]   = k;
-        tr->pos[tpos]       = 0;
-        tpos++;
-      }
-  }
-        /* do the match state itself */
-  tr->statetype[tpos] = STM;
-  tr->nodeidx[tpos]   = kassign[i];
-  tr->pos[tpos]       = i;
-  tpos++;
-        /* do any deletes necessary 'til next match */
-  if (i < L && tassign[i+1] == STM && kassign[i+1] - kassign[i] > 1)
-    for (k = kassign[i] + 1; k < kassign[i+1]; k++)
-      {
-        tr->statetype[tpos] = STD;
-        tr->nodeidx[tpos]   = k;
-        tr->pos[tpos]       = 0;
-        tpos++;
-      }
-        /* check for last match state */
-  if (i == L || tassign[i+1] == STC) {
-        /* check for wing unfolding */
-    if (Prob2Score(hmm->end[kassign[i-1]], 1.) + INTSCALE <=  hmm->esc[kassign[i-1]])
-      for (k = kassign[i]+1; k <= hmm->M; k++)
-        {
-    tr->statetype[tpos] = STD;
-    tr->nodeidx[tpos]   = k;
-    tr->pos[tpos]       = 0;
-    tpos++;
+        if (tr->statetype[tpos-1] == STN) {
+          tr->statetype[tpos] = STB;
+          tr->nodeidx[tpos]   = 0;
+          tr->pos[tpos]       = 0;
+          tpos++;
+              /* check for wing unfolding */
+          if (Prob2Score(hmm->begin[kassign[i]], hmm->p1) + INTSCALE <= hmm->bsc[kassign[i]])
+            for (k = 1; k < kassign[i]; k++) {
+              tr->statetype[tpos] = STD;
+              tr->nodeidx[tpos]   = k;
+              tr->pos[tpos]       = 0;
+              tpos++;
+            }
         }
-        /* add on the end state */
-    tr->statetype[tpos] = STE;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-    tpos++;
-        /* and a nonemitting C state */
-    tr->statetype[tpos] = STC;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-    tpos++;
-  }
-  break;
+        /* do the match state itself */
+        tr->statetype[tpos] = STM;
+        tr->nodeidx[tpos]   = kassign[i];
+        tr->pos[tpos]       = i;
+        tpos++;
+          /* do any deletes necessary 'til next match */
+        if (i < L && tassign[i+1] == STM && kassign[i+1] - kassign[i] > 1)
+          for (k = kassign[i] + 1; k < kassign[i+1]; k++){
+              tr->statetype[tpos] = STD;
+              tr->nodeidx[tpos]   = k;
+              tr->pos[tpos]       = 0;
+              tpos++;
+            }
+        /* check for last match state */
+        if (i == L || tassign[i+1] == STC) {
+          /* check for wing unfolding */
+          if (Prob2Score(hmm->end[kassign[i-1]], 1.) + INTSCALE <=  hmm->esc[kassign[i-1]])
+            for (k = kassign[i]+1; k <= hmm->M; k++){
+              tr->statetype[tpos] = STD;
+              tr->nodeidx[tpos]   = k;
+              tr->pos[tpos]       = 0;
+              tpos++;
+              }
+              /* add on the end state */
+          tr->statetype[tpos] = STE;
+          tr->nodeidx[tpos]   = 0;
+          tr->pos[tpos]       = 0;
+          tpos++;
+              /* and a nonemitting C state */
+          tr->statetype[tpos] = STC;
+          tr->nodeidx[tpos]   = 0;
+          tr->pos[tpos]       = 0;
+          tpos++;
+        }
+        break;
 
       case STI:
-  tr->statetype[tpos] = STI;
-  tr->nodeidx[tpos]   = kassign[i];
-  tr->pos[tpos]       = i;
-  tpos++;
-  break;
+        tr->statetype[tpos] = STI;
+        tr->nodeidx[tpos]   = kassign[i];
+        tr->pos[tpos]       = i;
+        tpos++;
+        break;
 
       case STN:
-  tr->statetype[tpos] = STN;
-  tr->nodeidx[tpos]   = 0;
-  tr->pos[tpos]       = i;
-  tpos++;
-  break;
+        tr->statetype[tpos] = STN;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = i;
+        tpos++;
+        break;
 
       case STC:
-  tr->statetype[tpos] = STC;
-  tr->nodeidx[tpos]   = 0;
-  tr->pos[tpos]       = i;
-  tpos++;
-  break;
+        tr->statetype[tpos] = STC;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = i;
+        tpos++;
+        break;
 
       default: Die("Bogus state %s", Statetype(tassign[i]));
-      }
     }
+  }
         /* terminate the trace */
   tr->statetype[tpos] = STT;
   tr->nodeidx[tpos]   = 0;
