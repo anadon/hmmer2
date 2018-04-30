@@ -81,8 +81,7 @@ static int xpam120[23][23] = {
  * Return:   number of characters x'ed out.
  */
 int
-XNU(unsigned char *dsq, int len)
-{
+XNU(unsigned char *dsq, int len) {
   int    i,k,off;
   int    topcut,fallcut;
   double s0;
@@ -119,33 +118,36 @@ XNU(unsigned char *dsq, int len)
     for (i=off+1; i<=len; i++) {
       sum += xpam120[dsq[i]][dsq[i-off]];
       if (sum>top) {
-  top=sum;
-  end=i;
+        top=sum;
+        end=i;
       }
       if (top>=topcut && top-sum>fallcut) {
-  for (k=beg; k<=end; k++)
-    hit[k] = hit[k-off] = 1;
-  sum=top=0;
-  beg=end=i+1;
+        for (k=beg; k<=end; k++)
+          hit[k] = hit[k-off] = 1;
+        sum=top=0;
+        beg=end=i+1;
       } else if (top-sum>fallcut) {
-  sum=top=0;
-  beg=end=i+1;
+        sum=top=0;
+        beg=end=i+1;
       }
       if (sum<0) {
-  beg=end=i+1;
-  sum=top=0;
+        beg=end=i+1;
+        sum=top=0;
       }
     }
     if (top>=topcut) {
       for (k=beg; k<=end; k++)
-  hit[k] = hit[k-off] = 1;
+        hit[k] = hit[k-off] = 1;
     }
   }
 
   /* Now mask off detected repeats
    */
   for (i=1; i<=len; i++)
-    if (hit[i]) { xnum++; dsq[i] = Alphabet_iupac-1;} /* e.g. 'X' */
+    if (hit[i]) {
+      xnum++;  /* e.g. 'X' */
+      dsq[i] = Alphabet_iupac-1;
+    }
 
   free(hit);
   return xnum;
@@ -166,8 +168,7 @@ XNU(unsigned char *dsq, int len)
  * Return:   the log_2-odds score correction.
  */
 float
-TraceScoreCorrection(struct plan7_s *hmm, struct p7trace_s *tr, unsigned char *dsq)
-{
+TraceScoreCorrection(struct plan7_s *hmm, struct p7trace_s *tr, unsigned char *dsq) {
   float p[MAXABET];    /* null model distribution */
   int   sc[MAXCODE];    /* null model scores       */
   int   x;
@@ -183,36 +184,36 @@ TraceScoreCorrection(struct plan7_s *hmm, struct p7trace_s *tr, unsigned char *d
    */
   FSet(p, Alphabet_size, 0.0);
   for (tpos = 0; tpos < tr->tlen; tpos++)
-     if      (tr->statetype[tpos] == STM)
-       FAdd(p, hmm->mat[tr->nodeidx[tpos]], Alphabet_size);
-     else if (tr->statetype[tpos] == STI)
-       FAdd(p, hmm->ins[tr->nodeidx[tpos]], Alphabet_size);
+    if      (tr->statetype[tpos] == STM)
+      FAdd(p, hmm->mat[tr->nodeidx[tpos]], Alphabet_size);
+    else if (tr->statetype[tpos] == STI)
+      FAdd(p, hmm->ins[tr->nodeidx[tpos]], Alphabet_size);
   FNorm(p, Alphabet_size);
 
   for (x = 0; x < Alphabet_size; x++)
     sc[x] = Prob2Score(p[x], hmm->null[x]);
-        /* could avoid this chunk if we knew
-           we didn't need any degenerate char scores */
+  /* could avoid this chunk if we knew
+     we didn't need any degenerate char scores */
   for (x = Alphabet_size; x < Alphabet_iupac; x++)
     sc[x] = DegenerateSymbolScore(p, hmm->null, x);
 
 
   /* Score all the M,I state emissions that appear in the trace.
    */
-   score = 0;
-   for (tpos = 0; tpos < tr->tlen; tpos++)
-     if (tr->statetype[tpos] == STM || tr->statetype[tpos] == STI)
-       score += sc[dsq[tr->pos[tpos]]];
+  score = 0;
+  for (tpos = 0; tpos < tr->tlen; tpos++)
+    if (tr->statetype[tpos] == STM || tr->statetype[tpos] == STI)
+      score += sc[dsq[tr->pos[tpos]]];
 
-   /* Apply an ad hoc 8 bit fudge factor penalty;
-    * interpreted as a prior, saying that the second null model is
-    * 1/2^8 (1/256) as likely as the standard null model
-    */
-   score -= 8 * INTSCALE;
+  /* Apply an ad hoc 8 bit fudge factor penalty;
+   * interpreted as a prior, saying that the second null model is
+   * 1/2^8 (1/256) as likely as the standard null model
+   */
+  score -= 8 * INTSCALE;
 
-   /* Return the correction to the bit score.
-    */
-   return Scorify(ILogsum(0, score));
+  /* Return the correction to the bit score.
+   */
+  return Scorify(ILogsum(0, score));
 }
 
 

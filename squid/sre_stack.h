@@ -11,7 +11,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -21,24 +21,24 @@
 #define SRE_STACKH_INCLUDED
 
 typedef struct nstack_s {
-  int *data;			/* the data stack                           */
-  int  n;			/* current (topmost) elem in data           */
-  int  nalloc;			/* # of elems allocated right now           */
-  int  memblock;		/* memory allocation block size, # of elems */
+  int *data;      /* the data stack                           */
+  int  n;     /* current (topmost) elem in data           */
+  int  nalloc;      /* # of elems allocated right now           */
+  int  memblock;    /* memory allocation block size, # of elems */
 } Nstack_t;
 
 typedef struct mstack_s {
-  void **data;			/* the data stack                           */
-  int    n;			/* current (topmost) elem in data           */
-  int    nalloc;		/* # of elems allocated right now           */
-  int    memblock;		/* memory allocation block size, # of elems */
+  void **data;      /* the data stack                           */
+  int    n;     /* current (topmost) elem in data           */
+  int    nalloc;    /* # of elems allocated right now           */
+  int    memblock;    /* memory allocation block size, # of elems */
 } Mstack_t;
 
 typedef struct cstack_s {
-  char  *data;			/* the data stack                           */
-  int    n;			/* current (topmost) elem in data           */
-  int    nalloc;		/* # of elems allocated right now           */
-  int    memblock;		/* memory allocation block size, # of elems */
+  char  *data;      /* the data stack                           */
+  int    n;     /* current (topmost) elem in data           */
+  int    nalloc;    /* # of elems allocated right now           */
+  int    memblock;    /* memory allocation block size, # of elems */
 } Cstack_t;
 
 extern Nstack_t *CreateNstack(void);

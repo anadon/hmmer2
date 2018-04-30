@@ -24,7 +24,7 @@ cc -O2 -o weetest -I ~/lib/squid.linux -L/nfs/wol2/people/eddy/lib/squid.linux w
 #include "squid.h"
 
 int
-main(int argc, char **argv){
+main(int argc, char **argv) {
   char   *file;
   char   *seq;
   int     format;

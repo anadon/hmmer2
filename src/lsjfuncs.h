@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -22,6 +22,6 @@
 #include "squid.h"
 #include "msa.h"
 
-extern float Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, 
-         float numb_seqs, float entwgt);
+extern float Eweight(struct plan7_s *hmm,  struct p7prior_s *pri,
+                     float numb_seqs, float entwgt);
 extern void ModelContent(float *ent1, float *ent2, int M);

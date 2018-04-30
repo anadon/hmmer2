@@ -38,8 +38,7 @@
  *            see the size of the model 'til partway thru the header.
  */
 struct plan7_s *
-AllocPlan7(int M)
-{
+AllocPlan7(int M) {
   struct plan7_s *hmm;
 
   hmm = AllocPlan7Shell();
@@ -47,8 +46,7 @@ AllocPlan7(int M)
   return hmm;
 }
 struct plan7_s *
-AllocPlan7Shell(void)
-{
+AllocPlan7Shell(void) {
   struct plan7_s *hmm;
 
   hmm    = (struct plan7_s *) MallocOrDie (sizeof(struct plan7_s));
@@ -87,12 +85,12 @@ AllocPlan7Shell(void)
   hmm->bsc = hmm->bsc_mem = NULL;
   hmm->esc = hmm->esc_mem = NULL;
 
-        /* DNA translation is not enabled by default */
+  /* DNA translation is not enabled by default */
   hmm->dnam   = NULL;
   hmm->dnai   = NULL;
   hmm->dna2   = -INFTY;
   hmm->dna4   = -INFTY;
-      /* statistical parameters set to innocuous empty values */
+  /* statistical parameters set to innocuous empty values */
   hmm->mu     = 0.;
   hmm->lambda = 0.;
 
@@ -101,8 +99,7 @@ AllocPlan7Shell(void)
 }
 #ifndef ALTIVEC  /* in Altivec port, replaced in fast_algorithms.c */
 void
-AllocPlan7Body(struct plan7_s *hmm, int M)
-{
+AllocPlan7Body(struct plan7_s *hmm, int M) {
   int k, x;
 
   hmm->M = M;
@@ -167,8 +164,7 @@ AllocPlan7Body(struct plan7_s *hmm, int M)
 #endif /* ALTIVEC */
 
 void
-FreePlan7(struct plan7_s *hmm)
-{
+FreePlan7(struct plan7_s *hmm) {
   if (hmm->name    != NULL) free(hmm->name);
   if (hmm->acc     != NULL) free(hmm->acc);
   if (hmm->desc    != NULL) free(hmm->desc);
@@ -208,15 +204,13 @@ FreePlan7(struct plan7_s *hmm)
  *           Leaves null model untouched.
  */
 void
-ZeroPlan7(struct plan7_s *hmm)
-{
+ZeroPlan7(struct plan7_s *hmm) {
   int k;
-  for (k = 1; k < hmm->M; k++)
-    {
-      FSet(hmm->t[k], 7, 0.);
-      FSet(hmm->mat[k], Alphabet_size, 0.);
-      FSet(hmm->ins[k], Alphabet_size, 0.);
-    }
+  for (k = 1; k < hmm->M; k++) {
+    FSet(hmm->t[k], 7, 0.);
+    FSet(hmm->mat[k], Alphabet_size, 0.);
+    FSet(hmm->ins[k], Alphabet_size, 0.);
+  }
   FSet(hmm->mat[hmm->M], Alphabet_size, 0.);
   hmm->tbd1 = 0.;
   FSet(hmm->begin+1, hmm->M, 0.);
@@ -235,8 +229,7 @@ ZeroPlan7(struct plan7_s *hmm)
  * Note:     Trailing whitespace and \n's are chopped.
  */
 void
-Plan7SetName(struct plan7_s *hmm, char *name)
-{
+Plan7SetName(struct plan7_s *hmm, char *name) {
   if (hmm->name != NULL) free(hmm->name);
   hmm->name = Strdup(name);
   StringChop(hmm->name);
@@ -248,8 +241,7 @@ Plan7SetName(struct plan7_s *hmm, char *name)
  * Note:     Trailing whitespace and \n's are chopped.
  */
 void
-Plan7SetAccession(struct plan7_s *hmm, char *acc)
-{
+Plan7SetAccession(struct plan7_s *hmm, char *acc) {
   if (hmm->acc != NULL) free(hmm->acc);
   hmm->acc = Strdup(acc);
   StringChop(hmm->acc);
@@ -263,8 +255,7 @@ Plan7SetAccession(struct plan7_s *hmm, char *acc)
  * Note:     Trailing whitespace and \n's are chopped.
  */
 void
-Plan7SetDescription(struct plan7_s *hmm, char *desc)
-{
+Plan7SetDescription(struct plan7_s *hmm, char *desc) {
   if (hmm->desc != NULL) free(hmm->desc);
   hmm->desc = Strdup(desc);
   StringChop(hmm->desc);
@@ -278,8 +269,7 @@ Plan7SetDescription(struct plan7_s *hmm, char *desc)
  *           command line log.
  */
 void
-Plan7ComlogAppend(struct plan7_s *hmm, int argc, char **argv)
-{
+Plan7ComlogAppend(struct plan7_s *hmm, int argc, char **argv) {
   int len;
   int i;
 
@@ -289,24 +279,20 @@ Plan7ComlogAppend(struct plan7_s *hmm, int argc, char **argv)
     len += strlen(argv[i]);
 
   /* allocate */
-  if (hmm->comlog != NULL)
-    {
-      len += strlen(hmm->comlog);
-      hmm->comlog = ReallocOrDie(hmm->comlog, sizeof(char)* (len+1));
-    }
-  else
-    {
-      hmm->comlog = MallocOrDie(sizeof(char)* (len+1));
-      *(hmm->comlog) = '\0'; /* need this to make strcat work */
-    }
+  if (hmm->comlog != NULL) {
+    len += strlen(hmm->comlog);
+    hmm->comlog = ReallocOrDie(hmm->comlog, sizeof(char)* (len+1));
+  } else {
+    hmm->comlog = MallocOrDie(sizeof(char)* (len+1));
+    *(hmm->comlog) = '\0'; /* need this to make strcat work */
+  }
 
   /* append */
   strcat(hmm->comlog, "\n");
-  for (i = 0; i < argc; i++)
-    {
-      strcat(hmm->comlog, argv[i]);
-      if (i < argc-1) strcat(hmm->comlog, " ");
-    }
+  for (i = 0; i < argc; i++) {
+    strcat(hmm->comlog, argv[i]);
+    if (i < argc-1) strcat(hmm->comlog, " ");
+  }
 }
 
 /* Function: Plan7SetCtime()
@@ -315,8 +301,7 @@ Plan7ComlogAppend(struct plan7_s *hmm, int argc, char **argv)
  * Purpose:  Set the ctime field in a new HMM to the current time.
  */
 void
-Plan7SetCtime(struct plan7_s *hmm)
-{
+Plan7SetCtime(struct plan7_s *hmm) {
   time_t date = time(NULL);
   if (hmm->ctime != NULL) free(hmm->ctime);
   hmm->ctime = Strdup(ctime(&date));
@@ -330,8 +315,7 @@ Plan7SetCtime(struct plan7_s *hmm)
  *           Convenience function.
  */
 void
-Plan7SetNullModel(struct plan7_s *hmm, float null[MAXABET], float p1)
-{
+Plan7SetNullModel(struct plan7_s *hmm, float null[MAXABET], float p1) {
   int x;
   for (x = 0; x < Alphabet_size; x++)
     hmm->null[x] = null[x];
@@ -384,8 +368,7 @@ Plan7SetNullModel(struct plan7_s *hmm, float null[MAXABET], float p1)
  *            hmm scores are filled in.
  */
 void
-P7Logoddsify(struct plan7_s *hmm, int viterbi_mode)
-{
+P7Logoddsify(struct plan7_s *hmm, int viterbi_mode) {
   int k;      /* counter for model position */
   int x;      /* counter for symbols        */
   float accum;
@@ -394,23 +377,20 @@ P7Logoddsify(struct plan7_s *hmm, int viterbi_mode)
 
   /* Symbol emission scores
    */
-  for (k = 1; k <= hmm->M; k++)
-    {
-        /* match/insert emissions in main model */
-      for (x = 0; x < Alphabet_size; x++)
-  {
-    hmm->msc[x][k] = Prob2Score(hmm->mat[k][x], hmm->null[x]);
-    if (k < hmm->M)
-      hmm->isc[x][k] =  Prob2Score(hmm->ins[k][x], hmm->null[x]);
-  }
-        /* degenerate match/insert emissions */
-      for (x = Alphabet_size; x < Alphabet_iupac; x++)
-  {
-    hmm->msc[x][k] = DegenerateSymbolScore(hmm->mat[k], hmm->null, x);
-    if (k < hmm->M)
-      hmm->isc[x][k] = DegenerateSymbolScore(hmm->ins[k], hmm->null, x);
-  }
+  for (k = 1; k <= hmm->M; k++) {
+    /* match/insert emissions in main model */
+    for (x = 0; x < Alphabet_size; x++) {
+      hmm->msc[x][k] = Prob2Score(hmm->mat[k][x], hmm->null[x]);
+      if (k < hmm->M)
+        hmm->isc[x][k] =  Prob2Score(hmm->ins[k][x], hmm->null[x]);
     }
+    /* degenerate match/insert emissions */
+    for (x = Alphabet_size; x < Alphabet_iupac; x++) {
+      hmm->msc[x][k] = DegenerateSymbolScore(hmm->mat[k], hmm->null, x);
+      if (k < hmm->M)
+        hmm->isc[x][k] = DegenerateSymbolScore(hmm->ins[k], hmm->null, x);
+    }
+  }
 
   /* State transitions.
    *
@@ -428,16 +408,15 @@ P7Logoddsify(struct plan7_s *hmm, int viterbi_mode)
    * entry/exit scores. They can't be set to -INFTY here because
    * we need them in save files.
    */
-  for (k = 1; k < hmm->M; k++)
-    {
-      hmm->tsc[TMM][k] = Prob2Score(hmm->t[k][TMM], hmm->p1);
-      hmm->tsc[TMI][k] = Prob2Score(hmm->t[k][TMI], hmm->p1);
-      hmm->tsc[TMD][k] = Prob2Score(hmm->t[k][TMD], 1.0);
-      hmm->tsc[TIM][k] = Prob2Score(hmm->t[k][TIM], hmm->p1);
-      hmm->tsc[TII][k] = Prob2Score(hmm->t[k][TII], hmm->p1);
-      hmm->tsc[TDM][k] = Prob2Score(hmm->t[k][TDM], hmm->p1);
-      hmm->tsc[TDD][k] = Prob2Score(hmm->t[k][TDD], 1.0);
-    }
+  for (k = 1; k < hmm->M; k++) {
+    hmm->tsc[TMM][k] = Prob2Score(hmm->t[k][TMM], hmm->p1);
+    hmm->tsc[TMI][k] = Prob2Score(hmm->t[k][TMI], hmm->p1);
+    hmm->tsc[TMD][k] = Prob2Score(hmm->t[k][TMD], 1.0);
+    hmm->tsc[TIM][k] = Prob2Score(hmm->t[k][TIM], hmm->p1);
+    hmm->tsc[TII][k] = Prob2Score(hmm->t[k][TII], hmm->p1);
+    hmm->tsc[TDM][k] = Prob2Score(hmm->t[k][TDM], hmm->p1);
+    hmm->tsc[TDD][k] = Prob2Score(hmm->t[k][TDD], 1.0);
+  }
 
   /* B->M entry transitions. Note how D_1 is folded out.
    * M1 is just B->M1
@@ -449,27 +428,25 @@ P7Logoddsify(struct plan7_s *hmm, int viterbi_mode)
    * doing in this in log space was in response to a bug report.
    */
   accum = hmm->tbd1 > 0.0 ? log(hmm->tbd1) : -9999.;
-  for (k = 1; k <= hmm->M; k++){
+  for (k = 1; k <= hmm->M; k++) {
     float tbm;
-      tbm = hmm->begin[k] > 0. ? log(hmm->begin[k]) : -9999.;  /* B->M_k part */
+    tbm = hmm->begin[k] > 0. ? log(hmm->begin[k]) : -9999.;  /* B->M_k part */
 
-      /* B->D1...D_k-1->M_k part we get from accum*/
-      if (k > 1 && accum > -9999.)
-  {
-    if (hmm->t[k-1][TDM] > 0.0)
-      {
+    /* B->D1...D_k-1->M_k part we get from accum*/
+    if (k > 1 && accum > -9999.) {
+      if (hmm->t[k-1][TDM] > 0.0) {
         if (viterbi_mode) tbm =  MAX(tbm, accum + log(hmm->t[k-1][TDM]));
         else              tbm =  LogSum(tbm, accum + log(hmm->t[k-1][TDM]));
       }
 
-    accum = (hmm->t[k-1][TDD] > 0.0) ? accum + log(hmm->t[k-1][TDD]) : -9999.;
-  }
-        /* Convert from log_e to scaled integer log_2 odds. */
-      if (tbm > -9999.)
-  hmm->bsc[k] = (int) floor(0.5 + INTSCALE * 1.44269504 * (tbm - log(hmm->p1)));
-      else
-  hmm->bsc[k] = -INFTY;
+      accum = (hmm->t[k-1][TDD] > 0.0) ? accum + log(hmm->t[k-1][TDD]) : -9999.;
     }
+    /* Convert from log_e to scaled integer log_2 odds. */
+    if (tbm > -9999.)
+      hmm->bsc[k] = (int) floor(0.5 + INTSCALE * 1.44269504 * (tbm - log(hmm->p1)));
+    else
+      hmm->bsc[k] = -INFTY;
+  }
 
   /* M->E exit transitions. Note how D_M is folded out.
    * M_M is 1 by definition
@@ -481,22 +458,21 @@ P7Logoddsify(struct plan7_s *hmm, int viterbi_mode)
    */
   hmm->esc[hmm->M] = 0;
   accum = 0.;
-  for (k = hmm->M-1; k >= 1; k--){
-      float tme;
-      tme = hmm->end[k] > 0. ? log(hmm->end[k]) : -9999.;
-      if (accum > -9999.){
-    if (hmm->t[k][TMD] > 0.0)
-      {
+  for (k = hmm->M-1; k >= 1; k--) {
+    float tme;
+    tme = hmm->end[k] > 0. ? log(hmm->end[k]) : -9999.;
+    if (accum > -9999.) {
+      if (hmm->t[k][TMD] > 0.0) {
         if (viterbi_mode) tme = MAX(tme, accum + log(hmm->t[k][TMD]));
         else              tme = LogSum(tme, accum + log(hmm->t[k][TMD]));
       }
-    accum = (hmm->t[k][TDD] > 0.0) ? accum + log(hmm->t[k][TDD]) : -9999.;
-  }
-        /* convert from log_e to scaled integer log odds. */
-      hmm->esc[k] = (tme > -9999.) ? (int) floor(0.5 + INTSCALE * 1.44269504 * tme) : -INFTY;
+      accum = (hmm->t[k][TDD] > 0.0) ? accum + log(hmm->t[k][TDD]) : -9999.;
     }
+    /* convert from log_e to scaled integer log odds. */
+    hmm->esc[k] = (tme > -9999.) ? (int) floor(0.5 + INTSCALE * 1.44269504 * tme) : -INFTY;
+  }
 
-        /* special transitions */
+  /* special transitions */
   hmm->xsc[XTN][LOOP] = Prob2Score(hmm->xt[XTN][LOOP], hmm->p1);
   hmm->xsc[XTN][MOVE] = Prob2Score(hmm->xt[XTN][MOVE], 1.0);
   hmm->xsc[XTE][LOOP] = Prob2Score(hmm->xt[XTE][LOOP], 1.0);
@@ -524,8 +500,7 @@ P7Logoddsify(struct plan7_s *hmm, int viterbi_mode)
  * Returns:   (void)
  */
 void
-Plan7Rescale(struct plan7_s *hmm, float scale)
-{
+Plan7Rescale(struct plan7_s *hmm, float scale) {
   int k;
   int st;
 
@@ -569,39 +544,37 @@ Plan7Rescale(struct plan7_s *hmm, float scale)
  *           hmm is changed.
  */
 void
-Plan7Renormalize(struct plan7_s *hmm)
-{
+Plan7Renormalize(struct plan7_s *hmm) {
   int   k;      /* counter for model position */
   int   st;      /* counter for special states */
   float d;      /* denominator */
 
-        /* match emissions */
+  /* match emissions */
   for (k = 1; k <= hmm->M; k++)
     FNorm(hmm->mat[k], Alphabet_size);
-        /* insert emissions */
+  /* insert emissions */
   for (k = 1; k < hmm->M; k++)
     FNorm(hmm->ins[k], Alphabet_size);
-        /* begin transitions */
+  /* begin transitions */
   d = FSum(hmm->begin+1, hmm->M) + hmm->tbd1;
   FScale(hmm->begin+1, hmm->M, 1./d);
   hmm->tbd1 /= d;
-        /* main model transitions */
-  for (k = 1; k < hmm->M; k++)
-    {
-      d = FSum(hmm->t[k], 3) + hmm->end[k];
-      FScale(hmm->t[k], 3, 1./d);
-      hmm->end[k] /= d;
+  /* main model transitions */
+  for (k = 1; k < hmm->M; k++) {
+    d = FSum(hmm->t[k], 3) + hmm->end[k];
+    FScale(hmm->t[k], 3, 1./d);
+    hmm->end[k] /= d;
 
-      FNorm(hmm->t[k]+3, 2);  /* insert */
-      FNorm(hmm->t[k]+5, 2);  /* delete */
-    }
-        /* null model emissions */
+    FNorm(hmm->t[k]+3, 2);  /* insert */
+    FNorm(hmm->t[k]+5, 2);  /* delete */
+  }
+  /* null model emissions */
   FNorm(hmm->null, Alphabet_size);
-        /* special transitions  */
+  /* special transitions  */
   for (st = 0; st < 4; st++)
     FNorm(hmm->xt[st], 2);
-        /* enforce nonexistent transitions */
-        /* (is this necessary?) */
+  /* enforce nonexistent transitions */
+  /* (is this necessary?) */
   hmm->t[0][TDM] = hmm->t[0][TDD] = 0.0;
 
   hmm->flags &= ~PLAN7_HASBITS;  /* clear the log-odds ready flag */
@@ -621,11 +594,10 @@ Plan7Renormalize(struct plan7_s *hmm)
  * Returns:  void
  */
 void
-Plan7RenormalizeExits(struct plan7_s *hmm)
-{
+Plan7RenormalizeExits(struct plan7_s *hmm) {
   int   k;
 
-  for (k = 1; k < hmm->M; k++){
+  for (k = 1; k < hmm->M; k++) {
     float d = FSum(hmm->t[k], 3);
     FScale(hmm->t[k], 3, 1./(d + d*hmm->end[k]));
   }
@@ -671,8 +643,7 @@ Plan7RenormalizeExits(struct plan7_s *hmm)
  *           Previous scores are invalidated if they existed.
  */
 void
-Plan7NakedConfig(struct plan7_s *hmm)
-{
+Plan7NakedConfig(struct plan7_s *hmm) {
   hmm->xt[XTN][MOVE] = 1.;        /* disallow N-terminal tail */
   hmm->xt[XTN][LOOP] = 0.;
   hmm->xt[XTE][MOVE] = 1.;        /* only 1 domain/sequence ("global" alignment) */
@@ -704,8 +675,7 @@ Plan7NakedConfig(struct plan7_s *hmm)
  *           Previous scores are invalidated if they existed.
  */
 void
-Plan7GlobalConfig(struct plan7_s *hmm)
-{
+Plan7GlobalConfig(struct plan7_s *hmm) {
   hmm->xt[XTN][MOVE] = 1. - hmm->p1;  /* allow N-terminal tail */
   hmm->xt[XTN][LOOP] = hmm->p1;
   hmm->xt[XTE][MOVE] = 1.;        /* only 1 domain/sequence ("global" alignment) */
@@ -733,8 +703,7 @@ Plan7GlobalConfig(struct plan7_s *hmm)
  *           the HMM probabilities are modified.
  */
 void
-Plan7LSConfig(struct plan7_s *hmm)
-{
+Plan7LSConfig(struct plan7_s *hmm) {
   hmm->xt[XTN][MOVE] = 1.-hmm->p1;    /* allow N-terminal tail */
   hmm->xt[XTN][LOOP] = hmm->p1;
   hmm->xt[XTE][MOVE] = 0.5;       /* expectation 2 domains/seq */
@@ -778,8 +747,7 @@ Plan7LSConfig(struct plan7_s *hmm)
  *           HMM probabilities are modified.
  */
 void
-Plan7SWConfig(struct plan7_s *hmm, float pentry, float pexit)
-{
+Plan7SWConfig(struct plan7_s *hmm, float pentry, float pexit) {
   float basep;      /* p1 for exits: the base p */
   int   k;      /* counter over states      */
 
@@ -828,8 +796,7 @@ Plan7SWConfig(struct plan7_s *hmm, float pentry, float pexit)
  *           HMM probabilities are modified.
  */
 void
-Plan7FSConfig(struct plan7_s *hmm, float pentry, float pexit)
-{
+Plan7FSConfig(struct plan7_s *hmm, float pentry, float pexit) {
   float basep;      /* p1 for exits: the base p */
   int   k;      /* counter over states      */
 
@@ -1014,8 +981,7 @@ PrintPlan7Stats(FILE *fp, struct plan7_s *hmm, unsigned char **dsq, int nseq,
  *           vector and the null model, scaled up by INTSCALE.
  */
 int
-DegenerateSymbolScore(float *p, float *null, int ambig)
-{
+DegenerateSymbolScore(float *p, float *null, int ambig) {
   int x;
   float numer = 0.;
   float denom = 0.;
@@ -1049,23 +1015,21 @@ DegenerateSymbolScore(float *p, float *null, int ambig)
  *           Plan7 HMM is allocated here. Free w/ FreePlan7().
  */
 void
-Plan9toPlan7(struct plan9_s *hmm, struct plan7_s **ret_plan7)
-{
+Plan9toPlan7(struct plan9_s *hmm, struct plan7_s **ret_plan7) {
   struct plan7_s *plan7;
   int k, x;
 
   plan7 = AllocPlan7(hmm->M);
 
-  for (k = 1; k < hmm->M; k++)
-    {
-      plan7->t[k][TMM] = hmm->mat[k].t[MATCH];
-      plan7->t[k][TMD] = hmm->mat[k].t[DELETE];
-      plan7->t[k][TMI] = hmm->mat[k].t[INSERT];
-      plan7->t[k][TDM] = hmm->del[k].t[MATCH];
-      plan7->t[k][TDD] = hmm->del[k].t[DELETE];
-      plan7->t[k][TIM] = hmm->ins[k].t[MATCH];
-      plan7->t[k][TII] = hmm->ins[k].t[INSERT];
-    }
+  for (k = 1; k < hmm->M; k++) {
+    plan7->t[k][TMM] = hmm->mat[k].t[MATCH];
+    plan7->t[k][TMD] = hmm->mat[k].t[DELETE];
+    plan7->t[k][TMI] = hmm->mat[k].t[INSERT];
+    plan7->t[k][TDM] = hmm->del[k].t[MATCH];
+    plan7->t[k][TDD] = hmm->del[k].t[DELETE];
+    plan7->t[k][TIM] = hmm->ins[k].t[MATCH];
+    plan7->t[k][TII] = hmm->ins[k].t[INSERT];
+  }
 
   for (k = 1; k <= hmm->M; k++)
     for (x = 0; x < Alphabet_size; x++)
@@ -1077,7 +1041,7 @@ Plan9toPlan7(struct plan9_s *hmm, struct plan7_s **ret_plan7)
 
   plan7->tbd1 = hmm->mat[0].t[DELETE] / (hmm->mat[0].t[DELETE] + hmm->mat[0].t[MATCH]);
 
-    /* We have to make up the null transition p1; use default */
+  /* We have to make up the null transition p1; use default */
   P7DefaultNullModel(plan7->null, &(plan7->p1));
   for (x = 0; x < Alphabet_size; x++)
     plan7->null[x] = hmm->null[x];

@@ -75,8 +75,7 @@
  * Return:   An allocated struct hit_s. Caller must free.
  */
 struct tophit_s *
-AllocTophits(int lumpsize)
-{
+AllocTophits(int lumpsize) {
   struct tophit_s *hitlist;
 
   hitlist        = MallocOrDie (sizeof(struct tophit_s));
@@ -88,30 +87,26 @@ AllocTophits(int lumpsize)
   return hitlist;
 }
 void
-GrowTophits(struct tophit_s *h)
-{
+GrowTophits(struct tophit_s *h) {
   h->unsrt = ReallocOrDie(h->unsrt,(h->alloc + h->lump) * sizeof(struct hit_s));
   h->alloc += h->lump;
 }
 void
-FreeTophits(struct tophit_s *h)
-{
+FreeTophits(struct tophit_s *h) {
   int pos;
-  for (pos = 0; pos < h->num; pos++)
-    {
-      if (h->unsrt[pos].ali  != NULL) FreeFancyAli(h->unsrt[pos].ali);
-      if (h->unsrt[pos].name != NULL) free(h->unsrt[pos].name);
-      if (h->unsrt[pos].acc  != NULL) free(h->unsrt[pos].acc);
-      if (h->unsrt[pos].desc != NULL) free(h->unsrt[pos].desc);
-    }
+  for (pos = 0; pos < h->num; pos++) {
+    if (h->unsrt[pos].ali  != NULL) FreeFancyAli(h->unsrt[pos].ali);
+    if (h->unsrt[pos].name != NULL) free(h->unsrt[pos].name);
+    if (h->unsrt[pos].acc  != NULL) free(h->unsrt[pos].acc);
+    if (h->unsrt[pos].desc != NULL) free(h->unsrt[pos].desc);
+  }
   free(h->unsrt);
   if (h->hit != NULL) free(h->hit);
   free(h);
 }
 
 struct fancyali_s *
-AllocFancyAli(void)
-{
+AllocFancyAli(void) {
   struct fancyali_s *ali;
 
   ali = MallocOrDie (sizeof(struct fancyali_s));
@@ -121,8 +116,7 @@ AllocFancyAli(void)
   return ali;
 }
 void
-FreeFancyAli(struct fancyali_s *ali)
-{
+FreeFancyAli(struct fancyali_s *ali) {
   if (ali != NULL) {
     if (ali->rfline != NULL) free(ali->rfline);
     if (ali->csline != NULL) free(ali->csline);
@@ -174,13 +168,12 @@ FreeFancyAli(struct fancyali_s *ali)
  */
 void
 RegisterHit(struct tophit_s *h, double key,
-      double pvalue, float score, double motherp, float mothersc,
-      char *name, char *acc, char *desc,
-      int sqfrom, int sqto, int sqlen,
-      int hmmfrom, int hmmto, int hmmlen,
-      int domidx, int ndom,
-      struct fancyali_s *ali)
-{
+            double pvalue, float score, double motherp, float mothersc,
+            char *name, char *acc, char *desc,
+            int sqfrom, int sqto, int sqlen,
+            int hmmfrom, int hmmto, int hmmlen,
+            int domidx, int ndom,
+            struct fancyali_s *ali) {
   /* Check to see if list is full and we must realloc.
    */
   if (h->num == h->alloc) GrowTophits(h);
@@ -218,14 +211,13 @@ RegisterHit(struct tophit_s *h, double key,
  */
 void
 GetRankedHit(struct tophit_s *h, int rank,
-       double *r_pvalue, float *r_score,
-       double *r_motherp, float *r_mothersc,
-       char **r_name, char **r_acc, char **r_desc,
-       int *r_sqfrom, int *r_sqto, int *r_sqlen,
-       int *r_hmmfrom, int *r_hmmto, int *r_hmmlen,
-       int *r_domidx, int *r_ndom,
-       struct fancyali_s **r_ali)
-{
+             double *r_pvalue, float *r_score,
+             double *r_motherp, float *r_mothersc,
+             char **r_name, char **r_acc, char **r_desc,
+             int *r_sqfrom, int *r_sqto, int *r_sqlen,
+             int *r_hmmfrom, int *r_hmmto, int *r_hmmlen,
+             int *r_domidx, int *r_ndom,
+             struct fancyali_s **r_ali) {
   if (r_pvalue  != NULL) *r_pvalue  = h->hit[rank]->pvalue;
   if (r_score   != NULL) *r_score   = h->hit[rank]->score;
   if (r_motherp != NULL) *r_motherp = h->hit[rank]->motherp;
@@ -250,13 +242,12 @@ GetRankedHit(struct tophit_s *h, int rank,
  *           doesn't need to be sorted yet.
  */
 int
-TophitsMaxName(struct tophit_s *h)
-{
+TophitsMaxName(struct tophit_s *h) {
   int i;
   int maxlen;
 
   maxlen = 0;
-  for (i = 0; i < h->num; i++){
+  for (i = 0; i < h->num; i++) {
     int len = strlen(h->unsrt[i].name);
     if (len > maxlen) maxlen = len;
   }
@@ -272,9 +263,8 @@ TophitsMaxName(struct tophit_s *h)
  * Args:     h - top hits structure
  */
 int
-hit_comparison(const void *vh1, const void *vh2)
-{
-           /* don't ask. don't change. Don't Panic. */
+hit_comparison(const void *vh1, const void *vh2) {
+  /* don't ask. don't change. Don't Panic. */
   struct hit_s *h1 = *((struct hit_s **) vh1);
   struct hit_s *h2 = *((struct hit_s **) vh2);
 
@@ -285,8 +275,7 @@ hit_comparison(const void *vh1, const void *vh2)
   return 0;
 }
 void
-FullSortTophits(struct tophit_s *h)
-{
+FullSortTophits(struct tophit_s *h) {
   int i;
 
   /* If we don't have /any/ hits, then don't
@@ -324,8 +313,7 @@ FullSortTophits(struct tophit_s *h)
  *           Prints information on stdout
  */
 void
-TophitsReport(struct tophit_s *h, double E, int nseq)
-{
+TophitsReport(struct tophit_s *h, double E, int nseq) {
   int i;
   int memused;
   int x;
@@ -335,40 +323,37 @@ TophitsReport(struct tophit_s *h, double E, int nseq)
    * in the whole list.
    */
   memused = sizeof(struct hit_s) * h->alloc + sizeof(struct tophit_s);
-  for (i = 0; i < h->num; i++)
-    {
-      if (h->unsrt[i].name != NULL)
-  memused += strlen(h->unsrt[i].name) + 1;
-      if (h->unsrt[i].acc != NULL)
-  memused += strlen(h->unsrt[i].acc)  + 1;
-      if (h->unsrt[i].desc != NULL)
-  memused += strlen(h->unsrt[i].desc) + 1;
-      if (h->unsrt[i].ali != NULL)
-  {
-    memused += sizeof(struct fancyali_s);
-    x = 0;
-    if (h->unsrt[i].ali->rfline != NULL) x++;
-    if (h->unsrt[i].ali->csline != NULL) x++;
+  for (i = 0; i < h->num; i++) {
+    if (h->unsrt[i].name != NULL)
+      memused += strlen(h->unsrt[i].name) + 1;
+    if (h->unsrt[i].acc != NULL)
+      memused += strlen(h->unsrt[i].acc)  + 1;
+    if (h->unsrt[i].desc != NULL)
+      memused += strlen(h->unsrt[i].desc) + 1;
+    if (h->unsrt[i].ali != NULL) {
+      memused += sizeof(struct fancyali_s);
+      x = 0;
+      if (h->unsrt[i].ali->rfline != NULL) x++;
+      if (h->unsrt[i].ali->csline != NULL) x++;
       if (h->unsrt[i].ali->model  != NULL) x++;
-    if (h->unsrt[i].ali->mline  != NULL) x++;
-    if (h->unsrt[i].ali->aseq   != NULL) x++;
-    memused += x * (h->unsrt[i].ali->len + 1);
+      if (h->unsrt[i].ali->mline  != NULL) x++;
+      if (h->unsrt[i].ali->aseq   != NULL) x++;
+      memused += x * (h->unsrt[i].ali->len + 1);
 
-    if (h->unsrt[i].ali->query  != NULL)
-      memused += strlen(h->unsrt[i].ali->query) + 1;
-    if (h->unsrt[i].ali->target != NULL)
-      memused += strlen(h->unsrt[i].ali->target) + 1;
-  }
+      if (h->unsrt[i].ali->query  != NULL)
+        memused += strlen(h->unsrt[i].ali->query) + 1;
+      if (h->unsrt[i].ali->target != NULL)
+        memused += strlen(h->unsrt[i].ali->target) + 1;
     }
+  }
 
   /* Count how many hits actually satisfy the E cutoff.
    */
   n = 0;
-  for (i = 0; i < h->num; i++)
-    {
-      if (h->hit[i]->pvalue * (double) nseq >= E) break;
-      n++;
-    }
+  for (i = 0; i < h->num; i++) {
+    if (h->hit[i]->pvalue * (double) nseq >= E) break;
+    n++;
+  }
 
   /* Format and print a summary
    */

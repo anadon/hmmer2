@@ -33,11 +33,13 @@ static struct p7prior_s *default_nucleic_prior(void);
  *           Very simple, but might get more complex someday.
  */
 struct p7prior_s *
-P7AllocPrior(void)
-{ return (struct p7prior_s *) MallocOrDie (sizeof(struct p7prior_s)); }
+P7AllocPrior(void) {
+  return (struct p7prior_s *) MallocOrDie (sizeof(struct p7prior_s));
+}
 void
-P7FreePrior(struct p7prior_s *pri)
-{ free(pri); }
+P7FreePrior(struct p7prior_s *pri) {
+  free(pri);
+}
 
 
 /* Function: P7LaplacePrior()
@@ -81,12 +83,14 @@ P7LaplacePrior(void)
  *           Dirichlet prior than Laplace.
  */
 struct p7prior_s *
-P7DefaultPrior(void)
-{
+P7DefaultPrior(void) {
   switch (Alphabet_type) {
-  case hmmAMINO:     return default_amino_prior();
-  case hmmNUCLEIC:   return default_nucleic_prior();
-  case hmmNOTSETYET: Die("Can't set prior; alphabet type not set yet");
+  case hmmAMINO:
+    return default_amino_prior();
+  case hmmNUCLEIC:
+    return default_nucleic_prior();
+  case hmmNOTSETYET:
+    Die("Can't set prior; alphabet type not set yet");
   }
   /*NOTREACHED*/
   return NULL;
@@ -97,8 +101,7 @@ P7DefaultPrior(void)
  * Purpose:  Input a prior from disk file.
  */
 struct p7prior_s *
-P7ReadPrior(char *prifile)
-{
+P7ReadPrior(char *prifile) {
   FILE             *fp;
   struct p7prior_s *pri;
   char             *sptr;
@@ -121,17 +124,13 @@ P7ReadPrior(char *prifile)
    */
   sptr = Getword(fp, sqdARG_STRING);
   s2upper(sptr);
-  if (strcmp(sptr, "AMINO") == 0)
-    {
-      if (Alphabet_type != hmmAMINO)
-  Die("HMM and/or sequences are DNA/RNA; can't use protein prior %s", prifile);
-    }
-  else if (strcmp(sptr, "NUCLEIC") == 0)
-    {
-      if (Alphabet_type != hmmNUCLEIC)
-  Die("HMM and/or sequences are protein; can't use DNA/RNA prior %s", prifile);
-    }
-  else
+  if (strcmp(sptr, "AMINO") == 0) {
+    if (Alphabet_type != hmmAMINO)
+      Die("HMM and/or sequences are DNA/RNA; can't use protein prior %s", prifile);
+  } else if (strcmp(sptr, "NUCLEIC") == 0) {
+    if (Alphabet_type != hmmNUCLEIC)
+      Die("HMM and/or sequences are protein; can't use DNA/RNA prior %s", prifile);
+  } else
     Die("Alphabet \"%s\" in prior file %s isn't valid.", sptr, prifile);
 
   /* State transition priors:
@@ -145,12 +144,11 @@ P7ReadPrior(char *prifile)
     Die("%d is bad; need at least one state transition mixture component", pri->tnum);
   if (pri->tnum > MAXDCHLET)
     Die("%d is bad, too many transition components (MAXDCHLET = %d)\n", MAXDCHLET);
-  for (q = 0; q < pri->tnum; q++)
-    {
-      pri->tq[q]    = (float) atof(Getword(fp, sqdARG_FLOAT));
-      for (x = 0; x < 7; x++)
-  pri->t[q][x] = (float) atof(Getword(fp, sqdARG_FLOAT));
-    }
+  for (q = 0; q < pri->tnum; q++) {
+    pri->tq[q]    = (float) atof(Getword(fp, sqdARG_FLOAT));
+    for (x = 0; x < 7; x++)
+      pri->t[q][x] = (float) atof(Getword(fp, sqdARG_FLOAT));
+  }
 
   /* Match emission priors:
    * # of mixtures.
@@ -164,12 +162,11 @@ P7ReadPrior(char *prifile)
   if (pri->mnum > MAXDCHLET)
     Die("%d is bad; too many match components (MAXDCHLET = %d)\n", pri->mnum, MAXDCHLET);
 
-  for (q = 0; q < pri->mnum; q++)
-    {
-      pri->mq[q] = (float) atof(Getword(fp, sqdARG_FLOAT));
-      for (x = 0; x < Alphabet_size; x++)
-  pri->m[q][x] = (float) atof(Getword(fp, sqdARG_FLOAT));
-    }
+  for (q = 0; q < pri->mnum; q++) {
+    pri->mq[q] = (float) atof(Getword(fp, sqdARG_FLOAT));
+    for (x = 0; x < Alphabet_size; x++)
+      pri->m[q][x] = (float) atof(Getword(fp, sqdARG_FLOAT));
+  }
 
   /* Insert emission priors:
    * # of mixtures.
@@ -182,12 +179,11 @@ P7ReadPrior(char *prifile)
     Die("%d is bad; need at least one insert emission mixture component", pri->inum);
   if (pri->inum > MAXDCHLET)
     Die("%d is bad; too many insert components (MAXDCHLET = %d)\n", pri->inum,  MAXDCHLET);
-  for (q = 0; q < pri->inum; q++)
-    {
-      pri->iq[q]  = (float) atof(Getword(fp, sqdARG_FLOAT));
-      for (x = 0; x < Alphabet_size; x++)
-  pri->i[q][x] = (float) atof(Getword(fp, sqdARG_FLOAT));
-    }
+  for (q = 0; q < pri->inum; q++) {
+    pri->iq[q]  = (float) atof(Getword(fp, sqdARG_FLOAT));
+    for (x = 0; x < Alphabet_size; x++)
+      pri->i[q][x] = (float) atof(Getword(fp, sqdARG_FLOAT));
+  }
 
   fclose(fp);
   return pri;
@@ -214,8 +210,7 @@ P7ReadPrior(char *prifile)
  *           a user.
  */
 void
-PAMPrior(char *pamfile, struct p7prior_s *pri, float wt)
-{
+PAMPrior(char *pamfile, struct p7prior_s *pri, float wt) {
   FILE  *fp;
   char  *blastpamfile;            /* BLAST looks in aa/ subdirectory of BLASTMAT */
   int  **pam;
@@ -250,22 +245,20 @@ PAMPrior(char *pamfile, struct p7prior_s *pri, float wt)
    * which we'll use as "pseudocounts" weighted by wt.
    */
   for (xi = 0; xi < Alphabet_size; xi++)
-    for (xj = 0; xj < Alphabet_size; xj++)
-      {
-        idx1 = Alphabet[xi] - 'A';
-        idx2 = Alphabet[xj] - 'A';
-        pri->m[xi][xj] = aafq[xj] * exp((float) pam[idx1][idx2] * scale);
-      }
+    for (xj = 0; xj < Alphabet_size; xj++) {
+      idx1 = Alphabet[xi] - 'A';
+      idx2 = Alphabet[xj] - 'A';
+      pri->m[xi][xj] = aafq[xj] * exp((float) pam[idx1][idx2] * scale);
+    }
 
   /* Normalize so that rows add up to wt.
    * i.e. Sum(xj) mat[xi][xj] = wt for every row xi
    */
-  for (xi = 0; xi < Alphabet_size; xi++)
-    {
-      pri->mq[xi] = 1. / Alphabet_size;
-      FNorm(pri->m[xi], Alphabet_size);
-      FScale(pri->m[xi], Alphabet_size, wt);
-    }
+  for (xi = 0; xi < Alphabet_size; xi++) {
+    pri->mq[xi] = 1. / Alphabet_size;
+    FNorm(pri->m[xi], Alphabet_size);
+    FScale(pri->m[xi], Alphabet_size, wt);
+  }
 
   Free2DArray((void **)pam,27);
 }
@@ -279,8 +272,7 @@ PAMPrior(char *pamfile, struct p7prior_s *pri, float wt)
  *           must already be known.
  */
 void
-P7DefaultNullModel(float *null, float *ret_p1)
-{
+P7DefaultNullModel(float *null, float *ret_p1) {
   int x;
   if (Alphabet_type == hmmAMINO) {
     for (x = 0; x < Alphabet_size; x++)
@@ -294,8 +286,7 @@ P7DefaultNullModel(float *null, float *ret_p1)
 }
 
 void
-P7ReadNullModel(char *rndfile, float *null, float *ret_p1)
-{
+P7ReadNullModel(char *rndfile, float *null, float *ret_p1) {
   FILE *fp;
   char *s;
   int   x;
@@ -308,12 +299,12 @@ P7ReadNullModel(char *rndfile, float *null, float *ret_p1)
   if      (strcmp(s, "NUCLEIC") == 0) type = hmmNUCLEIC;
   else if (strcmp(s, "AMINO")   == 0) type = hmmAMINO;
   else    goto FAILURE;
-        /* check/set alphabet type */
+  /* check/set alphabet type */
   if (Alphabet_type == 0)
     SetAlphabet(type);
   else if (Alphabet_type != type)
     Die("Alphabet type conflict; null model in %s is inappropriate\n", rndfile);
-        /* parse the file */
+  /* parse the file */
   for (x = 0; x < Alphabet_size; x++) {
     if ((s = Getword(fp, sqdARG_FLOAT)) == NULL) goto FAILURE;
     null[x] = atof(s);
@@ -342,8 +333,7 @@ FAILURE:
  *           HMM returns in probability form.
  */
 void
-P7PriorifyHMM(struct plan7_s *hmm, struct p7prior_s *pri)
-{
+P7PriorifyHMM(struct plan7_s *hmm, struct p7prior_s *pri) {
   int k;      /* counter for model position   */
   float d;      /* a denominator */
   float tq[MAXDCHLET];    /* prior distribution over mixtures */
@@ -361,58 +351,49 @@ P7PriorifyHMM(struct plan7_s *hmm, struct p7prior_s *pri)
 
   /* Main model transitions and emissions
    */
-  for (k = 1; k < hmm->M; k++)
-    {
-      /* The following code chunk is experimental.
-       * Collaboration with Michael Asman, Erik Sonnhammer, CGR Stockholm.
-       * Only activated if X-PR* annotation has been used, in which
-       * priors are overridden and a single Dirichlet component is
-       * specified for each column (using structural annotation).
-       * If X-PR* annotation is not used, which is usually the case,
-       * the following code has no effect (observe how the real prior
-       * distributions are copied into tq, mq, iq).
-       */
-      if (hmm->tpri != NULL && hmm->tpri[k] >= 0)
-  {
-    if (hmm->tpri[k] >= pri->tnum) Die("X-PRT annotation out of range");
-    FSet(tq, pri->tnum, 0.0);
-    tq[hmm->tpri[k]] = 1.0;
-  }
-      else
-  FCopy(tq, pri->tq, pri->tnum);
-      if (hmm->mpri != NULL && hmm->mpri[k] >= 0)
-  {
-    if (hmm->mpri[k] >= pri->mnum) Die("X-PRM annotation out of range");
-    FSet(mq, pri->mnum, 0.0);
-    mq[hmm->mpri[k]] = 1.0;
-  }
-      else
-  FCopy(mq, pri->mq, pri->mnum);
-      if (hmm->ipri != NULL && hmm->ipri[k] >= 0)
-  {
-    if (hmm->ipri[k] >= pri->inum) Die("X-PRI annotation out of range");
-    FSet(iq, pri->inum, 0.0);
-    iq[hmm->ipri[k]] = 1.0;
-  }
-      else
-  FCopy(iq, pri->iq, pri->inum);
+  for (k = 1; k < hmm->M; k++) {
+    /* The following code chunk is experimental.
+     * Collaboration with Michael Asman, Erik Sonnhammer, CGR Stockholm.
+     * Only activated if X-PR* annotation has been used, in which
+     * priors are overridden and a single Dirichlet component is
+     * specified for each column (using structural annotation).
+     * If X-PR* annotation is not used, which is usually the case,
+     * the following code has no effect (observe how the real prior
+     * distributions are copied into tq, mq, iq).
+     */
+    if (hmm->tpri != NULL && hmm->tpri[k] >= 0) {
+      if (hmm->tpri[k] >= pri->tnum) Die("X-PRT annotation out of range");
+      FSet(tq, pri->tnum, 0.0);
+      tq[hmm->tpri[k]] = 1.0;
+    } else
+      FCopy(tq, pri->tq, pri->tnum);
+    if (hmm->mpri != NULL && hmm->mpri[k] >= 0) {
+      if (hmm->mpri[k] >= pri->mnum) Die("X-PRM annotation out of range");
+      FSet(mq, pri->mnum, 0.0);
+      mq[hmm->mpri[k]] = 1.0;
+    } else
+      FCopy(mq, pri->mq, pri->mnum);
+    if (hmm->ipri != NULL && hmm->ipri[k] >= 0) {
+      if (hmm->ipri[k] >= pri->inum) Die("X-PRI annotation out of range");
+      FSet(iq, pri->inum, 0.0);
+      iq[hmm->ipri[k]] = 1.0;
+    } else
+      FCopy(iq, pri->iq, pri->inum);
 
-      /* This is the main line of the code:
-       */
-      P7PriorifyTransitionVector(hmm->t[k], pri, tq);
-      P7PriorifyEmissionVector(hmm->mat[k], pri, pri->mnum, mq, pri->m, NULL);
-      P7PriorifyEmissionVector(hmm->ins[k], pri, pri->inum, iq, pri->i, NULL);
-    }
+    /* This is the main line of the code:
+     */
+    P7PriorifyTransitionVector(hmm->t[k], pri, tq);
+    P7PriorifyEmissionVector(hmm->mat[k], pri, pri->mnum, mq, pri->m, NULL);
+    P7PriorifyEmissionVector(hmm->ins[k], pri, pri->inum, iq, pri->i, NULL);
+  }
 
   /* We repeat the above steps just for the final match state, M.
    */
-  if (hmm->mpri != NULL && hmm->mpri[hmm->M] >= 0)
-    {
-      if (hmm->mpri[hmm->M] >= pri->mnum) Die("X-PRM annotation out of range");
-      FSet(mq, pri->mnum, 0.0);
-      mq[hmm->mpri[hmm->M]] = 1.0;
-    }
-  else
+  if (hmm->mpri != NULL && hmm->mpri[hmm->M] >= 0) {
+    if (hmm->mpri[hmm->M] >= pri->mnum) Die("X-PRM annotation out of range");
+    FSet(mq, pri->mnum, 0.0);
+    mq[hmm->mpri[hmm->M]] = 1.0;
+  } else
     FCopy(mq, pri->mq, pri->mnum);
 
   P7PriorifyEmissionVector(hmm->mat[hmm->M], pri, pri->mnum, mq, pri->m, NULL);
@@ -444,9 +425,8 @@ P7PriorifyHMM(struct plan7_s *hmm, struct p7prior_s *pri)
  */
 void
 P7PriorifyEmissionVector(float *vec, struct p7prior_s *pri,
-           int num, float eq[MAXDCHLET], float e[MAXDCHLET][MAXABET],
-           float *ret_mix)
-{
+                         int num, float eq[MAXDCHLET], float e[MAXDCHLET][MAXABET],
+                         float *ret_mix) {
   int   x;                      /* counter over vec                     */
   int   q;                      /* counter over mixtures                */
   float mix[MAXDCHLET];         /* posterior distribution over mixtures */
@@ -466,21 +446,18 @@ P7PriorifyEmissionVector(float *vec, struct p7prior_s *pri,
    *  with num=1!!]
    */
   mix[0] = 1.0;
-  if (pri->strategy == PRI_DCHLET && num > 1)
-    {
-      for (q = 0; q < num; q++)
-  {
-    mix[q] =  eq[q] > 0.0 ? log(eq[q]) : -999.;
-    mix[q] += Logp_cvec(vec, Alphabet_size, e[q]);
+  if (pri->strategy == PRI_DCHLET && num > 1) {
+    for (q = 0; q < num; q++) {
+      mix[q] =  eq[q] > 0.0 ? log(eq[q]) : -999.;
+      mix[q] += Logp_cvec(vec, Alphabet_size, e[q]);
+    }
+    LogNorm(mix, num);      /* now mix[q] is P(component_q | n) */
+  } else if (pri->strategy == PRI_PAM && num > 1) {
+    /* pam prior uses aa frequencies as `P(q|n)' */
+    for (q = 0; q < Alphabet_size; q++)
+      mix[q] = vec[q];
+    FNorm(mix, Alphabet_size);
   }
-      LogNorm(mix, num);      /* now mix[q] is P(component_q | n) */
-    }
-  else if (pri->strategy == PRI_PAM && num > 1)
-    {    /* pam prior uses aa frequencies as `P(q|n)' */
-      for (q = 0; q < Alphabet_size; q++)
-  mix[q] = vec[q];
-      FNorm(mix, Alphabet_size);
-    }
 
   /* Convert the counts to probabilities, following Sjolander (1996)
    */
@@ -521,47 +498,48 @@ P7PriorifyEmissionVector(float *vec, struct p7prior_s *pri,
  */
 void
 P7PriorifyTransitionVector(float *t, struct p7prior_s *prior,
-         float tq[MAXDCHLET])
-{
+                           float tq[MAXDCHLET]) {
   int   ts;
   int   q;
   float mix[MAXDCHLET];
   float totm, totd, toti;       /* total counts in three transition vecs */
 
   mix[0] = 1.0;      /* default is simple one component */
-  if ((prior->strategy == PRI_DCHLET || prior->strategy == PRI_PAM) && prior->tnum > 1)
-    {
-      for (q = 0; q < prior->tnum; q++)
-        {
-          mix[q] =  tq[q] > 0.0 ? log(tq[q]) : -999.;
-          mix[q] += Logp_cvec(t,   3, prior->t[q]);   /* 3 match  */
-          mix[q] += Logp_cvec(t+3, 2, prior->t[q]+3); /* 2 insert */
-    mix[q] += Logp_cvec(t+5, 2, prior->t[q]+5); /* 2 delete */
-        }
-      LogNorm(mix, prior->tnum); /* mix[q] is now P(q | counts) */
+  if ((prior->strategy == PRI_DCHLET || prior->strategy == PRI_PAM) && prior->tnum > 1) {
+    for (q = 0; q < prior->tnum; q++) {
+      mix[q] =  tq[q] > 0.0 ? log(tq[q]) : -999.;
+      mix[q] += Logp_cvec(t,   3, prior->t[q]);   /* 3 match  */
+      mix[q] += Logp_cvec(t+3, 2, prior->t[q]+3); /* 2 insert */
+      mix[q] += Logp_cvec(t+5, 2, prior->t[q]+5); /* 2 delete */
     }
-        /* precalc some denominators */
+    LogNorm(mix, prior->tnum); /* mix[q] is now P(q | counts) */
+  }
+  /* precalc some denominators */
   totm = FSum(t,3);
   toti = t[TIM] + t[TII];
   totd = t[TDM] + t[TDD];
 
-  for (ts = 0; ts < 7; ts++){
+  for (ts = 0; ts < 7; ts++) {
     float xi; //Sjolander's X_i term
     xi = 0.0;
-    for (q = 0; q < prior->tnum; q++){
+    for (q = 0; q < prior->tnum; q++) {
       switch (ts) {
-        case TMM: case TMI: case TMD:
-          xi += mix[q] * (t[ts] + prior->t[q][ts]) /
-                (totm + FSum(prior->t[q], 3));
-          break;
-        case TIM: case TII:
-          xi += mix[q] * (t[ts] + prior->t[q][ts]) /
-                (toti + prior->t[q][TIM] + prior->t[q][TII]);
-          break;
-        case TDM: case TDD:
-          xi += mix[q] * (t[ts] + prior->t[q][ts]) /
-                (totd + prior->t[q][TDM] + prior->t[q][TDD]);
-          break;
+      case TMM:
+      case TMI:
+      case TMD:
+        xi += mix[q] * (t[ts] + prior->t[q][ts]) /
+              (totm + FSum(prior->t[q], 3));
+        break;
+      case TIM:
+      case TII:
+        xi += mix[q] * (t[ts] + prior->t[q][ts]) /
+              (toti + prior->t[q][TIM] + prior->t[q][TII]);
+        break;
+      case TDM:
+      case TDD:
+        xi += mix[q] * (t[ts] + prior->t[q][ts]) /
+              (totd + prior->t[q][TDM] + prior->t[q][TDD]);
+        break;
       }
     }
     t[ts] = xi;
@@ -577,53 +555,71 @@ P7PriorifyTransitionVector(float *t, struct p7prior_s *prior,
  * Purpose:  Set the default protein prior.
  */
 static struct p7prior_s *
-default_amino_prior(void)
-{
+default_amino_prior(void) {
   struct p7prior_s *pri;
   int q, x;
-        /* default match mixture coefficients */
+  /* default match mixture coefficients */
   static float defmq[9] = {
     0.178091, 0.056591, 0.0960191, 0.0781233, 0.0834977,
-    0.0904123, 0.114468, 0.0682132, 0.234585 };
+    0.0904123, 0.114468, 0.0682132, 0.234585
+  };
 
-        /* default match mixture Dirichlet components */
+  /* default match mixture Dirichlet components */
   static float defm[9][20] = {
-    { 0.270671, 0.039848, 0.017576, 0.016415, 0.014268,
+    {
+      0.270671, 0.039848, 0.017576, 0.016415, 0.014268,
       0.131916, 0.012391, 0.022599, 0.020358, 0.030727,
       0.015315, 0.048298, 0.053803, 0.020662, 0.023612,
-      0.216147, 0.147226, 0.065438, 0.003758, 0.009621 },
-    { 0.021465, 0.010300, 0.011741, 0.010883, 0.385651,
+      0.216147, 0.147226, 0.065438, 0.003758, 0.009621
+    },
+    {
+      0.021465, 0.010300, 0.011741, 0.010883, 0.385651,
       0.016416, 0.076196, 0.035329, 0.013921, 0.093517,
       0.022034, 0.028593, 0.013086, 0.023011, 0.018866,
-      0.029156, 0.018153, 0.036100, 0.071770, 0.419641 },
-    { 0.561459, 0.045448, 0.438366, 0.764167, 0.087364,
+      0.029156, 0.018153, 0.036100, 0.071770, 0.419641
+    },
+    {
+      0.561459, 0.045448, 0.438366, 0.764167, 0.087364,
       0.259114, 0.214940, 0.145928, 0.762204, 0.247320,
       0.118662, 0.441564, 0.174822, 0.530840, 0.465529,
-      0.583402, 0.445586, 0.227050, 0.029510, 0.121090 },
-    { 0.070143, 0.011140, 0.019479, 0.094657, 0.013162,
+      0.583402, 0.445586, 0.227050, 0.029510, 0.121090
+    },
+    {
+      0.070143, 0.011140, 0.019479, 0.094657, 0.013162,
       0.048038, 0.077000, 0.032939, 0.576639, 0.072293,
       0.028240, 0.080372, 0.037661, 0.185037, 0.506783,
-      0.073732, 0.071587, 0.042532, 0.011254, 0.028723 },
-    { 0.041103, 0.014794, 0.005610, 0.010216, 0.153602,
+      0.073732, 0.071587, 0.042532, 0.011254, 0.028723
+    },
+    {
+      0.041103, 0.014794, 0.005610, 0.010216, 0.153602,
       0.007797, 0.007175, 0.299635, 0.010849, 0.999446,
       0.210189, 0.006127, 0.013021, 0.019798, 0.014509,
-      0.012049, 0.035799, 0.180085, 0.012744, 0.026466 },
-    { 0.115607, 0.037381, 0.012414, 0.018179, 0.051778,
+      0.012049, 0.035799, 0.180085, 0.012744, 0.026466
+    },
+    {
+      0.115607, 0.037381, 0.012414, 0.018179, 0.051778,
       0.017255, 0.004911, 0.796882, 0.017074, 0.285858,
       0.075811, 0.014548, 0.015092, 0.011382, 0.012696,
-      0.027535, 0.088333, 0.944340, 0.004373, 0.016741 },
-    { 0.093461, 0.004737, 0.387252, 0.347841, 0.010822,
+      0.027535, 0.088333, 0.944340, 0.004373, 0.016741
+    },
+    {
+      0.093461, 0.004737, 0.387252, 0.347841, 0.010822,
       0.105877, 0.049776, 0.014963, 0.094276, 0.027761,
       0.010040, 0.187869, 0.050018, 0.110039, 0.038668,
-      0.119471, 0.065802, 0.025430, 0.003215, 0.018742 },
-    { 0.452171, 0.114613, 0.062460, 0.115702, 0.284246,
+      0.119471, 0.065802, 0.025430, 0.003215, 0.018742
+    },
+    {
+      0.452171, 0.114613, 0.062460, 0.115702, 0.284246,
       0.140204, 0.100358, 0.550230, 0.143995, 0.700649,
       0.276580, 0.118569, 0.097470, 0.126673, 0.143634,
-      0.278983, 0.358482, 0.661750, 0.061533, 0.199373 },
-    { 0.005193, 0.004039, 0.006722, 0.006121, 0.003468,
+      0.278983, 0.358482, 0.661750, 0.061533, 0.199373
+    },
+    {
+      0.005193, 0.004039, 0.006722, 0.006121, 0.003468,
       0.016931, 0.003647, 0.002184, 0.005019, 0.005990,
       0.001473, 0.004158, 0.009055, 0.003630, 0.006583,
-      0.003172, 0.003690, 0.002967, 0.002772, 0.002686 },
+      0.003172, 0.003690, 0.002967, 0.002772, 0.002686
+    },
   };
 
   pri = P7AllocPrior();
@@ -646,12 +642,11 @@ default_amino_prior(void)
    * from Kimmen Sjolander (Blocks9)
    */
   pri->mnum  = 9;
-  for (q = 0; q < pri->mnum; q++)
-    {
-      pri->mq[q] = defmq[q];
-      for (x = 0; x < 20; x++)
-  pri->m[q][x] = defm[q][x];
-    }
+  for (q = 0; q < pri->mnum; q++) {
+    pri->mq[q] = defmq[q];
+    for (x = 0; x < 20; x++)
+      pri->m[q][x] = defm[q][x];
+  }
 
   /* These insert emission priors are subjective. Observed frequencies
    * were obtained from PFAM 1.0, 10 Nov 96;
@@ -691,8 +686,7 @@ default_amino_prior(void)
  * Purpose:  Set the default DNA prior. (for now, almost a Laplace)
  */
 static struct p7prior_s *
-default_nucleic_prior(void)
-{
+default_nucleic_prior(void) {
   struct p7prior_s *pri;
 
   pri = P7AllocPrior();

@@ -10,12 +10,11 @@
 #include "squid.h"
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char *env;
   char *file;
   FILE *fp;
-  
+
   env = argv[1];
   file = argv[2];
 

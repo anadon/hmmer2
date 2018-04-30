@@ -27,9 +27,9 @@
 #include <assert.h>
 
 static float get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
-         int k1, char t1, int s1,
-         int k3, char t3, int s3,
-         int *ret_k2, char *ret_t2, int *ret_s2);
+                           int k1, char t1, int s1,
+                           int k3, char t3, int s3,
+                           int *ret_k2, char *ret_t2, int *ret_s2);
 
 
 #ifndef ALTIVEC
@@ -57,8 +57,7 @@ static float get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
  *           mx is allocated here. Caller frees with FreePlan7Matrix(mx).
  */
 struct dpmatrix_s *
-CreatePlan7Matrix(int N, int M, int padN, int padM)
-{
+CreatePlan7Matrix(int N, int M, int padN, int padM) {
   struct dpmatrix_s *mx;
   int i;
 
@@ -80,13 +79,12 @@ CreatePlan7Matrix(int N, int M, int padN, int padM)
   mx->mmx[0] = (int *) mx->mmx_mem;
   mx->imx[0] = (int *) mx->imx_mem;
   mx->dmx[0] = (int *) mx->dmx_mem;
-  for (i = 1; i <= N; i++)
-    {
-      mx->xmx[i] = mx->xmx[0] + (i*5);
-      mx->mmx[i] = mx->mmx[0] + (i*(M+2));
-      mx->imx[i] = mx->imx[0] + (i*(M+2));
-      mx->dmx[i] = mx->dmx[0] + (i*(M+2));
-    }
+  for (i = 1; i <= N; i++) {
+    mx->xmx[i] = mx->xmx[0] + (i*5);
+    mx->mmx[i] = mx->mmx[0] + (i*(M+2));
+    mx->imx[i] = mx->imx[0] + (i*(M+2));
+    mx->dmx[i] = mx->dmx[0] + (i*(M+2));
+  }
 
   mx->maxN = N;
   mx->maxM = M;
@@ -132,8 +130,7 @@ CreatePlan7Matrix(int N, int M, int padN, int padM)
  */
 void
 ResizePlan7Matrix(struct dpmatrix_s *mx, int N, int M,
-      int ***xmx, int ***mmx, int ***imx, int ***dmx)
-{
+                  int ***xmx, int ***mmx, int ***imx, int ***dmx) {
   int i;
 
   if (N <= mx->maxN && M <= mx->maxM) goto DONE;
@@ -162,15 +159,14 @@ ResizePlan7Matrix(struct dpmatrix_s *mx, int N, int M,
   mx->imx[0] = (int *) mx->imx_mem;
   mx->dmx[0] = (int *) mx->dmx_mem;
 
-  for (i = 1; i <= mx->maxN; i++)
-    {
-      mx->xmx[i] = mx->xmx[0] + (i*5);
-      mx->mmx[i] = mx->mmx[0] + (i*(mx->maxM+2));
-      mx->imx[i] = mx->imx[0] + (i*(mx->maxM+2));
-      mx->dmx[i] = mx->dmx[0] + (i*(mx->maxM+2));
-    }
+  for (i = 1; i <= mx->maxN; i++) {
+    mx->xmx[i] = mx->xmx[0] + (i*5);
+    mx->mmx[i] = mx->mmx[0] + (i*(mx->maxM+2));
+    mx->imx[i] = mx->imx[0] + (i*(mx->maxM+2));
+    mx->dmx[i] = mx->dmx[0] + (i*(mx->maxM+2));
+  }
 
- DONE:
+DONE:
   if (xmx != NULL) *xmx = mx->xmx;
   if (mmx != NULL) *mmx = mx->mmx;
   if (imx != NULL) *imx = mx->imx;
@@ -200,8 +196,7 @@ ResizePlan7Matrix(struct dpmatrix_s *mx, int N, int M,
  *           Caller free's w/ FreePlan7Matrix()
  */
 struct dpmatrix_s *
-AllocPlan7Matrix(int rows, int M, int ***xmx, int ***mmx, int ***imx, int ***dmx)
-{
+AllocPlan7Matrix(int rows, int M, int ***xmx, int ***mmx, int ***imx, int ***dmx) {
   struct dpmatrix_s *mx;
   mx = CreatePlan7Matrix(rows-1, M, 0, 0);
   if (xmx != NULL) *xmx = mx->xmx;
@@ -219,8 +214,7 @@ AllocPlan7Matrix(int rows, int M, int ***xmx, int ***mmx, int ***imx, int ***dmx
  * Return:   (void)
  */
 void
-FreePlan7Matrix(struct dpmatrix_s *mx)
-{
+FreePlan7Matrix(struct dpmatrix_s *mx) {
   free (mx->xmx_mem);
   free (mx->mmx_mem);
   free (mx->imx_mem);
@@ -247,8 +241,7 @@ FreePlan7Matrix(struct dpmatrix_s *mx)
  */
 
 struct dpshadow_s *
-AllocShadowMatrix(int rows, int M, char ***xtb, char ***mtb, char ***itb, char ***dtb)
-{
+AllocShadowMatrix(int rows, int M, char ***xtb, char ***mtb, char ***itb, char ***dtb) {
   struct dpshadow_s *tb;
   int i;
 
@@ -262,13 +255,12 @@ AllocShadowMatrix(int rows, int M, char ***xtb, char ***mtb, char ***itb, char *
   tb->mtb[0] = (char *)  MallocOrDie (sizeof(char) * (rows*(M+2)));
   tb->itb[0] = (char *)  MallocOrDie (sizeof(char) * (rows*(M+2)));
   tb->dtb[0] = (char *)  MallocOrDie (sizeof(char) * (rows*(M+2)));
-  for (i = 1; i < rows; i++)
-    {
-      tb->xtb[i] = tb->xtb[0] + (i*5);
-      tb->mtb[i] = tb->mtb[0] + (i*(M+2));
-      tb->itb[i] = tb->itb[0] + (i*(M+2));
-      tb->dtb[i] = tb->dtb[0] + (i*(M+2));
-    }
+  for (i = 1; i < rows; i++) {
+    tb->xtb[i] = tb->xtb[0] + (i*5);
+    tb->mtb[i] = tb->mtb[0] + (i*(M+2));
+    tb->itb[i] = tb->itb[0] + (i*(M+2));
+    tb->dtb[i] = tb->dtb[0] + (i*(M+2));
+  }
 
   if (xtb != NULL) *xtb = tb->xtb;
   if (mtb != NULL) *mtb = tb->mtb;
@@ -284,8 +276,7 @@ AllocShadowMatrix(int rows, int M, char ***xtb, char ***mtb, char ***itb, char *
  * Return:   (void)
  */
 void
-FreeShadowMatrix(struct dpshadow_s *tb)
-{
+FreeShadowMatrix(struct dpshadow_s *tb) {
   free (tb->xtb[0]);
   free (tb->mtb[0]);
   free (tb->itb[0]);
@@ -329,15 +320,16 @@ FreeShadowMatrix(struct dpshadow_s *tb)
  * Xref:      STL7 p.122.
  */
 int
-P7ViterbiSpaceOK(int L, int M, struct dpmatrix_s *mx)
-{
+P7ViterbiSpaceOK(int L, int M, struct dpmatrix_s *mx) {
   int newM;
   int newN;
 
   if (M <= mx->maxM && L <= mx->maxN) return TRUE;
 
-  if (M > mx->maxM) newM = M + mx->padM; else newM = mx->maxM;
-  if (L > mx->maxN) newN = L + mx->padN; else newN = mx->maxN;
+  if (M > mx->maxM) newM = M + mx->padM;
+  else newM = mx->maxM;
+  if (L > mx->maxN) newN = L + mx->padN;
+  else newN = mx->maxN;
 
   if (P7ViterbiSize(newN, newM) <= RAMLIMIT)
     return TRUE;
@@ -363,8 +355,7 @@ P7ViterbiSpaceOK(int L, int M, struct dpmatrix_s *mx)
  * Returns:  # of MB
  */
 int
-P7ViterbiSize(int L, int M)
-{
+P7ViterbiSize(int L, int M) {
   float Mbytes;
 
   /* We're excessively precise here, but it doesn't cost
@@ -457,8 +448,7 @@ P7WeeViterbiSize(int L, int M)
  * Return:   log P(S|M)/P(S|R), as a bit score.
  */
 float
-P7Forward(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s **ret_mx)
-{
+P7Forward(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s **ret_mx) {
   struct dpmatrix_s *mx;
   int **xmx;
   int **mmx;
@@ -486,47 +476,45 @@ P7Forward(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s **re
    * Note some slightly wasteful boundary conditions:
    *    tsc[0] = -INFTY for all eight transitions (no node 0)
    */
-  for (i = 1; i <= L; i++)
-    {
-      mmx[i][0] = imx[i][0] = dmx[i][0] = -INFTY;
-      for (k = 1; k < hmm->M; k++)
-  {
-    mmx[i][k]  = ILogsum(ILogsum(mmx[i-1][k-1] + hmm->tsc[TMM][k-1],
-             imx[i-1][k-1] + hmm->tsc[TIM][k-1]),
-            ILogsum(xmx[i-1][XMB] + hmm->bsc[k],
-             dmx[i-1][k-1] + hmm->tsc[TDM][k-1]));
-    mmx[i][k] += hmm->msc[dsq[i]][k];
+  for (i = 1; i <= L; i++) {
+    mmx[i][0] = imx[i][0] = dmx[i][0] = -INFTY;
+    for (k = 1; k < hmm->M; k++) {
+      mmx[i][k]  = ILogsum(ILogsum(mmx[i-1][k-1] + hmm->tsc[TMM][k-1],
+                                   imx[i-1][k-1] + hmm->tsc[TIM][k-1]),
+                           ILogsum(xmx[i-1][XMB] + hmm->bsc[k],
+                                   dmx[i-1][k-1] + hmm->tsc[TDM][k-1]));
+      mmx[i][k] += hmm->msc[dsq[i]][k];
 
-    dmx[i][k]  = ILogsum(mmx[i][k-1] + hmm->tsc[TMD][k-1],
-            dmx[i][k-1] + hmm->tsc[TDD][k-1]);
-    imx[i][k]  = ILogsum(mmx[i-1][k] + hmm->tsc[TMI][k],
-            imx[i-1][k] + hmm->tsc[TII][k]);
-    imx[i][k] += hmm->isc[dsq[i]][k];
-  }
-      mmx[i][hmm->M] = ILogsum(ILogsum(mmx[i-1][hmm->M-1] + hmm->tsc[TMM][hmm->M-1],
-           imx[i-1][hmm->M-1] + hmm->tsc[TIM][hmm->M-1]),
-             ILogsum(xmx[i-1][XMB] + hmm->bsc[hmm->M],
-           dmx[i-1][hmm->M-1] + hmm->tsc[TDM][hmm->M-1]));
-      mmx[i][hmm->M] += hmm->msc[dsq[i]][hmm->M];
-
-      /* Now the special states.
-       * remember, C and J emissions are zero score by definition
-       */
-      xmx[i][XMN] = xmx[i-1][XMN] + hmm->xsc[XTN][LOOP];
-
-      xmx[i][XME] = -INFTY;
-      for (k = 1; k <= hmm->M; k++)
-  xmx[i][XME] = ILogsum(xmx[i][XME], mmx[i][k] + hmm->esc[k]);
-
-      xmx[i][XMJ] = ILogsum(xmx[i-1][XMJ] + hmm->xsc[XTJ][LOOP],
-         xmx[i][XME]   + hmm->xsc[XTE][LOOP]);
-
-      xmx[i][XMB] = ILogsum(xmx[i][XMN] + hmm->xsc[XTN][MOVE],
-          xmx[i][XMJ] + hmm->xsc[XTJ][MOVE]);
-
-      xmx[i][XMC] = ILogsum(xmx[i-1][XMC] + hmm->xsc[XTC][LOOP],
-          xmx[i][XME] + hmm->xsc[XTE][MOVE]);
+      dmx[i][k]  = ILogsum(mmx[i][k-1] + hmm->tsc[TMD][k-1],
+                           dmx[i][k-1] + hmm->tsc[TDD][k-1]);
+      imx[i][k]  = ILogsum(mmx[i-1][k] + hmm->tsc[TMI][k],
+                           imx[i-1][k] + hmm->tsc[TII][k]);
+      imx[i][k] += hmm->isc[dsq[i]][k];
     }
+    mmx[i][hmm->M] = ILogsum(ILogsum(mmx[i-1][hmm->M-1] + hmm->tsc[TMM][hmm->M-1],
+                                     imx[i-1][hmm->M-1] + hmm->tsc[TIM][hmm->M-1]),
+                             ILogsum(xmx[i-1][XMB] + hmm->bsc[hmm->M],
+                                     dmx[i-1][hmm->M-1] + hmm->tsc[TDM][hmm->M-1]));
+    mmx[i][hmm->M] += hmm->msc[dsq[i]][hmm->M];
+
+    /* Now the special states.
+     * remember, C and J emissions are zero score by definition
+     */
+    xmx[i][XMN] = xmx[i-1][XMN] + hmm->xsc[XTN][LOOP];
+
+    xmx[i][XME] = -INFTY;
+    for (k = 1; k <= hmm->M; k++)
+      xmx[i][XME] = ILogsum(xmx[i][XME], mmx[i][k] + hmm->esc[k]);
+
+    xmx[i][XMJ] = ILogsum(xmx[i-1][XMJ] + hmm->xsc[XTJ][LOOP],
+                          xmx[i][XME]   + hmm->xsc[XTE][LOOP]);
+
+    xmx[i][XMB] = ILogsum(xmx[i][XMN] + hmm->xsc[XTN][MOVE],
+                          xmx[i][XMJ] + hmm->xsc[XTJ][MOVE]);
+
+    xmx[i][XMC] = ILogsum(xmx[i-1][XMC] + hmm->xsc[XTC][LOOP],
+                          xmx[i][XME] + hmm->xsc[XTE][MOVE]);
+  }
 
   sc = xmx[L][XMC] + hmm->xsc[XTC][MOVE];
 
@@ -562,8 +550,7 @@ P7Forward(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s **re
  * Return:   log P(S|M)/P(S|R), as a bit score
  */
 float
-P7Viterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx, struct p7trace_s **ret_tr)
-{
+P7Viterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx, struct p7trace_s **ret_tr) {
   struct p7trace_s  *tr;
   int **xmx;
   int **mmx;
@@ -593,73 +580,73 @@ P7Viterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx,
     mmx[i][0] = imx[i][0] = dmx[i][0] = -INFTY;
 
     for (k = 1; k <= hmm->M; k++) {
-        /* match state */
+      /* match state */
       mmx[i][k]  = -INFTY;
       if ((sc = mmx[i-1][k-1] + hmm->tsc[TMM][k-1]) > mmx[i][k])
-  mmx[i][k] = sc;
+        mmx[i][k] = sc;
       if ((sc = imx[i-1][k-1] + hmm->tsc[TIM][k-1]) > mmx[i][k])
-  mmx[i][k] = sc;
+        mmx[i][k] = sc;
       if ((sc = xmx[i-1][XMB] + hmm->bsc[k]) > mmx[i][k])
-  mmx[i][k] = sc;
+        mmx[i][k] = sc;
       if ((sc = dmx[i-1][k-1] + hmm->tsc[TDM][k-1]) > mmx[i][k])
-  mmx[i][k] = sc;
+        mmx[i][k] = sc;
       if (hmm->msc[dsq[i]][k] != -INFTY) mmx[i][k] += hmm->msc[dsq[i]][k];
       else                                     mmx[i][k] = -INFTY;
 
-        /* delete state */
+      /* delete state */
       dmx[i][k] = -INFTY;
       if ((sc = mmx[i][k-1] + hmm->tsc[TMD][k-1]) > dmx[i][k])
-  dmx[i][k] = sc;
+        dmx[i][k] = sc;
       if ((sc = dmx[i][k-1] + hmm->tsc[TDD][k-1]) > dmx[i][k])
-  dmx[i][k] = sc;
+        dmx[i][k] = sc;
 
-        /* insert state */
+      /* insert state */
       if (k < hmm->M) {
-  imx[i][k] = -INFTY;
-  if ((sc = mmx[i-1][k] + hmm->tsc[TMI][k]) > imx[i][k])
-    imx[i][k] = sc;
-  if ((sc = imx[i-1][k] + hmm->tsc[TII][k]) > imx[i][k])
-    imx[i][k] = sc;
-  if (hmm->isc[dsq[i]][k] != -INFTY) imx[i][k] += hmm->isc[dsq[i]][k];
-  else                                    imx[i][k] = -INFTY;
+        imx[i][k] = -INFTY;
+        if ((sc = mmx[i-1][k] + hmm->tsc[TMI][k]) > imx[i][k])
+          imx[i][k] = sc;
+        if ((sc = imx[i-1][k] + hmm->tsc[TII][k]) > imx[i][k])
+          imx[i][k] = sc;
+        if (hmm->isc[dsq[i]][k] != -INFTY) imx[i][k] += hmm->isc[dsq[i]][k];
+        else                                    imx[i][k] = -INFTY;
       }
     }
 
     /* Now the special states. Order is important here.
      * remember, C and J emissions are zero score by definition,
      */
-        /* N state */
+    /* N state */
     xmx[i][XMN] = -INFTY;
     if ((sc = xmx[i-1][XMN] + hmm->xsc[XTN][LOOP]) > -INFTY)
       xmx[i][XMN] = sc;
 
-        /* E state */
+    /* E state */
     xmx[i][XME] = -INFTY;
     for (k = 1; k <= hmm->M; k++)
       if ((sc =  mmx[i][k] + hmm->esc[k]) > xmx[i][XME])
-  xmx[i][XME] = sc;
-        /* J state */
+        xmx[i][XME] = sc;
+    /* J state */
     xmx[i][XMJ] = -INFTY;
     if ((sc = xmx[i-1][XMJ] + hmm->xsc[XTJ][LOOP]) > -INFTY)
       xmx[i][XMJ] = sc;
     if ((sc = xmx[i][XME]   + hmm->xsc[XTE][LOOP]) > xmx[i][XMJ])
       xmx[i][XMJ] = sc;
 
-        /* B state */
+    /* B state */
     xmx[i][XMB] = -INFTY;
     if ((sc = xmx[i][XMN] + hmm->xsc[XTN][MOVE]) > -INFTY)
       xmx[i][XMB] = sc;
     if ((sc = xmx[i][XMJ] + hmm->xsc[XTJ][MOVE]) > xmx[i][XMB])
       xmx[i][XMB] = sc;
 
-        /* C state */
+    /* C state */
     xmx[i][XMC] = -INFTY;
     if ((sc = xmx[i-1][XMC] + hmm->xsc[XTC][LOOP]) > -INFTY)
       xmx[i][XMC] = sc;
     if ((sc = xmx[i][XME] + hmm->xsc[XTE][MOVE]) > xmx[i][XMC])
       xmx[i][XMC] = sc;
   }
-        /* T state (not stored) */
+  /* T state (not stored) */
   sc = xmx[L][XMC] + hmm->xsc[XTC][MOVE];
 
   if (ret_tr != NULL) {
@@ -688,8 +675,7 @@ P7Viterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx,
  */
 void
 P7ViterbiTrace(struct plan7_s *hmm, unsigned char *dsq, int N,
-         struct dpmatrix_s *mx, struct p7trace_s **ret_tr)
-{
+               struct dpmatrix_s *mx, struct p7trace_s **ret_tr) {
   struct p7trace_s *tr;
   int curralloc;    /* current allocated length of trace */
   int tpos;      /* position in trace */
@@ -728,185 +714,174 @@ P7ViterbiTrace(struct plan7_s *hmm, unsigned char *dsq, int N,
     switch (tr->statetype[tpos-1]) {
     case STM:      /* M connects from i-1,k-1, or B */
       sc = mmx[i+1][k+1] - hmm->msc[dsq[i+1]][k+1];
-      if (sc <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      else if (sc == xmx[i][XMB] + hmm->bsc[k+1])
-  {
+      if (sc <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
+      } else if (sc == xmx[i][XMB] + hmm->bsc[k+1]) {
         /* Check for wing unfolding */
-    if (Prob2Score(hmm->begin[k+1], hmm->p1) + 1 * INTSCALE <= hmm->bsc[k+1])
-      while (k > 0)
-        {
-    tr->statetype[tpos] = STD;
-    tr->nodeidx[tpos]   = k--;
-    tr->pos[tpos]       = 0;
-    tpos++;
-    if (tpos == curralloc)
-      {        /* grow trace if necessary  */
-        curralloc += N;
-        P7ReallocTrace(tr, curralloc);
-      }
-        }
+        if (Prob2Score(hmm->begin[k+1], hmm->p1) + 1 * INTSCALE <= hmm->bsc[k+1])
+          while (k > 0) {
+            tr->statetype[tpos] = STD;
+            tr->nodeidx[tpos]   = k--;
+            tr->pos[tpos]       = 0;
+            tpos++;
+            if (tpos == curralloc) {
+              /* grow trace if necessary  */
+              curralloc += N;
+              P7ReallocTrace(tr, curralloc);
+            }
+          }
 
-    tr->statetype[tpos] = STB;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-  }
-      else if (sc == mmx[i][k] + hmm->tsc[TMM][k])
-  {
-    tr->statetype[tpos] = STM;
-    tr->nodeidx[tpos]   = k--;
-    tr->pos[tpos]       = i--;
-  }
-      else if (sc == imx[i][k] + hmm->tsc[TIM][k])
-  {
-    tr->statetype[tpos] = STI;
-    tr->nodeidx[tpos]   = k;
-    tr->pos[tpos]       = i--;
-  }
-      else if (sc == dmx[i][k] + hmm->tsc[TDM][k])
-  {
-    tr->statetype[tpos] = STD;
-    tr->nodeidx[tpos]   = k--;
-    tr->pos[tpos]       = 0;
-  }
-      else
-  Die("traceback failed");
+        tr->statetype[tpos] = STB;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;
+      } else if (sc == mmx[i][k] + hmm->tsc[TMM][k]) {
+        tr->statetype[tpos] = STM;
+        tr->nodeidx[tpos]   = k--;
+        tr->pos[tpos]       = i--;
+      } else if (sc == imx[i][k] + hmm->tsc[TIM][k]) {
+        tr->statetype[tpos] = STI;
+        tr->nodeidx[tpos]   = k;
+        tr->pos[tpos]       = i--;
+      } else if (sc == dmx[i][k] + hmm->tsc[TDM][k]) {
+        tr->statetype[tpos] = STD;
+        tr->nodeidx[tpos]   = k--;
+        tr->pos[tpos]       = 0;
+      } else
+        Die("traceback failed");
       break;
 
     case STD:      /* D connects from M,D */
-      if (dmx[i][k+1] <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      else if (dmx[i][k+1] == mmx[i][k] + hmm->tsc[TMD][k])
-  {
-    tr->statetype[tpos] = STM;
-    tr->nodeidx[tpos]   = k--;
-    tr->pos[tpos]       = i--;
-  }
-      else if (dmx[i][k+1] == dmx[i][k] + hmm->tsc[TDD][k])
-  {
-    tr->statetype[tpos] = STD;
-    tr->nodeidx[tpos]   = k--;
-    tr->pos[tpos]       = 0;
-  }
-      else Die("traceback failed");
+      if (dmx[i][k+1] <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
+      } else if (dmx[i][k+1] == mmx[i][k] + hmm->tsc[TMD][k]) {
+        tr->statetype[tpos] = STM;
+        tr->nodeidx[tpos]   = k--;
+        tr->pos[tpos]       = i--;
+      } else if (dmx[i][k+1] == dmx[i][k] + hmm->tsc[TDD][k]) {
+        tr->statetype[tpos] = STD;
+        tr->nodeidx[tpos]   = k--;
+        tr->pos[tpos]       = 0;
+      } else Die("traceback failed");
       break;
 
     case STI:      /* I connects from M,I */
       sc = imx[i+1][k] - hmm->isc[dsq[i+1]][k];
-      if (sc <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      else if (sc == mmx[i][k] + hmm->tsc[TMI][k])
-  {
-    tr->statetype[tpos] = STM;
-    tr->nodeidx[tpos]   = k--;
-    tr->pos[tpos]       = i--;
-  }
-      else if (sc == imx[i][k] + hmm->tsc[TII][k])
-  {
-    tr->statetype[tpos] = STI;
-    tr->nodeidx[tpos]   = k;
-    tr->pos[tpos]       = i--;
-  }
-      else Die("traceback failed");
+      if (sc <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
+      } else if (sc == mmx[i][k] + hmm->tsc[TMI][k]) {
+        tr->statetype[tpos] = STM;
+        tr->nodeidx[tpos]   = k--;
+        tr->pos[tpos]       = i--;
+      } else if (sc == imx[i][k] + hmm->tsc[TII][k]) {
+        tr->statetype[tpos] = STI;
+        tr->nodeidx[tpos]   = k;
+        tr->pos[tpos]       = i--;
+      } else Die("traceback failed");
       break;
 
     case STN:      /* N connects from S, N */
-      if (i == 0 && xmx[i][XMN] == 0)
-  {
-    tr->statetype[tpos] = STS;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-  }
-      else if (i > 0 && xmx[i+1][XMN] == xmx[i][XMN] + hmm->xsc[XTN][LOOP])
-  {
-    tr->statetype[tpos] = STN;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;    /* note convention adherence:  */
-    tr->pos[tpos-1]     = i--;  /* first N doesn't emit        */
-  }
-      else Die("traceback failed");
+      if (i == 0 && xmx[i][XMN] == 0) {
+        tr->statetype[tpos] = STS;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;
+      } else if (i > 0 && xmx[i+1][XMN] == xmx[i][XMN] + hmm->xsc[XTN][LOOP]) {
+        tr->statetype[tpos] = STN;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;    /* note convention adherence:  */
+        tr->pos[tpos-1]     = i--;  /* first N doesn't emit        */
+      } else Die("traceback failed");
       break;
 
     case STB:      /* B connects from N, J */
-      if (xmx[i][XMB] <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      else if (xmx[i][XMB] == xmx[i][XMN] + hmm->xsc[XTN][MOVE])
-  {
-    tr->statetype[tpos] = STN;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-  }
-      else if (xmx[i][XMB] == xmx[i][XMJ] + hmm->xsc[XTJ][MOVE])
-  {
-    tr->statetype[tpos] = STJ;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;
-  }
+      if (xmx[i][XMB] <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
+      } else if (xmx[i][XMB] == xmx[i][XMN] + hmm->xsc[XTN][MOVE]) {
+        tr->statetype[tpos] = STN;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;
+      } else if (xmx[i][XMB] == xmx[i][XMJ] + hmm->xsc[XTJ][MOVE]) {
+        tr->statetype[tpos] = STJ;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;
+      }
 
       else Die("traceback failed");
       break;
 
     case STE:      /* E connects from any M state. k set here */
-      if (xmx[i][XME] <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      for (k = hmm->M; k >= 1; k--)
-  if (xmx[i][XME] == mmx[i][k] + hmm->esc[k])
-    {
-        /* check for wing unfolding */
-      if (Prob2Score(hmm->end[k], 1.) + 1*INTSCALE <=  hmm->esc[k])
-        {
-    int dk;    /* need a tmp k while moving thru delete wing */
-    for (dk = hmm->M; dk > k; dk--)
-      {
-        tr->statetype[tpos] = STD;
-        tr->nodeidx[tpos]   = dk;
-        tr->pos[tpos]       = 0;
-        tpos++;
-        if (tpos == curralloc)
-          {        /* grow trace if necessary  */
-      curralloc += N;
-      P7ReallocTrace(tr, curralloc);
-          }
+      if (xmx[i][XME] <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
       }
-        }
+      for (k = hmm->M; k >= 1; k--)
+        if (xmx[i][XME] == mmx[i][k] + hmm->esc[k]) {
+          /* check for wing unfolding */
+          if (Prob2Score(hmm->end[k], 1.) + 1*INTSCALE <=  hmm->esc[k]) {
+            int dk;    /* need a tmp k while moving thru delete wing */
+            for (dk = hmm->M; dk > k; dk--) {
+              tr->statetype[tpos] = STD;
+              tr->nodeidx[tpos]   = dk;
+              tr->pos[tpos]       = 0;
+              tpos++;
+              if (tpos == curralloc) {
+                /* grow trace if necessary  */
+                curralloc += N;
+                P7ReallocTrace(tr, curralloc);
+              }
+            }
+          }
 
-      tr->statetype[tpos] = STM;
-      tr->nodeidx[tpos]   = k--;
-      tr->pos[tpos]       = i--;
-      break;
-    }
+          tr->statetype[tpos] = STM;
+          tr->nodeidx[tpos]   = k--;
+          tr->pos[tpos]       = i--;
+          break;
+        }
       if (k < 0) Die("traceback failed");
       break;
 
     case STC:      /* C comes from C, E */
-      if (xmx[i][XMC] <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      else if (xmx[i][XMC] == xmx[i-1][XMC] + hmm->xsc[XTC][LOOP])
-  {
-    tr->statetype[tpos] = STC;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;    /* note convention adherence: */
-    tr->pos[tpos-1]     = i--;  /* first C doesn't emit       */
-  }
-      else if (xmx[i][XMC] == xmx[i][XME] + hmm->xsc[XTE][MOVE])
-  {
-    tr->statetype[tpos] = STE;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0; /* E is a nonemitter */
-  }
+      if (xmx[i][XMC] <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
+      } else if (xmx[i][XMC] == xmx[i-1][XMC] + hmm->xsc[XTC][LOOP]) {
+        tr->statetype[tpos] = STC;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;    /* note convention adherence: */
+        tr->pos[tpos-1]     = i--;  /* first C doesn't emit       */
+      } else if (xmx[i][XMC] == xmx[i][XME] + hmm->xsc[XTE][MOVE]) {
+        tr->statetype[tpos] = STE;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0; /* E is a nonemitter */
+      }
 
       else Die("Traceback failed.");
       break;
 
     case STJ:      /* J connects from E, J */
-      if (xmx[i][XMJ] <= -INFTY) { P7FreeTrace(tr); *ret_tr = NULL; return; }
-      else if (xmx[i][XMJ] == xmx[i-1][XMJ] + hmm->xsc[XTJ][LOOP])
-  {
-    tr->statetype[tpos] = STJ;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0;    /* note convention adherence: */
-    tr->pos[tpos-1]     = i--;  /* first J doesn't emit       */
-  }
-      else if (xmx[i][XMJ] == xmx[i][XME] + hmm->xsc[XTE][LOOP])
-  {
-    tr->statetype[tpos] = STE;
-    tr->nodeidx[tpos]   = 0;
-    tr->pos[tpos]       = 0; /* E is a nonemitter */
-  }
+      if (xmx[i][XMJ] <= -INFTY) {
+        P7FreeTrace(tr);
+        *ret_tr = NULL;
+        return;
+      } else if (xmx[i][XMJ] == xmx[i-1][XMJ] + hmm->xsc[XTJ][LOOP]) {
+        tr->statetype[tpos] = STJ;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;    /* note convention adherence: */
+        tr->pos[tpos-1]     = i--;  /* first J doesn't emit       */
+      } else if (xmx[i][XMJ] == xmx[i][XME] + hmm->xsc[XTE][LOOP]) {
+        tr->statetype[tpos] = STE;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0; /* E is a nonemitter */
+      }
 
       else Die("Traceback failed.");
       break;
@@ -917,11 +892,11 @@ P7ViterbiTrace(struct plan7_s *hmm, unsigned char *dsq, int N,
     } /* end switch over statetype[tpos-1] */
 
     tpos++;
-    if (tpos == curralloc)
-      {        /* grow trace if necessary  */
-  curralloc += N;
-  P7ReallocTrace(tr, curralloc);
-      }
+    if (tpos == curralloc) {
+      /* grow trace if necessary  */
+      curralloc += N;
+      P7ReallocTrace(tr, curralloc);
+    }
 
   } /* end traceback, at S state; tpos == tlen now */
   tr->tlen = tpos;
@@ -955,8 +930,7 @@ P7ViterbiTrace(struct plan7_s *hmm, unsigned char *dsq, int N,
  * Returns:  Score of optimal alignment in bits.
  */
 float
-P7SmallViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx, struct p7trace_s **ret_tr)
-{
+P7SmallViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s *mx, struct p7trace_s **ret_tr) {
   struct p7trace_s *ctr;        /* collapsed trace of optimal parse */
   struct p7trace_s *tr;         /* full trace of optimal alignment */
   struct p7trace_s **tarr;      /* trace array */
@@ -977,11 +951,10 @@ P7SmallViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s
 
   /* If we don't want full trace, we're done;
    * also, if parsing viterbi returned a NULL trace we're done. */
-  if (ctr == NULL || ret_tr == NULL)
-    {
-      P7FreeTrace(ctr);
-      return sc;
-    }
+  if (ctr == NULL || ret_tr == NULL) {
+    P7FreeTrace(ctr);
+    return sc;
+  }
 
   /* Step 2. Call either P7Viterbi or P7WeeViterbi on each subsequence
    *         to recover a full traceback of each, collecting them in
@@ -990,28 +963,28 @@ P7SmallViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s
   ndom = ctr->tlen/2 - 1;
   tarr = MallocOrDie(sizeof(struct p7trace_s *) * ndom);
   tlen = totlen = 0;
-  for (i = 0; i < ndom; i++){
+  for (i = 0; i < ndom; i++) {
     int   sqlen;      /* length of a subsequence */
     sqlen = ctr->pos[i*2+2] - ctr->pos[i*2+1];   /* length of subseq */
 
-    if (P7ViterbiSpaceOK(sqlen, hmm->M, mx)){
+    if (P7ViterbiSpaceOK(sqlen, hmm->M, mx)) {
       SQD_DPRINTF1(("      -- using P7Viterbi on an %dx%d subproblem\n",
-        hmm->M, sqlen));
+                    hmm->M, sqlen));
       P7Viterbi(dsq + ctr->pos[i*2+1], sqlen, hmm, mx, &(tarr[i]));
-    }else if (sqlen == 1){
+    } else if (sqlen == 1) {
       /* xref bug#h30. P7WeeViterbi() can't take L=1. This
        is a hack to work around the problem, which is rare.
        Attempts to use our main dp mx will violate our
        RAMLIMIT guarantee, so allocate a tiny linear one. */
       struct dpmatrix_s *tiny;
       SQD_DPRINTF1(("      -- using P7Viterbi on %dx%d subproblem that P7WeeV should get\n",
-        hmm->M, sqlen));
+                    hmm->M, sqlen));
       tiny = CreatePlan7Matrix(1, hmm->M, 0, 0);
       P7Viterbi(dsq + ctr->pos[i*2+1], sqlen, hmm, tiny, &(tarr[i]));
       FreePlan7Matrix(tiny);
-    }else{
+    } else {
       SQD_DPRINTF1(("      -- using P7WeeViterbi on an %dx%d subproblem\n",
-      hmm->M, sqlen));
+                    hmm->M, sqlen));
       P7WeeViterbi(dsq + ctr->pos[i*2+1], sqlen, hmm, &(tarr[i]));
     }
 
@@ -1044,55 +1017,51 @@ P7SmallViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s
   tr->nodeidx[1]   = 0;
   tr->pos[1]       = 0;
   tpos = 2;
-        /* add implied N's */
-  for (pos = 1; pos <= ctr->pos[1]; pos++)
-    {
-      tr->statetype[tpos] = STN;
-      tr->nodeidx[tpos]   = 0;
-      tr->pos[tpos]       = pos;
-      tpos++;
-    }
+  /* add implied N's */
+  for (pos = 1; pos <= ctr->pos[1]; pos++) {
+    tr->statetype[tpos] = STN;
+    tr->nodeidx[tpos]   = 0;
+    tr->pos[tpos]       = pos;
+    tpos++;
+  }
 
   /* Add each subseq trace in, with its appropriate
    * sequence offset derived from the collapsed trace
    */
-  for (i = 0; i < ndom; i++)
-    {        /* skip SN, CT framework at ends */
-      for (t2 = 2; t2 < tarr[i]->tlen-2; t2++)
-  {
-    tr->statetype[tpos] = tarr[i]->statetype[t2];
-    tr->nodeidx[tpos]   = tarr[i]->nodeidx[t2];
-    if (tarr[i]->pos[t2] > 0)
-      tr->pos[tpos]       = tarr[i]->pos[t2] + ctr->pos[i*2+1];
-    else
-      tr->pos[tpos]       = 0;
+  for (i = 0; i < ndom; i++) {
+    /* skip SN, CT framework at ends */
+    for (t2 = 2; t2 < tarr[i]->tlen-2; t2++) {
+      tr->statetype[tpos] = tarr[i]->statetype[t2];
+      tr->nodeidx[tpos]   = tarr[i]->nodeidx[t2];
+      if (tarr[i]->pos[t2] > 0)
+        tr->pos[tpos]       = tarr[i]->pos[t2] + ctr->pos[i*2+1];
+      else
+        tr->pos[tpos]       = 0;
+      tpos++;
+    }
+    /* add nonemitting J or C */
+    tr->statetype[tpos] = (i == ndom-1) ? STC : STJ;
+    tr->nodeidx[tpos]   = 0;
+    tr->pos[tpos]       = 0;
+    tpos++;
+    /* add implied emitting J's */
+    if (i != ndom-1)
+      for (pos = ctr->pos[i*2+2]+1; pos <= ctr->pos[(i+1)*2+1]; pos++) {
+        tr->statetype[tpos] = STJ;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = pos;
+        tpos++;
+      }
+  }
+
+  /* add implied C's */
+  for (pos = ctr->pos[ndom*2]+1; pos <= L; pos++) {
+    tr->statetype[tpos] = STC;
+    tr->nodeidx[tpos]   = 0;
+    tr->pos[tpos]       = pos;
     tpos++;
   }
-        /* add nonemitting J or C */
-      tr->statetype[tpos] = (i == ndom-1) ? STC : STJ;
-      tr->nodeidx[tpos]   = 0;
-      tr->pos[tpos]       = 0;
-      tpos++;
-        /* add implied emitting J's */
-      if (i != ndom-1)
-  for (pos = ctr->pos[i*2+2]+1; pos <= ctr->pos[(i+1)*2+1]; pos++)
-    {
-      tr->statetype[tpos] = STJ;
-      tr->nodeidx[tpos]   = 0;
-      tr->pos[tpos]       = pos;
-      tpos++;
-    }
-    }
-
-        /* add implied C's */
-  for (pos = ctr->pos[ndom*2]+1; pos <= L; pos++)
-    {
-      tr->statetype[tpos] = STC;
-      tr->nodeidx[tpos]   = 0;
-      tr->pos[tpos]       = pos;
-      tpos++;
-    }
-        /* add terminal T */
+  /* add terminal T */
   tr->statetype[tpos] = STT;
   tr->nodeidx[tpos]   = 0;
   tr->pos[tpos]       = 0;
@@ -1138,8 +1107,7 @@ P7SmallViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_s
  * Returns:  Score of the optimal Viterbi alignment, in bits.
  */
 float
-P7ParsingViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **ret_tr)
-{
+P7ParsingViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **ret_tr) {
   struct dpmatrix_s *mx;        /* two rows of score matrix */
   struct dpmatrix_s *tmx;       /* two rows of misused score matrix: traceback ptrs */
   struct p7trace_s  *tr;        /* RETURN: collapsed traceback */
@@ -1194,74 +1162,104 @@ P7ParsingViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_
     mmx[cur][0] = imx[cur][0] = dmx[cur][0] = -INFTY;
 
     for (k = 1; k <= hmm->M; k++) {
-        /* match state */
+      /* match state */
       mmx[cur][k] = -INFTY;
-      if ((sc = mmx[prv][k-1] + hmm->tsc[TMM][k-1]) > -INFTY)
-  { mmx[cur][k] = sc; mtr[cur][k] = mtr[prv][k-1]; }
-      if ((sc = imx[prv][k-1] + hmm->tsc[TIM][k-1]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtr[cur][k] = itr[prv][k-1]; }
-      if ((sc = xmx[prv][XMB] + hmm->bsc[k]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtr[cur][k] = i-1; }
-      if ((sc = dmx[prv][k-1] + hmm->tsc[TDM][k-1]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtr[cur][k] = dtr[prv][k-1]; }
+      if ((sc = mmx[prv][k-1] + hmm->tsc[TMM][k-1]) > -INFTY) {
+        mmx[cur][k] = sc;
+        mtr[cur][k] = mtr[prv][k-1];
+      }
+      if ((sc = imx[prv][k-1] + hmm->tsc[TIM][k-1]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtr[cur][k] = itr[prv][k-1];
+      }
+      if ((sc = xmx[prv][XMB] + hmm->bsc[k]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtr[cur][k] = i-1;
+      }
+      if ((sc = dmx[prv][k-1] + hmm->tsc[TDM][k-1]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtr[cur][k] = dtr[prv][k-1];
+      }
       if (hmm->msc[dsq[i]][k] != -INFTY)
-  mmx[cur][k] += hmm->msc[dsq[i]][k];
+        mmx[cur][k] += hmm->msc[dsq[i]][k];
       else
-  mmx[cur][k] = -INFTY;
+        mmx[cur][k] = -INFTY;
 
-        /* delete state */
+      /* delete state */
       dmx[cur][k] = -INFTY;
-      if ((sc = mmx[cur][k-1] + hmm->tsc[TMD][k-1]) > -INFTY)
-  { dmx[cur][k] = sc; dtr[cur][k] = mtr[cur][k-1]; }
-      if ((sc = dmx[cur][k-1] + hmm->tsc[TDD][k-1]) > dmx[cur][k])
-  { dmx[cur][k] = sc; dtr[cur][k] = dtr[cur][k-1]; }
+      if ((sc = mmx[cur][k-1] + hmm->tsc[TMD][k-1]) > -INFTY) {
+        dmx[cur][k] = sc;
+        dtr[cur][k] = mtr[cur][k-1];
+      }
+      if ((sc = dmx[cur][k-1] + hmm->tsc[TDD][k-1]) > dmx[cur][k]) {
+        dmx[cur][k] = sc;
+        dtr[cur][k] = dtr[cur][k-1];
+      }
 
-        /* insert state */
+      /* insert state */
       if (k < hmm->M) {
-  imx[cur][k] = -INFTY;
-  if ((sc = mmx[prv][k] + hmm->tsc[TMI][k]) > -INFTY)
-    { imx[cur][k] = sc; itr[cur][k] = mtr[prv][k]; }
-  if ((sc = imx[prv][k] + hmm->tsc[TII][k]) > imx[cur][k])
-    { imx[cur][k] = sc; itr[cur][k] = itr[prv][k]; }
-  if (hmm->isc[dsq[i]][k] != -INFTY)
-    imx[cur][k] += hmm->isc[dsq[i]][k];
-  else
-    imx[cur][k] = -INFTY;
+        imx[cur][k] = -INFTY;
+        if ((sc = mmx[prv][k] + hmm->tsc[TMI][k]) > -INFTY) {
+          imx[cur][k] = sc;
+          itr[cur][k] = mtr[prv][k];
+        }
+        if ((sc = imx[prv][k] + hmm->tsc[TII][k]) > imx[cur][k]) {
+          imx[cur][k] = sc;
+          itr[cur][k] = itr[prv][k];
+        }
+        if (hmm->isc[dsq[i]][k] != -INFTY)
+          imx[cur][k] += hmm->isc[dsq[i]][k];
+        else
+          imx[cur][k] = -INFTY;
       }
     }
 
     /* Now the special states. Order is important here.
      * remember, C and J emissions are zero score by definition,
      */
-        /* N state */
+    /* N state */
     xmx[cur][XMN] = -INFTY;
     if ((sc = xmx[prv][XMN] + hmm->xsc[XTN][LOOP]) > -INFTY)
       xmx[cur][XMN] = sc;
-        /* E state */
+    /* E state */
     xmx[cur][XME] = -INFTY;
     for (k = 1; k <= hmm->M; k++)
-      if ((sc =  mmx[cur][k] + hmm->esc[k]) > xmx[cur][XME])
-  { xmx[cur][XME] = sc; etr[i] = mtr[cur][k]; }
-        /* J state */
+      if ((sc =  mmx[cur][k] + hmm->esc[k]) > xmx[cur][XME]) {
+        xmx[cur][XME] = sc;
+        etr[i] = mtr[cur][k];
+      }
+    /* J state */
     xmx[cur][XMJ] = -INFTY;
-    if ((sc = xmx[prv][XMJ] + hmm->xsc[XTJ][LOOP]) > -INFTY)
-      { xmx[cur][XMJ] = sc; xtr[cur][XMJ] = xtr[prv][XMJ]; }
-    if ((sc = xmx[cur][XME]   + hmm->xsc[XTE][LOOP]) > xmx[cur][XMJ])
-      { xmx[cur][XMJ] = sc; xtr[cur][XMJ] = i; }
-        /* B state */
+    if ((sc = xmx[prv][XMJ] + hmm->xsc[XTJ][LOOP]) > -INFTY) {
+      xmx[cur][XMJ] = sc;
+      xtr[cur][XMJ] = xtr[prv][XMJ];
+    }
+    if ((sc = xmx[cur][XME]   + hmm->xsc[XTE][LOOP]) > xmx[cur][XMJ]) {
+      xmx[cur][XMJ] = sc;
+      xtr[cur][XMJ] = i;
+    }
+    /* B state */
     xmx[cur][XMB] = -INFTY;
-    if ((sc = xmx[cur][XMN] + hmm->xsc[XTN][MOVE]) > -INFTY)
-      { xmx[cur][XMB] = sc; btr[i] = 0; }
-    if ((sc = xmx[cur][XMJ] + hmm->xsc[XTJ][MOVE]) > xmx[cur][XMB])
-      { xmx[cur][XMB] = sc; btr[i] = xtr[cur][XMJ]; }
-        /* C state */
+    if ((sc = xmx[cur][XMN] + hmm->xsc[XTN][MOVE]) > -INFTY) {
+      xmx[cur][XMB] = sc;
+      btr[i] = 0;
+    }
+    if ((sc = xmx[cur][XMJ] + hmm->xsc[XTJ][MOVE]) > xmx[cur][XMB]) {
+      xmx[cur][XMB] = sc;
+      btr[i] = xtr[cur][XMJ];
+    }
+    /* C state */
     xmx[cur][XMC] = -INFTY;
-    if ((sc = xmx[prv][XMC] + hmm->xsc[XTC][LOOP]) > -INFTY)
-      { xmx[cur][XMC] = sc; xtr[cur][XMC] = xtr[prv][XMC]; }
-    if ((sc = xmx[cur][XME] + hmm->xsc[XTE][MOVE]) > xmx[cur][XMC])
-      { xmx[cur][XMC] = sc; xtr[cur][XMC] = i; }
+    if ((sc = xmx[prv][XMC] + hmm->xsc[XTC][LOOP]) > -INFTY) {
+      xmx[cur][XMC] = sc;
+      xtr[cur][XMC] = xtr[prv][XMC];
+    }
+    if ((sc = xmx[cur][XME] + hmm->xsc[XTE][MOVE]) > xmx[cur][XMC]) {
+      xmx[cur][XMC] = sc;
+      xtr[cur][XMC] = i;
+    }
   }
-        /* T state (not stored) */
+  /* T state (not stored) */
   sc = xmx[cur][XMC] + hmm->xsc[XTC][MOVE];
 
   /*****************************************************************
@@ -1281,21 +1279,20 @@ P7ParsingViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_
   tr->statetype[tpos] = STT;
   tr->pos[tpos]       = 0;
   i                   = xtr[L%2][XMC];
-  while (i > 0)
-    {
-      curralloc += 2;
-      P7ReallocTrace(tr, curralloc);
+  while (i > 0) {
+    curralloc += 2;
+    P7ReallocTrace(tr, curralloc);
 
-      tpos++;
-      tr->statetype[tpos] = STE;
-      tr->pos[tpos] = i;
-      i = etr[i];
+    tpos++;
+    tr->statetype[tpos] = STE;
+    tr->pos[tpos] = i;
+    i = etr[i];
 
-      tpos++;
-      tr->statetype[tpos] = STB;
-      tr->pos[tpos] = i;
-      i = btr[i];
-    }
+    tpos++;
+    tr->statetype[tpos] = STB;
+    tr->pos[tpos] = i;
+    i = btr[i];
+  }
 
   tpos++;
   tr->statetype[tpos] = STS;
@@ -1342,8 +1339,7 @@ P7ParsingViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_
  * Returns:  Score of the optimal Viterbi alignment.
  */
 float
-P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **ret_tr)
-{
+P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **ret_tr) {
   struct p7trace_s *tr;         /* RETURN: traceback */
   int          *kassign;        /* 0..L+1, alignment of seq positions to model nodes */
   char         *tassign;        /* 0..L+1, alignment of seq positions to state types */
@@ -1377,12 +1373,12 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
 
   /* Recursive divide-and-conquer alignment.
    */
-  while (lpos >= 0){
+  while (lpos >= 0) {
     //NOTE: k2, t2, and s2 are initialized by reference.
     int k1, k2, k3; /* start, middle, and end in model      */
     char t1, t2, t3;  /* start, middle, and end in state type */
     int s1, s2, s3;  /* start, middle, and end in sequence   */
-      /* Pop a segment off the stack */
+    /* Pop a segment off the stack */
     s1 = startlist[lpos];
     k1 = kassign[s1];
     t1 = tassign[s1];
@@ -1396,29 +1392,29 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
     sc = get_wee_midpt(hmm, dsq, L, k1, t1, s1, k3, t3, s3, &k2, &t2, &s2);
     kassign[s2] = k2;
     tassign[s2] = t2;
-                             /* score is valid on first pass */
+    /* score is valid on first pass */
     if (t1 == STS && t3 == STT) ret_sc = sc;
 
-      /* push N-terminal segment on stack */
-    if (t2 != STN && (s2 - s1 > 1 || (s2 - s1 == 1 && t1 == STS))){
+    /* push N-terminal segment on stack */
+    if (t2 != STN && (s2 - s1 > 1 || (s2 - s1 == 1 && t1 == STS))) {
       lpos++;
       startlist[lpos] = s1;
       endlist[lpos]   = s2;
     }
     /* push C-terminal segment on stack */
-    if (t2 != STC && (s3 - s2 > 1 || (s3 - s2 == 1 && t3 == STT))){
+    if (t2 != STC && (s3 - s2 > 1 || (s3 - s2 == 1 && t3 == STT))) {
       lpos++;
       startlist[lpos] = s2;
       endlist[lpos]   = s3;
     }
 
-    if (t2 == STN){ //if we see STN midpoint, we know the whole N-term is STN
+    if (t2 == STN) { //if we see STN midpoint, we know the whole N-term is STN
       for (; s2 >= s1; s2--) {
         kassign[s2] = 1;
         tassign[s2] = STN;
       }
     }
-    if (t2 == STC){ //if we see STC midpoint, we know whole C-term is STC
+    if (t2 == STC) { //if we see STC midpoint, we know whole C-term is STC
       for (; s2 <= s3; s2++) {
         kassign[s2] = hmm->M;
         tassign[s2] = STC;
@@ -1439,7 +1435,7 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
    *****************************************************************/
 
   tlen = L + 6;
-  for (i = 1; i < L; i++){
+  for (i = 1; i < L; i++) {
     if (tassign[i] == STM && tassign[i+1] == STM)
       tlen += kassign[i+1] - kassign[i] - 1;
     if (tassign[i] == STN && tassign[i+1] == STM)
@@ -1459,85 +1455,86 @@ P7WeeViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct p7trace_s **
   tr->pos[1]       = 0;
   tpos = 2;
 
-  for (i = 1; i <= L; i++){
+  for (i = 1; i <= L; i++) {
     switch(tassign[i]) {
-      case STM:
-        /* check for first match state */
-        if (tr->statetype[tpos-1] == STN) {
-          tr->statetype[tpos] = STB;
-          tr->nodeidx[tpos]   = 0;
-          tr->pos[tpos]       = 0;
-          tpos++;
-              /* check for wing unfolding */
-          if (Prob2Score(hmm->begin[kassign[i]], hmm->p1) + INTSCALE <= hmm->bsc[kassign[i]])
-            for (k = 1; k < kassign[i]; k++) {
-              tr->statetype[tpos] = STD;
-              tr->nodeidx[tpos]   = k;
-              tr->pos[tpos]       = 0;
-              tpos++;
-            }
-        }
-        /* do the match state itself */
-        tr->statetype[tpos] = STM;
-        tr->nodeidx[tpos]   = kassign[i];
-        tr->pos[tpos]       = i;
-        tpos++;
-          /* do any deletes necessary 'til next match */
-        if (i < L && tassign[i+1] == STM && kassign[i+1] - kassign[i] > 1)
-          for (k = kassign[i] + 1; k < kassign[i+1]; k++){
-              tr->statetype[tpos] = STD;
-              tr->nodeidx[tpos]   = k;
-              tr->pos[tpos]       = 0;
-              tpos++;
-            }
-        /* check for last match state */
-        if (i == L || tassign[i+1] == STC) {
-          /* check for wing unfolding */
-          if (Prob2Score(hmm->end[kassign[i-1]], 1.) + INTSCALE <=  hmm->esc[kassign[i-1]])
-            for (k = kassign[i]+1; k <= hmm->M; k++){
-              tr->statetype[tpos] = STD;
-              tr->nodeidx[tpos]   = k;
-              tr->pos[tpos]       = 0;
-              tpos++;
-              }
-              /* add on the end state */
-          tr->statetype[tpos] = STE;
-          tr->nodeidx[tpos]   = 0;
-          tr->pos[tpos]       = 0;
-          tpos++;
-              /* and a nonemitting C state */
-          tr->statetype[tpos] = STC;
-          tr->nodeidx[tpos]   = 0;
-          tr->pos[tpos]       = 0;
-          tpos++;
-        }
-        break;
-
-      case STI:
-        tr->statetype[tpos] = STI;
-        tr->nodeidx[tpos]   = kassign[i];
-        tr->pos[tpos]       = i;
-        tpos++;
-        break;
-
-      case STN:
-        tr->statetype[tpos] = STN;
+    case STM:
+      /* check for first match state */
+      if (tr->statetype[tpos-1] == STN) {
+        tr->statetype[tpos] = STB;
         tr->nodeidx[tpos]   = 0;
-        tr->pos[tpos]       = i;
+        tr->pos[tpos]       = 0;
         tpos++;
-        break;
-
-      case STC:
+        /* check for wing unfolding */
+        if (Prob2Score(hmm->begin[kassign[i]], hmm->p1) + INTSCALE <= hmm->bsc[kassign[i]])
+          for (k = 1; k < kassign[i]; k++) {
+            tr->statetype[tpos] = STD;
+            tr->nodeidx[tpos]   = k;
+            tr->pos[tpos]       = 0;
+            tpos++;
+          }
+      }
+      /* do the match state itself */
+      tr->statetype[tpos] = STM;
+      tr->nodeidx[tpos]   = kassign[i];
+      tr->pos[tpos]       = i;
+      tpos++;
+      /* do any deletes necessary 'til next match */
+      if (i < L && tassign[i+1] == STM && kassign[i+1] - kassign[i] > 1)
+        for (k = kassign[i] + 1; k < kassign[i+1]; k++) {
+          tr->statetype[tpos] = STD;
+          tr->nodeidx[tpos]   = k;
+          tr->pos[tpos]       = 0;
+          tpos++;
+        }
+      /* check for last match state */
+      if (i == L || tassign[i+1] == STC) {
+        /* check for wing unfolding */
+        if (Prob2Score(hmm->end[kassign[i-1]], 1.) + INTSCALE <=  hmm->esc[kassign[i-1]])
+          for (k = kassign[i]+1; k <= hmm->M; k++) {
+            tr->statetype[tpos] = STD;
+            tr->nodeidx[tpos]   = k;
+            tr->pos[tpos]       = 0;
+            tpos++;
+          }
+        /* add on the end state */
+        tr->statetype[tpos] = STE;
+        tr->nodeidx[tpos]   = 0;
+        tr->pos[tpos]       = 0;
+        tpos++;
+        /* and a nonemitting C state */
         tr->statetype[tpos] = STC;
         tr->nodeidx[tpos]   = 0;
-        tr->pos[tpos]       = i;
+        tr->pos[tpos]       = 0;
         tpos++;
-        break;
+      }
+      break;
 
-      default: Die("Bogus state %s", Statetype(tassign[i]));
+    case STI:
+      tr->statetype[tpos] = STI;
+      tr->nodeidx[tpos]   = kassign[i];
+      tr->pos[tpos]       = i;
+      tpos++;
+      break;
+
+    case STN:
+      tr->statetype[tpos] = STN;
+      tr->nodeidx[tpos]   = 0;
+      tr->pos[tpos]       = i;
+      tpos++;
+      break;
+
+    case STC:
+      tr->statetype[tpos] = STC;
+      tr->nodeidx[tpos]   = 0;
+      tr->pos[tpos]       = i;
+      tpos++;
+      break;
+
+    default:
+      Die("Bogus state %s", Statetype(tassign[i]));
     }
   }
-        /* terminate the trace */
+  /* terminate the trace */
   tr->statetype[tpos] = STT;
   tr->nodeidx[tpos]   = 0;
   tr->pos[tpos]       = 0;
@@ -1732,10 +1729,9 @@ Plan7ESTViterbi(unsigned char *dsq, int L, struct plan7_s *hmm, struct dpmatrix_
  */
 static float
 get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
-        int k1, char t1, int s1,
-        int k3, char t3, int s3,
-        int *ret_k2, char *ret_t2, int *ret_s2)
-{
+              int k1, char t1, int s1,
+              int k3, char t3, int s3,
+              int *ret_k2, char *ret_t2, int *ret_s2) {
   struct dpmatrix_s *fwd;
   struct dpmatrix_s *bck;
   int        **xmx;             /* convenience ptr into special states */
@@ -1781,12 +1777,23 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
    * (only possible to start on an emitting state; J disallowed)
    */
   switch (t1) {
-  case STM: mmx[cur][k1]  = 0; break;
-  case STI: imx[cur][k1]  = 0; break;
-  case STN: xmx[cur][XMN] = 0; break;
-  case STC: xmx[cur][XMC] = 0; break;
-  case STS: xmx[cur][XMN] = 0; break;
-  default:  Die("you can't init get_wee_midpt with a %s\n", Statetype(t1));
+  case STM:
+    mmx[cur][k1]  = 0;
+    break;
+  case STI:
+    imx[cur][k1]  = 0;
+    break;
+  case STN:
+    xmx[cur][XMN] = 0;
+    break;
+  case STC:
+    xmx[cur][XMC] = 0;
+    break;
+  case STS:
+    xmx[cur][XMN] = 0;
+    break;
+  default:
+    Die("you can't init get_wee_midpt with a %s\n", Statetype(t1));
   }
 
   /* Still initializing.
@@ -1800,8 +1807,8 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
    *    STS-> (N, already implied by setting xmx[cur][XMN] = 0)
    *    STB-> M
    */
-  if (t1 == STM){
-    for (k = k1+1; k <= k3; k++){ /* transits into STD */
+  if (t1 == STM) {
+    for (k = k1+1; k <= k3; k++) { /* transits into STD */
       dmx[cur][k] = -INFTY;
       if ((sc = mmx[cur][k-1] + hmm->tsc[TMD][k-1]) > -INFTY)
         dmx[cur][k] = sc;
@@ -1818,7 +1825,7 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
   xmx[cur][XMB] = -INFTY;
   if ((sc = xmx[cur][XMN] + hmm->xsc[XTN][MOVE]) > -INFTY)
     xmx[cur][XMB] = sc;
-        /* transit into STC from STE */
+  /* transit into STC from STE */
   xmx[cur][XMC] = -INFTY;
   if ((sc = xmx[cur][XME] + hmm->xsc[XTE][MOVE]) > -INFTY)
     xmx[cur][XMC] = sc;
@@ -1856,7 +1863,7 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
     /* Main chunk of recursion across model positions
      */
     for (k = k1+1; k <= k3; k++) {
-        /* match state */
+      /* match state */
       mmx[cur][k]  = -INFTY;
       if ((sc = mmx[prv][k-1] + hmm->tsc[TMM][k-1]) > -INFTY)
         mmx[cur][k] = sc;
@@ -1871,13 +1878,13 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
       else
         mmx[cur][k] = -INFTY;
 
-        /* delete state */
+      /* delete state */
       dmx[cur][k] = -INFTY;
       if (k < hmm->M) {
         if ((sc = mmx[cur][k-1] + hmm->tsc[TMD][k-1]) > -INFTY)
           dmx[cur][k] = sc;
         if ((sc = dmx[cur][k-1] + hmm->tsc[TDD][k-1]) > dmx[cur][k])
-        dmx[cur][k] = sc;
+          dmx[cur][k] = sc;
       }
 
       /* insert state */
@@ -1897,16 +1904,16 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
     xmx[cur][XMN] = -INFTY;
     if ((sc = xmx[prv][XMN] + hmm->xsc[XTN][LOOP]) > -INFTY)
       xmx[cur][XMN] = sc;
-        /* E state */
+    /* E state */
     xmx[cur][XME] = -INFTY;
     for (k = k1; k <= k3 && k <= hmm->M; k++)
       if ((sc =  mmx[cur][k] + hmm->esc[k]) > xmx[cur][XME])
         xmx[cur][XME] = sc;
-        /* B state */
+    /* B state */
     xmx[cur][XMB] = -INFTY;
     if ((sc = xmx[cur][XMN] + hmm->xsc[XTN][MOVE]) > -INFTY)
       xmx[cur][XMB] = sc;
-        /* C state */
+    /* C state */
     xmx[cur][XMC] = -INFTY;
     if ((sc = xmx[prv][XMC] + hmm->xsc[XTC][LOOP]) > -INFTY)
       xmx[cur][XMC] = sc;
@@ -1936,12 +1943,23 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
   /* Where to put the zero for our end point on last row.
    */
   switch (t3) {
-  case STM: mmx[nxt][k3]  = 0; break;
-  case STI: imx[nxt][k3]  = 0; break;
-  case STN: xmx[nxt][XMN] = 0; break;
-  case STC: xmx[nxt][XMC] = 0; break;   /* must be an emitting C */
-  case STT: xmx[nxt][XMC] = hmm->xsc[XTC][MOVE];  break; /* C->T implied */
-  default:  Die("you can't init get_wee_midpt with a %s\n", Statetype(t3));
+  case STM:
+    mmx[nxt][k3]  = 0;
+    break;
+  case STI:
+    imx[nxt][k3]  = 0;
+    break;
+  case STN:
+    xmx[nxt][XMN] = 0;
+    break;
+  case STC:
+    xmx[nxt][XMC] = 0;
+    break;   /* must be an emitting C */
+  case STT:
+    xmx[nxt][XMC] = hmm->xsc[XTC][MOVE];
+    break; /* C->T implied */
+  default:
+    Die("you can't init get_wee_midpt with a %s\n", Statetype(t3));
   }
 
   /* Still initializing.
@@ -1949,7 +1967,7 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
    * on row s3, because STT isn't an emitter. All other states are
    * emitters, so their connections have to be to the previous row s3-1.
    */
-  if (t3 == STT){ // E->C
+  if (t3 == STT) { // E->C
     xmx[nxt][XME] = xmx[nxt][XMC] + hmm->xsc[XTE][MOVE];
     // M->E
     for (k = k3; k >= k1; k--) {
@@ -1964,23 +1982,23 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
    * emission scores. Be careful of integer underflow.
    */
   for (i = s3-1; i >= s2; i--) {
-        /* note i < L, so i+1 is always a legal index */
+    /* note i < L, so i+1 is always a legal index */
     cur = i%2;
     nxt = !cur;
-        /* C pulls from C (T is special cased) */
+    /* C pulls from C (T is special cased) */
     xmx[cur][XMC] = -INFTY;
     if ((sc = xmx[nxt][XMC] + hmm->xsc[XTC][LOOP]) > -INFTY)
       xmx[cur][XMC] = sc;
-        /* B pulls from M's */
+    /* B pulls from M's */
     xmx[cur][XMB] = -INFTY;
     for (k = k1; k <= k3; k++)
       if ((sc = mmx[nxt][k] + hmm->bsc[k]) > xmx[cur][XMB])
         xmx[cur][XMB] = sc;
-        /* E pulls from C (J disallowed) */
+    /* E pulls from C (J disallowed) */
     xmx[cur][XME] = -INFTY;
     if ((sc = xmx[cur][XMC] + hmm->xsc[XTE][MOVE]) > -INFTY)
       xmx[cur][XME] = sc;
-        /* N pulls from B, N */
+    /* N pulls from B, N */
     xmx[cur][XMN] = -INFTY;
     if ((sc = xmx[cur][XMB] + hmm->xsc[XTN][MOVE]) > -INFTY)
       xmx[cur][XMN] = sc;
@@ -1990,7 +2008,7 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
     /* Main recursion across model
      */
     for (k = k3; k >= k1; k--)  {
-        /* special case k == M */
+      /* special case k == M */
       if (k == hmm->M) {
         mmx[cur][k] = xmx[cur][XME]; /* p=1 transition to E by definition */
         dmx[cur][k] = -INFTY;  /* doesn't exist */
@@ -2019,7 +2037,7 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
         dmx[cur][k] = sc;
       if ((sc = dmx[cur][k+1] + hmm->tsc[TDD][k]) > dmx[cur][k])
         dmx[cur][k] = sc;
-        /* pull into insert state */
+      /* pull into insert state */
       imx[cur][k] = -INFTY;
       if ((sc = mmx[nxt][k+1] + hmm->tsc[TIM][k]) > -INFTY)
         imx[cur][k] = sc;
@@ -2037,16 +2055,28 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
 
   cur = s2%2;
   max = -INFTY;
-  for (k = k1; k <= k3; k++){
-    if ((sc = fwd->mmx[cur][k] + bck->mmx[cur][k]) > max)
-      { k2 = k; t2 = STM; max = sc; }
-    if ((sc = fwd->imx[cur][k] + bck->imx[cur][k]) > max)
-      { k2 = k; t2 = STI; max = sc; }
+  for (k = k1; k <= k3; k++) {
+    if ((sc = fwd->mmx[cur][k] + bck->mmx[cur][k]) > max) {
+      k2 = k;
+      t2 = STM;
+      max = sc;
+    }
+    if ((sc = fwd->imx[cur][k] + bck->imx[cur][k]) > max) {
+      k2 = k;
+      t2 = STI;
+      max = sc;
+    }
   }
-  if ((sc = fwd->xmx[cur][XMN] + bck->xmx[cur][XMN]) > max)
-    { k2 = 1;        t2 = STN; max = sc; }
-  if ((sc = fwd->xmx[cur][XMC] + bck->xmx[cur][XMC]) > max)
-    { k2 = hmm->M;   t2 = STC; max = sc; }
+  if ((sc = fwd->xmx[cur][XMN] + bck->xmx[cur][XMN]) > max) {
+    k2 = 1;
+    t2 = STN;
+    max = sc;
+  }
+  if ((sc = fwd->xmx[cur][XMC] + bck->xmx[cur][XMC]) > max) {
+    k2 = hmm->M;
+    t2 = STC;
+    max = sc;
+  }
 
   /*****************************************************************
    * Garbage collection, return.
@@ -2097,8 +2127,7 @@ get_wee_midpt(struct plan7_s *hmm, unsigned char *dsq, int L,
  *           statetype[] contains metastates M*, etc. as STM, etc.
  */
 struct p7trace_s *
-P7ViterbiAlignAlignment(MSA *msa, struct plan7_s *hmm)
-{
+P7ViterbiAlignAlignment(MSA *msa, struct plan7_s *hmm) {
   struct dpmatrix_s *mx;        /* Viterbi calculation lattice (two rows) */
   struct dpshadow_s *tb;        /* shadow matrix of traceback pointers */
   struct p7trace_s  *tr;        /* RETURN: traceback */
@@ -2117,7 +2146,7 @@ P7ViterbiAlignAlignment(MSA *msa, struct plan7_s *hmm)
    * Gaps are not counted explicitly, but columns with lots of gaps get
    * less total weight because they have fewer counts.
    */
-        /* allocation */
+  /* allocation */
   con  = MallocOrDie(sizeof(float *) * (msa->alen+1));
   mocc = MallocOrDie(sizeof(float)   * (msa->alen+1));
   for (i = 1; i <= msa->alen; i++) {
@@ -2125,17 +2154,17 @@ P7ViterbiAlignAlignment(MSA *msa, struct plan7_s *hmm)
     FSet(con[i], Alphabet_size, 0.0);
   }
   mocc[0] = -9999.;
-        /* initialization */
-        /* note: aseq is off by one, 0..alen-1 */
-        /* "normalized" to have a max total count of 1 per col */
+  /* initialization */
+  /* note: aseq is off by one, 0..alen-1 */
+  /* "normalized" to have a max total count of 1 per col */
   denom = FSum(msa->wgt, msa->nseq);
-  for (i = 1; i <= msa->alen; i++){
+  for (i = 1; i <= msa->alen; i++) {
     for (idx = 0; idx < msa->nseq; idx++)
       if (! isgap(msa->aseq[idx][i-1]))
         P7CountSymbol(con[i], SYMIDX(msa->aseq[idx][i-1]), msa->wgt[idx]);
-        FScale(con[i], Alphabet_size, 1./denom);
-        mocc[i] = FSum(con[i], Alphabet_size);
-      }
+    FScale(con[i], Alphabet_size, 1./denom);
+    mocc[i] = FSum(con[i], Alphabet_size);
+  }
 
   /* Allocate a DP matrix with 2 rows, 0..M columns,
    * and a shadow matrix with 0,1..alen rows, 0..M columns.
@@ -2171,97 +2200,127 @@ P7ViterbiAlignAlignment(MSA *msa, struct plan7_s *hmm)
     mtb[i][0]   = itb[i][0]   = dtb[i][0]   = STBOGUS;
 
     for (k = 1; k <= hmm->M; k++) {
-        /* match state */
+      /* match state */
       mmx[cur][k]  = -INFTY;
       mtb[i][k]    = STBOGUS;
       if (mmx[prv][k-1] > -INFTY && hmm->tsc[TMM][k-1] > -INFTY &&
-    (sc = mmx[prv][k-1] + hmm->tsc[TMM][k-1]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtb[i][k] = STM; }
+          (sc = mmx[prv][k-1] + hmm->tsc[TMM][k-1]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtb[i][k] = STM;
+      }
       if (imx[prv][k-1] > -INFTY && hmm->tsc[TIM][k-1] > -INFTY &&
-    (sc = imx[prv][k-1] + hmm->tsc[TIM][k-1] * mocc[i-1]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtb[i][k] = STI; }
-      if ((sc = xmx[prv][XMB] + hmm->bsc[k]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtb[i][k] = STB; }
+          (sc = imx[prv][k-1] + hmm->tsc[TIM][k-1] * mocc[i-1]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtb[i][k] = STI;
+      }
+      if ((sc = xmx[prv][XMB] + hmm->bsc[k]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtb[i][k] = STB;
+      }
       if (dmx[prv][k-1] > -INFTY && hmm->tsc[TDM][k-1] > -INFTY &&
-    (sc = dmx[prv][k-1] + hmm->tsc[TDM][k-1]) > mmx[cur][k])
-  { mmx[cur][k] = sc; mtb[i][k] = STD; }
-        /* average over "consensus" sequence */
-      for (sym = 0; sym < Alphabet_size; sym++)
-  {
-    if (con[i][sym] > 0 && hmm->msc[sym][k] == -INFTY) { mmx[cur][k] = -INFTY; break; }
-    mmx[cur][k] += hmm->msc[sym][k] * con[i][sym];
-  }
+          (sc = dmx[prv][k-1] + hmm->tsc[TDM][k-1]) > mmx[cur][k]) {
+        mmx[cur][k] = sc;
+        mtb[i][k] = STD;
+      }
+      /* average over "consensus" sequence */
+      for (sym = 0; sym < Alphabet_size; sym++) {
+        if (con[i][sym] > 0 && hmm->msc[sym][k] == -INFTY) {
+          mmx[cur][k] = -INFTY;
+          break;
+        }
+        mmx[cur][k] += hmm->msc[sym][k] * con[i][sym];
+      }
 
-        /* delete state */
+      /* delete state */
       dmx[cur][k] = -INFTY;
       dtb[i][k]   = STBOGUS;
       if (mmx[cur][k-1] > -INFTY && hmm->tsc[TMD][k-1] > -INFTY &&
-    (sc = mmx[cur][k-1] + hmm->tsc[TMD][k-1]) > dmx[cur][k])
-  { dmx[cur][k] = sc; dtb[i][k] = STM; }
+          (sc = mmx[cur][k-1] + hmm->tsc[TMD][k-1]) > dmx[cur][k]) {
+        dmx[cur][k] = sc;
+        dtb[i][k] = STM;
+      }
       if (dmx[cur][k-1] > -INFTY && hmm->tsc[TDD][k-1] > -INFTY &&
-    (sc = dmx[cur][k-1] + hmm->tsc[TDD][k-1]) > dmx[cur][k])
-  { dmx[cur][k] = sc; dtb[i][k] = STD; }
+          (sc = dmx[cur][k-1] + hmm->tsc[TDD][k-1]) > dmx[cur][k]) {
+        dmx[cur][k] = sc;
+        dtb[i][k] = STD;
+      }
 
-        /* insert state */
+      /* insert state */
       if (k < hmm->M) {
-  imx[cur][k] = -INFTY;
-  itb[i][k]   = STBOGUS;
-  if (mmx[prv][k] > -INFTY && hmm->tsc[TMI][k] > -INFTY &&
-      (sc = mmx[prv][k] + hmm->tsc[TMI][k] * mocc[i]) > imx[cur][k])
-    { imx[cur][k] = sc; itb[i][k] = STM; }
-  if (imx[prv][k] > -INFTY && hmm->tsc[TII][k] > -INFTY &&
-      (sc = imx[prv][k] + hmm->tsc[TII][k] * mocc[i-1] * mocc[i]) > imx[cur][k])
-    { imx[cur][k] = sc; itb[i][k] = STI; }
+        imx[cur][k] = -INFTY;
+        itb[i][k]   = STBOGUS;
+        if (mmx[prv][k] > -INFTY && hmm->tsc[TMI][k] > -INFTY &&
+            (sc = mmx[prv][k] + hmm->tsc[TMI][k] * mocc[i]) > imx[cur][k]) {
+          imx[cur][k] = sc;
+          itb[i][k] = STM;
+        }
+        if (imx[prv][k] > -INFTY && hmm->tsc[TII][k] > -INFTY &&
+            (sc = imx[prv][k] + hmm->tsc[TII][k] * mocc[i-1] * mocc[i]) > imx[cur][k]) {
+          imx[cur][k] = sc;
+          itb[i][k] = STI;
+        }
         /* average over "consensus" sequence */
-  for (sym = 0; sym < Alphabet_size; sym++)
-    {
-      if (con[i][sym] > 0 && hmm->isc[sym][k] == -INFTY) { imx[cur][k] = -INFTY; break; }
-      imx[cur][k] += hmm->isc[sym][k] * con[i][sym];
-    }
+        for (sym = 0; sym < Alphabet_size; sym++) {
+          if (con[i][sym] > 0 && hmm->isc[sym][k] == -INFTY) {
+            imx[cur][k] = -INFTY;
+            break;
+          }
+          imx[cur][k] += hmm->isc[sym][k] * con[i][sym];
+        }
       }
     }
 
     /* Now the special states. Order is important here.
      * remember, N, C, and J emissions are zero score by definition.
      */
-        /* N state */
+    /* N state */
     xmx[cur][XMN] = -INFTY;
     xtb[i][XMN]   = STBOGUS;
     if (xmx[prv][XMN] > -INFTY && hmm->xsc[XTN][LOOP] > -INFTY &&
-  (sc = xmx[prv][XMN] + hmm->xsc[XTN][LOOP] * mocc[i]) > -INFTY)
-      { xmx[cur][XMN] = sc; xtb[i][XMN] = STN; }
-        /* E state */
+        (sc = xmx[prv][XMN] + hmm->xsc[XTN][LOOP] * mocc[i]) > -INFTY) {
+      xmx[cur][XMN] = sc;
+      xtb[i][XMN] = STN;
+    }
+    /* E state */
     xmx[cur][XME] = -INFTY;
     xtb[i][XME]   = STBOGUS;
     for (k = 1; k <= hmm->M; k++)
       if (mmx[cur][k] > -INFTY && hmm->esc[k] > -INFTY &&
-    (sc =  mmx[cur][k] + hmm->esc[k]) > xmx[cur][XME])
-  { xmx[cur][XME] = sc; tb->esrc[i] = k; }
+          (sc =  mmx[cur][k] + hmm->esc[k]) > xmx[cur][XME]) {
+        xmx[cur][XME] = sc;
+        tb->esrc[i] = k;
+      }
 
-        /* we don't check J state */
-        /* B state; don't connect from J */
+    /* we don't check J state */
+    /* B state; don't connect from J */
     xmx[cur][XMB] = -INFTY;
     xtb[i][XMB]   = STBOGUS;
     if (xmx[cur][XMN] > -INFTY && hmm->xsc[XTN][MOVE] > -INFTY &&
-  (sc = xmx[cur][XMN] + hmm->xsc[XTN][MOVE]) > xmx[cur][XMB])
-      { xmx[cur][XMB] = sc; xtb[i][XMB] = STN; }
+        (sc = xmx[cur][XMN] + hmm->xsc[XTN][MOVE]) > xmx[cur][XMB]) {
+      xmx[cur][XMB] = sc;
+      xtb[i][XMB] = STN;
+    }
 
-        /* C state */
+    /* C state */
     xmx[cur][XMC] = -INFTY;
     xtb[i][XMC]   = STBOGUS;
     if (xmx[prv][XMC] > -INFTY && hmm->xsc[XTC][LOOP] > -INFTY &&
-  (sc = xmx[prv][XMC] + hmm->xsc[XTC][LOOP] * mocc[i]) > -INFTY)
-      { xmx[cur][XMC] = sc; xtb[i][XMC] = STC; }
+        (sc = xmx[prv][XMC] + hmm->xsc[XTC][LOOP] * mocc[i]) > -INFTY) {
+      xmx[cur][XMC] = sc;
+      xtb[i][XMC] = STC;
+    }
     if (xmx[cur][XME] > -INFTY && hmm->xsc[XTE][MOVE] > -INFTY &&
-  (sc = xmx[cur][XME] + hmm->xsc[XTE][MOVE]) > xmx[cur][XMC])
-      { xmx[cur][XMC] = sc; xtb[i][XMC] = STE; }
+        (sc = xmx[cur][XME] + hmm->xsc[XTE][MOVE]) > xmx[cur][XMC]) {
+      xmx[cur][XMC] = sc;
+      xtb[i][XMC] = STE;
+    }
   }
-        /* T state (not stored in mx) */
+  /* T state (not stored in mx) */
   sc = xmx[msa->alen%2][XMC] + hmm->xsc[XTC][MOVE];
 
-        /* do the traceback */
+  /* do the traceback */
   tr = ShadowTrace(tb, hmm, msa->alen);
-        /* cleanup and return */
+  /* cleanup and return */
   FreePlan7Matrix(mx);
   FreeShadowMatrix(tb);
   for (i = 1; i <= msa->alen; i++)
@@ -2287,8 +2346,7 @@ P7ViterbiAlignAlignment(MSA *msa, struct plan7_s *hmm)
  * Returns:  traceback. Caller must free w/ P7FreeTrace().
  */
 struct p7trace_s *
-ShadowTrace(struct dpshadow_s *tb, struct plan7_s *hmm, int L)
-{
+ShadowTrace(struct dpshadow_s *tb, struct plan7_s *hmm, int L) {
   struct p7trace_s *tr;
   int curralloc;    /* current allocated length of trace */
   int tpos;      /* position in trace */
@@ -2351,20 +2409,19 @@ ShadowTrace(struct dpshadow_s *tb, struct plan7_s *hmm, int L)
       break;
 
     case STB:
-        /* Check for wing unfolding */
+      /* Check for wing unfolding */
       if (Prob2Score(hmm->begin[k+1], hmm->p1) + 1 * INTSCALE <= hmm->bsc[k+1])
-  while (k > 0)
-    {
-      tr->statetype[tpos] = STD;
-      tr->nodeidx[tpos]   = k--;
-      tr->pos[tpos]       = 0;
-      tpos++;
-      if (tpos == curralloc)
-        {        /* grow trace if necessary  */
-    curralloc += L;
-    P7ReallocTrace(tr, curralloc);
+        while (k > 0) {
+          tr->statetype[tpos] = STD;
+          tr->nodeidx[tpos]   = k--;
+          tr->pos[tpos]       = 0;
+          tpos++;
+          if (tpos == curralloc) {
+            /* grow trace if necessary  */
+            curralloc += L;
+            P7ReallocTrace(tr, curralloc);
+          }
         }
-    }
 
       tr->statetype[tpos] = STB;
       nxtstate            = tb->xtb[i][XMB];
@@ -2388,23 +2445,21 @@ ShadowTrace(struct dpshadow_s *tb, struct plan7_s *hmm, int L)
       k                   = tb->esrc[i];
       nxtstate            = STM;
       tpos++;
-        /* check for wing unfolding */
-      if (Prob2Score(hmm->end[k], 1.) + 1*INTSCALE <=  hmm->esc[k])
-  {
-    int dk;    /* need a tmp k while moving thru delete wing */
-    for (dk = hmm->M; dk > k; dk--)
-      {
-        tr->statetype[tpos] = STD;
-        tr->nodeidx[tpos]   = dk;
-        tr->pos[tpos]       = 0;
-        tpos++;
-        if (tpos == curralloc)
-    {        /* grow trace if necessary  */
-      curralloc += L;
-      P7ReallocTrace(tr, curralloc);
-    }
+      /* check for wing unfolding */
+      if (Prob2Score(hmm->end[k], 1.) + 1*INTSCALE <=  hmm->esc[k]) {
+        int dk;    /* need a tmp k while moving thru delete wing */
+        for (dk = hmm->M; dk > k; dk--) {
+          tr->statetype[tpos] = STD;
+          tr->nodeidx[tpos]   = dk;
+          tr->pos[tpos]       = 0;
+          tpos++;
+          if (tpos == curralloc) {
+            /* grow trace if necessary  */
+            curralloc += L;
+            P7ReallocTrace(tr, curralloc);
+          }
+        }
       }
-  }
       break;
 
     case STC:
@@ -2420,11 +2475,11 @@ ShadowTrace(struct dpshadow_s *tb, struct plan7_s *hmm, int L)
 
     } /* end switch over nxtstate */
 
-    if (tpos == curralloc)
-      {        /* grow trace if necessary  */
-  curralloc += L;
-  P7ReallocTrace(tr, curralloc);
-      }
+    if (tpos == curralloc) {
+      /* grow trace if necessary  */
+      curralloc += L;
+      P7ReallocTrace(tr, curralloc);
+    }
 
   } /* end traceback, just before assigning S state */
 
@@ -2511,20 +2566,19 @@ ShadowTrace(struct dpshadow_s *tb, struct plan7_s *hmm, int L)
  */
 float
 PostprocessSignificantHit(struct tophit_s    *ghit,
-        struct tophit_s    *dhit,
-        struct p7trace_s   *tr,
-        struct plan7_s     *hmm,
-        unsigned char      *dsq,
-        int                 L,
-        char               *seqname,
-        char               *seqacc,
-        char               *seqdesc,
-        int                 do_forward,
-        float               sc_override,
-        int                 do_null2,
-        struct threshold_s *thresh,
-        int                 hmmpfam_mode)
-{
+                          struct tophit_s    *dhit,
+                          struct p7trace_s   *tr,
+                          struct plan7_s     *hmm,
+                          unsigned char      *dsq,
+                          int                 L,
+                          char               *seqname,
+                          char               *seqacc,
+                          char               *seqdesc,
+                          int                 do_forward,
+                          float               sc_override,
+                          int                 do_null2,
+                          struct threshold_s *thresh,
+                          int                 hmmpfam_mode) {
   struct p7trace_s **tarr;      /* array of per-domain traces */
   struct fancyali_s *ali;       /* alignment of a domain      */
   int ntr;      /* number of domain traces from Viterbi */
@@ -2558,17 +2612,16 @@ PostprocessSignificantHit(struct tophit_s    *ghit,
   usedomain = MallocOrDie(sizeof(int)   * ntr);
   ndom      = 0;
   whole_sc  = 0.;
-  for (tidx = 0; tidx < ntr; tidx++)
-    {
-      score[tidx]  = P7TraceScore(hmm, dsq, tarr[tidx]);
-      if (do_null2) score[tidx] -= TraceScoreCorrection(hmm, tarr[tidx], dsq);
-      if (score[tidx] > 0.0) {
-  usedomain[tidx] = TRUE;
-  ndom++;
-  whole_sc += score[tidx];
-      } else
-  usedomain[tidx] = FALSE;
-    }
+  for (tidx = 0; tidx < ntr; tidx++) {
+    score[tidx]  = P7TraceScore(hmm, dsq, tarr[tidx]);
+    if (do_null2) score[tidx] -= TraceScoreCorrection(hmm, tarr[tidx], dsq);
+    if (score[tidx] > 0.0) {
+      usedomain[tidx] = TRUE;
+      ndom++;
+      whole_sc += score[tidx];
+    } else
+      usedomain[tidx] = FALSE;
+  }
 
   /* Make sure at least one positive scoring domain is in
    * the trace. If not, invoke "weak single domain" rules:
@@ -2603,19 +2656,19 @@ PostprocessSignificantHit(struct tophit_s    *ghit,
       ali     = CreateFancyAli(tarr[tidx], hmm, dsq, seqname);
 
       if (hmmpfam_mode)
-  sortkey = -1.*(double)i1; /* hmmpfam: sort on position in seq    */
+        sortkey = -1.*(double)i1; /* hmmpfam: sort on position in seq    */
       else
-  sortkey = score[tidx];    /* hmmsearch: sort on E (monotonic w/ sc) */
+        sortkey = score[tidx];    /* hmmsearch: sort on E (monotonic w/ sc) */
 
       RegisterHit(dhit, sortkey,
-      pvalue,     score[tidx],
-      whole_pval, whole_sc,
-      hmmpfam_mode ? hmm->name : seqname,
-      hmmpfam_mode ? hmm->acc  : seqacc,
-      hmmpfam_mode ? hmm->desc : seqdesc,
-      i1,i2, L,
-      k1,k2, hmm->M,
-      didx,ndom,ali);
+                  pvalue,     score[tidx],
+                  whole_pval, whole_sc,
+                  hmmpfam_mode ? hmm->name : seqname,
+                  hmmpfam_mode ? hmm->acc  : seqacc,
+                  hmmpfam_mode ? hmm->desc : seqdesc,
+                  i1,i2, L,
+                  k1,k2, hmm->M,
+                  didx,ndom,ali);
     }
     didx++;
   }
@@ -2652,15 +2705,15 @@ PostprocessSignificantHit(struct tophit_s    *ghit,
    */
   if (whole_sc >= thresh->globT) {
     RegisterHit(ghit, sortkey,
-    whole_pval, whole_sc,
-    0., 0.,                    /* no mother seq */
-    hmmpfam_mode ? hmm->name : seqname,
-    hmmpfam_mode ? hmm->acc  : seqacc,
-    hmmpfam_mode ? hmm->desc : seqdesc,
-    0,0,0,                    /* seq positions  */
-    0,0,0,                    /* HMM positions  */
-    0, ndom,            /* # domains info    */
-    NULL);                    /* alignment info */
+                whole_pval, whole_sc,
+                0., 0.,                    /* no mother seq */
+                hmmpfam_mode ? hmm->name : seqname,
+                hmmpfam_mode ? hmm->acc  : seqacc,
+                hmmpfam_mode ? hmm->desc : seqdesc,
+                0,0,0,                    /* seq positions  */
+                0,0,0,                    /* HMM positions  */
+                0, ndom,            /* # domains info    */
+                NULL);                    /* alignment info */
   }
 
   /* Clean up and return.

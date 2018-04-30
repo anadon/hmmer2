@@ -1,5 +1,5 @@
 /* sre_random.c
- * 
+ *
  * Portable random number generator, and sampling routines.
  *
  * SRE, Tue Oct  1 15:24:11 2002 [St. Louis]
@@ -13,29 +13,29 @@
 #include <math.h>
 #include "sre_random.h"
 
-static int sre_randseed = 42;	/* default seed for sre_random()   */
+static int sre_randseed = 42; /* default seed for sre_random()   */
 
 /* Function: sre_random()
- * 
+ *
  * Purpose:  Return a uniform deviate x, 0.0 <= x < 1.0.
- * 
+ *
  *           sre_randseed is a static variable, set
- *           by sre_srandom(). When it is non-zero, 
+ *           by sre_srandom(). When it is non-zero,
  *           we re-seed.
- *           
+ *
  *           Implements L'Ecuyer's algorithm for combining output
  *           of two linear congruential generators, plus a Bays-Durham
  *           shuffle. This is essentially ran2() from Numerical Recipes,
  *           sans their nonhelpful Rand/McNally-esque code obfuscation.
- *           
+ *
  *           Overflow errors are avoided by Schrage's algorithm:
  *               az % m = a(z%q) - r(z/q) (+m if <0)
  *           where q=m/a, r=m%a
  *
  *           Requires that long int's have at least 32 bits.
  *           This function uses statics and is NOT THREADSAFE.
- *           
- * Reference: Press et al. Numerical Recipes in C, 1992. 
+ *
+ * Reference: Press et al. Numerical Recipes in C, 1992.
  *
  * Reliable and portable, but slow. Benchmarks on wrasse,
  * using Linux gcc and Linux glibc rand() (see randspeed, in Testsuite):
@@ -43,20 +43,19 @@ static int sre_randseed = 42;	/* default seed for sre_random()   */
  *     rand():          0.2 usec/call
  */
 double
-sre_random(void)
-{
-  static long  rnd1;		/* random number from LCG1 */
+sre_random(void) {
+  static long  rnd1;    /* random number from LCG1 */
   static long  rnd2;            /* random number from LCG2 */
   static long  rnd;             /* random number we return */
-  static long  tbl[64];		/* table for Bays/Durham shuffle */
+  static long  tbl[64];   /* table for Bays/Durham shuffle */
   long x,y;
   int i;
 
   /* Magic numbers a1,m1, a2,m2 from L'Ecuyer, for 2 LCGs.
    * q,r derive from them (q=m/a, r=m%a) and are needed for Schrage's algorithm.
    */
-  long a1 = 40014;		
-  long m1 = 2147483563;		
+  long a1 = 40014;
+  long m1 = 2147483563;
   long q1 = 53668;
   long r1 = 12211;
 
@@ -65,27 +64,26 @@ sre_random(void)
   long q2 = 52774;
   long r2 = 3791;
 
-  if (sre_randseed > 0) 
-    {
-      rnd1 = sre_randseed;
-      rnd2 = sre_randseed;
-				/* Fill the table for Bays/Durham */
-      for (i = 0; i < 64; i++) {
-	x    = a1*(rnd1%q1);   /* LCG1 in action... */
-	y    = r1*(rnd1/q1);
-	rnd1 = x-y;
-	if (rnd1 < 0) rnd1 += m1;
+  if (sre_randseed > 0) {
+    rnd1 = sre_randseed;
+    rnd2 = sre_randseed;
+    /* Fill the table for Bays/Durham */
+    for (i = 0; i < 64; i++) {
+      x    = a1*(rnd1%q1);   /* LCG1 in action... */
+      y    = r1*(rnd1/q1);
+      rnd1 = x-y;
+      if (rnd1 < 0) rnd1 += m1;
 
-	x    = a2*(rnd2%q2);   /* LCG2 in action... */
-	y    = r2*(rnd2/q2);
-	rnd2 = x-y;
-	if (rnd2 < 0) rnd2 += m2;
+      x    = a2*(rnd2%q2);   /* LCG2 in action... */
+      y    = r2*(rnd2/q2);
+      rnd2 = x-y;
+      if (rnd2 < 0) rnd2 += m2;
 
-	tbl[i] = rnd1-rnd2;
-	if (tbl[i] < 0) tbl[i] += m1;
-      }
-      sre_randseed = 0;		/* drop the flag. */
-    }/* end of initialization*/
+      tbl[i] = rnd1-rnd2;
+      if (tbl[i] < 0) tbl[i] += m1;
+    }
+    sre_randseed = 0;   /* drop the flag. */
+  }/* end of initialization*/
 
 
   x    = a1*(rnd1%q1);   /* LCG1 in action... */
@@ -98,24 +96,23 @@ sre_random(void)
   rnd2 = x-y;
   if (rnd2 < 0) rnd2 += m2;
 
-   			/* Choose our random number from the table... */
+  /* Choose our random number from the table... */
   i   = (int) (((double) rnd / (double) m1) * 64.);
   rnd = tbl[i];
-			/* and replace with a new number by L'Ecuyer. */
+  /* and replace with a new number by L'Ecuyer. */
   tbl[i] = rnd1-rnd2;
   if (tbl[i] < 0) tbl[i] += m1;
 
-  return ((double) rnd / (double) m1);  
+  return ((double) rnd / (double) m1);
 }
 
 /* Function: sre_srandom()
- * 
+ *
  * Purpose:  Initialize with a random seed. Seed must be
  *           >= 0 to work; we silently enforce this.
  */
 void
-sre_srandom(int seed)
-{
+sre_srandom(int seed) {
   int burnin = 7;
 
   if (seed < 0)  seed = -1 * seed;
@@ -136,10 +133,11 @@ sre_srandom(int seed)
  * Purpose:  Assure 0 < x < 1 (positive uniform deviate)
  */
 double
-sre_random_positive(void)
-{
+sre_random_positive(void) {
   double x;
-  do { x = sre_random(); } while (x == 0.0);
+  do {
+    x = sre_random();
+  } while (x == 0.0);
   return x;
 }
 
@@ -148,36 +146,34 @@ sre_random_positive(void)
  *
  * Purpose:  Pick an exponentially distributed random variable
  *           0 > x >= infinity
- *           
+ *
  * Args:     (void)
  *
  * Returns:  x
  */
 double
-ExponentialRandom(void)
-{
+ExponentialRandom(void) {
   return -log(sre_random_positive());
-}    
+}
 
 /* Function: Gaussrandom()
- * 
+ *
  * Pick a Gaussian-distributed random variable
  * with some mean and standard deviation, and
  * return it.
- * 
+ *
  * Based on RANLIB.c public domain implementation.
  * Thanks to the authors, Barry W. Brown and James Lovato,
  * University of Texas, M.D. Anderson Cancer Center, Houston TX.
- * Their implementation is from Ahrens and Dieter, "Extensions 
+ * Their implementation is from Ahrens and Dieter, "Extensions
  * of Forsythe's method for random sampling from the normal
  * distribution", Math. Comput. 27:927-937 (1973).
  *
  * Impenetrability of the code is to be blamed on its FORTRAN/f2c lineage.
- * 
+ *
  */
 double
-Gaussrandom(double mean, double stddev)
-{
+Gaussrandom(double mean, double stddev) {
   static double a[32] = {
     0.0,3.917609E-2,7.841241E-2,0.11777,0.1573107,0.1970991,0.2372021,0.2776904,    0.3186394,0.36013,0.4022501,0.4450965,0.4887764,0.5334097,0.5791322,
     0.626099,0.6744898,0.7245144,0.7764218,0.8305109,0.8871466,0.9467818,
@@ -277,49 +273,47 @@ S160:
   goto S140;
 }
 
-  
+
 /* Functions: DChoose(), FChoose()
  *
  * Purpose:   Make a random choice from a normalized distribution.
  *            DChoose() is for double-precision vectors;
  *            FChoose() is for single-precision float vectors.
  *            Returns the number of the choice.
- *            
- * Limitation: 
+ *
+ * Limitation:
  *            All p's must be >> FLT_EPSILON/DBL_EPSILON.
  */
 int
-DChoose(double *p, int N)
-{
+DChoose(double *p, int N) {
   double roll;                  /* random fraction */
   double sum;                   /* integrated prob */
   int    i;                     /* counter over the probs */
 
   roll    = sre_random();
   sum     = 0.0;
-  for (i = 0; i < N; i++)
-    {
-      sum += p[i];
-      if (roll < sum) return i;
-    }
+  for (i = 0; i < N; i++) {
+    sum += p[i];
+    if (roll < sum) return i;
+  }
   /* See comment on this next line in FChoose() */
-  do { i = (int) (sre_random() * N); } while (p[i] == 0.);
+  do {
+    i = (int) (sre_random() * N);
+  } while (p[i] == 0.);
   return i;
 }
 int
-FChoose(float *p, int N)
-{
+FChoose(float *p, int N) {
   float roll;                   /* random fraction */
-  float sum;			/* integrated prob */
+  float sum;      /* integrated prob */
   int   i;                      /* counter over the probs */
 
   roll    = sre_random();
   sum     = 0.0;
-  for (i = 0; i < N; i++)
-    {
-      sum += p[i];
-      if (roll < sum) return i;
-    }
+  for (i = 0; i < N; i++) {
+    sum += p[i];
+    if (roll < sum) return i;
+  }
 
   /* Very rarely, because of machine floating point representation,
    * our roll is "impossibly" >= total sum, even though any roll of
@@ -331,9 +325,11 @@ FChoose(float *p, int N)
    * of about 1/10^8, as measured for bug #sq5. To work around, choose
    * one of the *nonzero* p[i]'s at random.  (If you chooose *any*
    * p[i] you get bug #sq5; routines like StrMarkov0() fail because
-   * they choose impossible residues.)  
+   * they choose impossible residues.)
    */
-  do { i = (int) (sre_random() * N); } while (p[i] == 0.);
+  do {
+    i = (int) (sre_random() * N);
+  } while (p[i] == 0.);
   return i;
 }
 
@@ -343,21 +339,20 @@ FChoose(float *p, int N)
  *   c is K-dimensional and allocated by the caller.
  */
 void
-SampleCountvector(double *p, int K, int ctot, double *c)
-{
+SampleCountvector(double *p, int K, int ctot, double *c) {
   int i;
   for (i = 0; i < K; i++) c[i] = 0.;
   for (i = 0; i < ctot; i++)
     c[DChoose(p,K)] += 1.;
 }
 
-  
 
-/*****************************************************************  
+
+/*****************************************************************
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.

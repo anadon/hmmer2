@@ -35,20 +35,30 @@
  * Example:  Statetype(S) = "S"
  */
 char *
-Statetype(char st)
-{
+Statetype(char st) {
   switch (st) {
-  case STS: return "S";
-  case STN: return "N";
-  case STB: return "B";
-  case STM: return "M";
-  case STD: return "D";
-  case STI: return "I";
-  case STE: return "E";
-  case STJ: return "J";
-  case STC: return "C";
-  case STT: return "T";
-  default: return "BOGUS";
+  case STS:
+    return "S";
+  case STN:
+    return "N";
+  case STB:
+    return "B";
+  case STM:
+    return "M";
+  case STD:
+    return "D";
+  case STI:
+    return "I";
+  case STE:
+    return "E";
+  case STJ:
+    return "J";
+  case STC:
+    return "C";
+  case STT:
+    return "T";
+  default:
+    return "BOGUS";
   }
 }
 
@@ -64,13 +74,16 @@ Statetype(char st)
  * Returns:  char *
  */
 char *
-AlphabetType2String(int type)
-{
+AlphabetType2String(int type) {
   switch (type) {
-  case hmmAMINO:     return "protein";
-  case hmmNUCLEIC:   return "nucleic acid";
-  case hmmNOTSETYET: return "unknown";
-  default:           return "BOGUS";
+  case hmmAMINO:
+    return "protein";
+  case hmmNUCLEIC:
+    return "nucleic acid";
+  case hmmNOTSETYET:
+    return "unknown";
+  default:
+    return "BOGUS";
   }
 }
 
@@ -86,8 +99,7 @@ AlphabetType2String(int type)
  *           dsq - NULL or digitized sequence trace refers to.
  */
 void
-P7PrintTrace(FILE *fp, struct p7trace_s *tr, struct plan7_s *hmm, unsigned char *dsq)
-{
+P7PrintTrace(FILE *fp, struct p7trace_s *tr, struct plan7_s *hmm, unsigned char *dsq) {
   int          tpos;    /* counter for trace position */
 
   if (tr == NULL) {
@@ -100,9 +112,9 @@ P7PrintTrace(FILE *fp, struct p7trace_s *tr, struct plan7_s *hmm, unsigned char 
     fprintf(fp, "--  ---- ------\n");
     for (tpos = 0; tpos < tr->tlen; tpos++) {
       fprintf(fp, "%1s  %4d %6d\n",
-        Statetype(tr->statetype[tpos]),
-        tr->nodeidx[tpos],
-        tr->pos[tpos]);
+              Statetype(tr->statetype[tpos]),
+              tr->nodeidx[tpos],
+              tr->pos[tpos]);
     }
   } else {
     if (!(hmm->flags & PLAN7_HASBITS))
@@ -117,28 +129,28 @@ P7PrintTrace(FILE *fp, struct p7trace_s *tr, struct plan7_s *hmm, unsigned char 
       if (dsq != NULL) sym = dsq[tr->pos[tpos]];
 
       fprintf(fp, "%1s  %4d %6d  %7d",
-        Statetype(tr->statetype[tpos]),
-        tr->nodeidx[tpos],
-        tr->pos[tpos],
-        (tpos < tr->tlen-1) ?
-        TransitionScoreLookup(hmm, tr->statetype[tpos], tr->nodeidx[tpos],
-            tr->statetype[tpos+1], tr->nodeidx[tpos+1]) : 0);
+              Statetype(tr->statetype[tpos]),
+              tr->nodeidx[tpos],
+              tr->pos[tpos],
+              (tpos < tr->tlen-1) ?
+              TransitionScoreLookup(hmm, tr->statetype[tpos], tr->nodeidx[tpos],
+                                    tr->statetype[tpos+1], tr->nodeidx[tpos+1]) : 0);
 
       if (tpos < tr->tlen-1)
         sc += TransitionScoreLookup(hmm, tr->statetype[tpos], tr->nodeidx[tpos],
-            tr->statetype[tpos+1], tr->nodeidx[tpos+1]);
+                                    tr->statetype[tpos+1], tr->nodeidx[tpos+1]);
 
       if (dsq != NULL) {
-        if (tr->statetype[tpos] == STM){
+        if (tr->statetype[tpos] == STM) {
           fprintf(fp, " %8d %c", hmm->msc[sym][tr->nodeidx[tpos]], Alphabet[sym]);
           sc += hmm->msc[sym][tr->nodeidx[tpos]];
-        }else if (tr->statetype[tpos] == STI){
+        } else if (tr->statetype[tpos] == STI) {
           fprintf(fp, " %8d %c", hmm->isc[sym][tr->nodeidx[tpos]],
-            (char) tolower((int) Alphabet[sym]));
+                  (char) tolower((int) Alphabet[sym]));
           sc += hmm->isc[sym][tr->nodeidx[tpos]];
-        }else if ((tr->statetype[tpos] == STN && tr->statetype[tpos-1] == STN) ||
-                  (tr->statetype[tpos] == STC && tr->statetype[tpos-1] == STC) ||
-                  (tr->statetype[tpos] == STJ && tr->statetype[tpos-1] == STJ)){
+        } else if ((tr->statetype[tpos] == STN && tr->statetype[tpos-1] == STN) ||
+                   (tr->statetype[tpos] == STC && tr->statetype[tpos-1] == STC) ||
+                   (tr->statetype[tpos] == STJ && tr->statetype[tpos-1] == STJ)) {
           fprintf(fp, " %8d %c", 0, (char) tolower((int) Alphabet[sym]));
         }
       } else {
@@ -220,7 +232,7 @@ P7PrintPrior(FILE *fp, struct p7prior_s *pri)
 
 //USED EXTERNALLY***************************************************************
 int
-TraceVerify(struct p7trace_s *tr, int M, int N){
+TraceVerify(struct p7trace_s *tr, int M, int N) {
   int tpos;      // position in trace
   int k;      // current position in HMM nodes 1..M
   int i;      // current position in seq 1..N
@@ -238,106 +250,98 @@ TraceVerify(struct p7trace_s *tr, int M, int N){
   // Check for consistency throughout trace
 
   k = i = nn = nc = nj = nm = 0;
-  for (tpos = 0; tpos < tr->tlen; tpos++)
-    {
-      switch (tr->statetype[tpos]) {
-      case STS:
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (tr->pos[tpos]     != 0) return 0;
-  if (k != 0)                 return 0;
-  if (i != 0)                 return 0;
-  if (tpos != 0)              return 0;
-  break;
+  for (tpos = 0; tpos < tr->tlen; tpos++) {
+    switch (tr->statetype[tpos]) {
+    case STS:
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (tr->pos[tpos]     != 0) return 0;
+      if (k != 0)                 return 0;
+      if (i != 0)                 return 0;
+      if (tpos != 0)              return 0;
+      break;
 
-      case STN:      // first N doesn't emit.
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (k != 0)                 return 0;
-  if (nn > 0)
-    {
+    case STN:      // first N doesn't emit.
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (k != 0)                 return 0;
+      if (nn > 0) {
+        if (tr->pos[tpos] != i+1) return 0;
+        i++;
+      } else {
+        if (tr->pos[tpos] != 0) return 0;
+        if (i != 0)             return 0;
+      }
+      nn++;
+      break;
+
+    case STB:
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (tr->pos[tpos]     != 0) return 0;
+      nm = 0;
+      break;
+
+    case STM:      // can enter anywhere on first M
       if (tr->pos[tpos] != i+1) return 0;
+      if (tr->nodeidx[tpos] < 1 || tr->nodeidx[tpos] > M) return 0;
       i++;
-    }
-  else
-    {
-      if (tr->pos[tpos] != 0) return 0;
-      if (i != 0)             return 0;
-    }
-  nn++;
-  break;
+      if (nm == 0)  k = tr->nodeidx[tpos];
+      else {
+        if (tr->nodeidx[tpos] != k+1) return 0;
+        k++;
+      }
+      nm++;
+      break;
 
-      case STB:
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (tr->pos[tpos]     != 0) return 0;
-  nm = 0;
-  break;
-
-      case STM:      // can enter anywhere on first M
-  if (tr->pos[tpos] != i+1) return 0;
-  if (tr->nodeidx[tpos] < 1 || tr->nodeidx[tpos] > M) return 0;
-  i++;
-  if (nm == 0)  k = tr->nodeidx[tpos];
-  else {
-    if (tr->nodeidx[tpos] != k+1) return 0;
-    k++;
-  }
-  nm++;
-  break;
-
-      case STI:
-  if (tr->pos[tpos] != i+1)   return 0;
-  if (tr->nodeidx[tpos] != k) return 0;
-  if (tr->nodeidx[tpos] < 1 || tr->nodeidx[tpos] > M-1) return 0;
-  if (k >= M)                 return 0;
-  i++;
-  break;
-
-      case STD:
-  if (tr->pos[tpos] != 0)       return 0;
-  if (tr->nodeidx[tpos] != k+1) return 0;
-  if (tr->nodeidx[tpos] < 1 || tr->nodeidx[tpos] > M) return 0;
-  k++;
-  break;
-
-      case STE:
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (tr->pos[tpos]     != 0) return 0;
-  nj = 0;
-  break;
-
-      case STJ:
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (nj > 0)
-    {
-      if (tr->pos[tpos] != i+1) return 0;
+    case STI:
+      if (tr->pos[tpos] != i+1)   return 0;
+      if (tr->nodeidx[tpos] != k) return 0;
+      if (tr->nodeidx[tpos] < 1 || tr->nodeidx[tpos] > M-1) return 0;
+      if (k >= M)                 return 0;
       i++;
-    }
-  else if (tr->pos[tpos] != 0) return 0;
-  nj++;
-  break;
+      break;
 
-      case STC:
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (nc > 0)
-    {
-      if (tr->pos[tpos] != i+1) return 0;
-      i++;
-    }
-  else if (tr->pos[tpos] != 0)  return 0;
-  nc++;
-  break;
+    case STD:
+      if (tr->pos[tpos] != 0)       return 0;
+      if (tr->nodeidx[tpos] != k+1) return 0;
+      if (tr->nodeidx[tpos] < 1 || tr->nodeidx[tpos] > M) return 0;
+      k++;
+      break;
 
-      case STT:
-  if (tpos != tr->tlen - 1)   return 0;
-  if (tr->nodeidx[tpos] != 0) return 0;
-  if (tr->pos[tpos]     != 0) return 0;
-  if (i != N)                 return 0;
-  break;
+    case STE:
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (tr->pos[tpos]     != 0) return 0;
+      nj = 0;
+      break;
 
-      case STBOGUS:
-      default:
-  return 0;
-  }  // end switch over statetypes
-    } // end loop over trace positions
+    case STJ:
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (nj > 0) {
+        if (tr->pos[tpos] != i+1) return 0;
+        i++;
+      } else if (tr->pos[tpos] != 0) return 0;
+      nj++;
+      break;
+
+    case STC:
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (nc > 0) {
+        if (tr->pos[tpos] != i+1) return 0;
+        i++;
+      } else if (tr->pos[tpos] != 0)  return 0;
+      nc++;
+      break;
+
+    case STT:
+      if (tpos != tr->tlen - 1)   return 0;
+      if (tr->nodeidx[tpos] != 0) return 0;
+      if (tr->pos[tpos]     != 0) return 0;
+      if (i != N)                 return 0;
+      break;
+
+    case STBOGUS:
+    default:
+      return 0;
+    }  // end switch over statetypes
+  } // end loop over trace positions
 
   return 1;
 }
@@ -357,17 +361,16 @@ TraceVerify(struct p7trace_s *tr, int M, int N){
 
 //USED EXTERNALLY***************************************************************
 int
-TraceCompare(struct p7trace_s *t1, struct p7trace_s *t2){
+TraceCompare(struct p7trace_s *t1, struct p7trace_s *t2) {
   int tpos;
 
   if (t1->tlen != t2->tlen) return 0;
 
-  for (tpos = 0; tpos < t1->tlen; tpos++)
-    {
-      if (t1->statetype[tpos] != t2->statetype[tpos]) return 0;
-      if (t1->nodeidx[tpos]   != t2->nodeidx[tpos])   return 0;
-      if (t1->pos[tpos]       != t2->pos[tpos])       return 0;
-    }
+  for (tpos = 0; tpos < t1->tlen; tpos++) {
+    if (t1->statetype[tpos] != t2->statetype[tpos]) return 0;
+    if (t1->nodeidx[tpos]   != t2->nodeidx[tpos])   return 0;
+    if (t1->pos[tpos]       != t2->pos[tpos])       return 0;
+  }
   return 1;
 }
 //*/

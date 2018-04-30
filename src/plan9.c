@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -28,8 +28,7 @@
 #include "funcs.h"
 
 struct plan9_s *
-P9AllocHMM(int M)                   /* length of model to make */
-{
+P9AllocHMM(int M) {                 /* length of model to make */
   struct plan9_s *hmm;        /* RETURN: blank HMM */
 
   hmm        = (struct plan9_s *)     MallocOrDie (sizeof(struct plan9_s));
@@ -47,8 +46,7 @@ P9AllocHMM(int M)                   /* length of model to make */
   return hmm;
 }
 int
-P9FreeHMM(struct plan9_s *hmm)
-{
+P9FreeHMM(struct plan9_s *hmm) {
   if (hmm == NULL) return 0;
   free(hmm->ref);
   free(hmm->cs);
@@ -63,29 +61,25 @@ P9FreeHMM(struct plan9_s *hmm)
 
 
 /* Function: P9ZeroHMM()
- * 
+ *
  * Purpose:  Zero emission and transition counts in an HMM.
  */
 void
-P9ZeroHMM(struct plan9_s *hmm)
-{
+P9ZeroHMM(struct plan9_s *hmm) {
   int k, ts, idx;
 
-  for (k = 0; k <= hmm->M+1; k++)
-    {
-      for (ts = 0; ts < 3; ts++)
-  {
-    hmm->mat[k].t[ts] = 0.0;
-    hmm->ins[k].t[ts] = 0.0;
-    hmm->del[k].t[ts] = 0.0;
-  }
-      for (idx = 0; idx < Alphabet_size; idx++)
-  {
-    hmm->mat[k].p[idx]   = 0.0;
-    hmm->ins[k].p[idx]   = 0.0;
-    hmm->del[k].p[idx]   = 0.0;
-  }
+  for (k = 0; k <= hmm->M+1; k++) {
+    for (ts = 0; ts < 3; ts++) {
+      hmm->mat[k].t[ts] = 0.0;
+      hmm->ins[k].t[ts] = 0.0;
+      hmm->del[k].t[ts] = 0.0;
     }
+    for (idx = 0; idx < Alphabet_size; idx++) {
+      hmm->mat[k].p[idx]   = 0.0;
+      hmm->ins[k].p[idx]   = 0.0;
+      hmm->del[k].p[idx]   = 0.0;
+    }
+  }
 }
 
 
@@ -93,40 +87,37 @@ P9ZeroHMM(struct plan9_s *hmm)
 
 
 /* Function: P9Renormalize()
- * 
+ *
  * Normalize all P distributions so they sum to 1.
  * P distributions that are all 0, or contain negative
  * probabilities, are left untouched.
- * 
+ *
  * Returns 1 on success, or 0 on failure.
  */
 void
-P9Renormalize(struct plan9_s *hmm)
-{
+P9Renormalize(struct plan9_s *hmm) {
   int    k;      /* counter for states                  */
 
-  for (k = 0; k <= hmm->M ; k++)
-    {
-        /* match state transition frequencies */
-      FNorm(hmm->mat[k].t, 3);
-      FNorm(hmm->ins[k].t, 3);
-      if (k > 0) FNorm(hmm->del[k].t, 3);
+  for (k = 0; k <= hmm->M ; k++) {
+    /* match state transition frequencies */
+    FNorm(hmm->mat[k].t, 3);
+    FNorm(hmm->ins[k].t, 3);
+    if (k > 0) FNorm(hmm->del[k].t, 3);
 
-      if (k > 0) FNorm(hmm->mat[k].p, Alphabet_size);
-      FNorm(hmm->ins[k].p, Alphabet_size);
-    }
+    if (k > 0) FNorm(hmm->mat[k].p, Alphabet_size);
+    FNorm(hmm->ins[k].p, Alphabet_size);
+  }
 }
 
 /* Function: P9DefaultNullModel()
- * 
+ *
  * Purpose:  Set up a default random sequence model, using
- *           global aafq[]'s for protein or 0.25 for nucleic 
+ *           global aafq[]'s for protein or 0.25 for nucleic
  *           acid. randomseq is alloc'ed in caller. Alphabet information
  *           must already be known.
  */
 void
-P9DefaultNullModel(float *null)
-{
+P9DefaultNullModel(float *null) {
   int x;
   if (Alphabet_type == hmmAMINO)
     for (x = 0; x < Alphabet_size; x++)

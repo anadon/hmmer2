@@ -52,7 +52,7 @@
  * Returns:  (void)
  */
 void
-HMMERBanner(FILE *fp, char *banner){
+HMMERBanner(FILE *fp, char *banner) {
   fprintf(fp, "%s\n", banner);
   fprintf(fp, "%s %s (%s)\n", PACKAGE_NAME, PACKAGE_VERSION, PACKAGE_DATE);
   fprintf(fp, "%s\n", PACKAGE_COPYRIGHT);
@@ -72,19 +72,17 @@ HMMERBanner(FILE *fp, char *banner){
  *           type - sqdARG_INT, sqdARG_FLOAT, or sqdARG_STRING from squid.h
  */
 char *
-Getword(FILE *fp, int type)
-{
+Getword(FILE *fp, int type) {
   static char buffer[512];
   static char *sptr = NULL;
 
   if (sptr != NULL) sptr = strtok(NULL, " \t\n");
 
-  while (sptr == NULL)
-    {
-      if ((sptr = fgets(buffer, 512, fp)) == NULL) return NULL;
-      if ((sptr = strchr(buffer, '#')) != NULL) *sptr = '\0';
-      sptr = strtok(buffer, " \t\n");
-    }
+  while (sptr == NULL) {
+    if ((sptr = fgets(buffer, 512, fp)) == NULL) return NULL;
+    if ((sptr = strchr(buffer, '#')) != NULL) *sptr = '\0';
+    sptr = strtok(buffer, " \t\n");
+  }
 
   switch (type) {
   case sqdARG_STRING:
@@ -157,8 +155,7 @@ Getline(char *s, int n, FILE *fp)
  *           CUT_NONE.
  */
 int
-SetAutocuts(struct threshold_s *thresh, struct plan7_s *hmm)
-{
+SetAutocuts(struct threshold_s *thresh, struct plan7_s *hmm) {
   if (thresh->autocut == CUT_GA) {
     if (! (hmm->flags & PLAN7_GA)) return 0;
     thresh->globT = hmm->ga1;

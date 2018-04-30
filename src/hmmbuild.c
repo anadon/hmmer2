@@ -200,7 +200,7 @@ struct p7config_s {
 
 static void  default_config(struct p7config_s *cfg);
 static void  process_cmdline(int argc, char **argv, struct p7config_s *cfg,
-           char **ret_hmmfile, char **ret_alifile, int *ret_format);
+                             char **ret_hmmfile, char **ret_alifile, int *ret_format);
 static void  verify_options(struct p7config_s *cfg, char *hmmfile);
 static FILE *open_hmmfile(struct p7config_s *cfg, char *hmmfile);
 static void  open_optional_outputfiles(struct p7config_s *cfg);
@@ -209,33 +209,33 @@ static void  set_alphabet(MSA *msa);
 static void  set_relative_weights(MSA *msa, struct p7config_s *cfg);
 static float set_entropy_target(int eloss_set, float eloss, int mode, float *randomseq);
 static int   tag_candidate_seq_fragments(MSA *msa, float thresh,
-           int *rlen, char *isfrag);
+    int *rlen, char *isfrag);
 static void  construct_model(struct p7config_s *cfg, MSA *msa, unsigned char **dsq, char *isfrag,
-           struct plan7_s **ret_hmm, struct p7trace_s ***ret_tr);
+                             struct plan7_s **ret_hmm, struct p7trace_s ***ret_tr);
 static void  set_effective_seqnumber(struct p7config_s *cfg, MSA *msa, struct plan7_s *hmm, struct p7prior_s *pri);
 static void  save_countvectors(FILE *cfp, char *cfile, char *name, struct plan7_s *hmm);
 static void  position_average_score(struct plan7_s *hmm, unsigned char **dsq, float *wgt,
-           int nseq, struct p7trace_s **tr, float *pernode,
-           float *ret_avg);
+                                    int nseq, struct p7trace_s **tr, float *pernode,
+                                    float *ret_avg);
 static float frag_trace_score(struct plan7_s *hmm, unsigned char *dsq, struct p7trace_s *tr,
-            float *pernode, float expected);
+                              float *pernode, float expected);
 static void  maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
-           float eff_nseq,
-           struct p7prior_s *prior, struct p7trace_s **tr);
+                             float eff_nseq,
+                             struct p7prior_s *prior, struct p7trace_s **tr);
 static void  set_model_name(struct plan7_s *hmm, char *setname, char *msa_name, char *alifile, int nali);
 static void  print_statistics(FILE *fp, struct plan7_s *hmm, unsigned char **dsq, int nseq,
-            struct p7trace_s **tr);
+                              struct p7trace_s **tr);
 static void  save_hmmbuild_alignment(FILE *alignfp, MSA *msa, unsigned char **dsq, struct plan7_s *hmm,
-             struct p7trace_s **tr);
+                                     struct p7trace_s **tr);
 static void  print_all_scores(FILE *fp, struct plan7_s *hmm,
-            unsigned char **dsq, MSA *msa, struct p7trace_s **tr);
+                              unsigned char **dsq, MSA *msa, struct p7trace_s **tr);
 
 
 
 
 
 int
-main(int argc, char **argv){
+main(int argc, char **argv) {
   struct p7config_s cfg;  /* holds a multitude of config options     */
   char            *hmmfile;     /* file to write HMM to                    */
   FILE            *hmmfp;       /* HMM output file handle                  */
@@ -275,7 +275,7 @@ main(int argc, char **argv){
    ***********************************************/
 
   nali = 0;
-  while ((msa = MSAFileRead(afp)) != NULL){
+  while ((msa = MSAFileRead(afp)) != NULL) {
     /* Print some stuff about what we're about to do.
      */
     if (msa->name != NULL) printf("Alignment:           %s\n",  msa->name);
@@ -291,11 +291,11 @@ main(int argc, char **argv){
     for (idx = 0; idx < msa->nseq; idx++)
       s2upper(msa->aseq[idx]);
 
-      /* --- Post-alphabet initialization section ---
-       * (This code must be delayed until after we've seen the
-       * first alignment, because we have to see the alphabet type first.)
-       */
-    if (nali == 0){
+    /* --- Post-alphabet initialization section ---
+     * (This code must be delayed until after we've seen the
+     * first alignment, because we have to see the alphabet type first.)
+     */
+    if (nali == 0) {
       if (Alphabet_type == hmmNOTSETYET)  set_alphabet(msa);
       if (cfg.prifile == NULL)  pri = P7DefaultPrior();
       else                      pri = P7ReadPrior(cfg.prifile);
@@ -312,16 +312,16 @@ main(int argc, char **argv){
     /* Prepare unaligned digitized sequences for internal use */
     DigitizeAlignment(msa, &dsq);
 
-      /* Determine relative sequence weights (except ME, which comes later).
-       * The weights are stored in msa->wgt.
-       */
+    /* Determine relative sequence weights (except ME, which comes later).
+     * The weights are stored in msa->wgt.
+     */
     set_relative_weights(msa, &cfg);
 
-      /* Identify candidate seq frags, to inform the model
-       * construction algorithms. Relative sequence weighting must precede this.
-       * Upon return, rlen[i] is the unaligned length of seq i [0..nseq-1];
-       * isfrag[i] is a 1/0 flag for whether we defined it as a frag or not.
-       */
+    /* Identify candidate seq frags, to inform the model
+     * construction algorithms. Relative sequence weighting must precede this.
+     * Upon return, rlen[i] is the unaligned length of seq i [0..nseq-1];
+     * isfrag[i] is a 1/0 flag for whether we defined it as a frag or not.
+     */
     int *rlen;  // raw (unaligned) seq lengths 0..nseq-1
     char *isfrag;  // TRUE/FALSE for candidate seq frags
     rlen   = MallocOrDie(sizeof(int)  * msa->nseq);
@@ -341,119 +341,142 @@ main(int argc, char **argv){
      */
     if (cfg.cfile != NULL)
       save_countvectors(cfg.cfp, cfg.cfile, (msa->name != NULL ? msa->name : "-"), hmm);
-      /* Plan7_DumpCounts(stdout, hmm); */
+    /* Plan7_DumpCounts(stdout, hmm); */
 
-      /* Record the null model in the HMM;
-       * add prior contributions in pseudocounts and renormalize.
-       */
-      printf("%-40s ... ", "Converting counts to probabilities"); fflush(stdout);
-      Plan7SetNullModel(hmm, cfg.randomseq, cfg.p1);
-      P7PriorifyHMM(hmm, pri);  /* this function also renormalizes. */
-      printf("done.\n");
+    /* Record the null model in the HMM;
+     * add prior contributions in pseudocounts and renormalize.
+     */
+    printf("%-40s ... ", "Converting counts to probabilities");
+    fflush(stdout);
+    Plan7SetNullModel(hmm, cfg.randomseq, cfg.p1);
+    P7PriorifyHMM(hmm, pri);  /* this function also renormalizes. */
+    printf("done.\n");
 
-      /* if evolving information content: */
-      if (cfg.evolve_ic){
-        /* if info wasn't defined by user, use default settings for gl or ll */
-        if (cfg.info == 0.0) {
-          if (cfg.mode == P7_FS_MODE || cfg.mode == P7_SW_MODE) { cfg.info = 0.65; } /* ll default */
-          else { cfg.info = 1.4; } /* gl default */
+    /* if evolving information content: */
+    if (cfg.evolve_ic) {
+      /* if info wasn't defined by user, use default settings for gl or ll */
+      if (cfg.info == 0.0) {
+        if (cfg.mode == P7_FS_MODE || cfg.mode == P7_SW_MODE) {
+          cfg.info = 0.65;  /* ll default */
+        } else {
+          cfg.info = 1.4;  /* gl default */
         }
-        AdjustAveInfoContent(hmm, cfg.info, cfg.matrixfile);  /* DJB */
       }
-
-      /* Model configuration, temporary.  hmmbuild assumes that it's
-       * given an alignment of single domains, and the alignment may
-       * contain fragments. So, for the purpose of scoring the
-       * sequences (or, optionally, MD/ME weighting), configure the
-       * model into S/W mode. Later we'll configure the model
-       * according to how the user wants to use it.
-       */
-      Plan7SWConfig(hmm, 0.5, 0.5);
-      /* Plan7_DumpScores(stdout, hmm); */
-
-
-      /* Maximum entropy is the one relative weighting strategy
-       * that requires having a model architecture, and a model
-       * scoring configuration.
-       */
-      if (cfg.w_strategy == WGT_ME)
-        maximum_entropy(hmm, dsq, msa, cfg.eff_nseq, pri, tr);
-
-      /* Transfer other information from the alignment to
-       * the HMM. This typically only works for Stockholm or SELEX format
-       * alignments, so these things are conditional/optional.
-       */
-      if (msa->acc  != NULL) Plan7SetAccession(hmm,   msa->acc);
-      if (msa->desc != NULL) Plan7SetDescription(hmm, msa->desc);
-
-      if (msa->cutoff_is_set[MSA_CUTOFF_GA1] && msa->cutoff_is_set[MSA_CUTOFF_GA2])
-  { hmm->flags |= PLAN7_GA; hmm->ga1 = msa->cutoff[MSA_CUTOFF_GA1]; hmm->ga2 = msa->cutoff[MSA_CUTOFF_GA2]; }
-      if (msa->cutoff_is_set[MSA_CUTOFF_TC1] && msa->cutoff_is_set[MSA_CUTOFF_TC2])
-  { hmm->flags |= PLAN7_TC; hmm->tc1 = msa->cutoff[MSA_CUTOFF_TC1]; hmm->tc2 = msa->cutoff[MSA_CUTOFF_TC2]; }
-      if (msa->cutoff_is_set[MSA_CUTOFF_NC1] && msa->cutoff_is_set[MSA_CUTOFF_NC2])
-  { hmm->flags |= PLAN7_NC; hmm->nc1 = msa->cutoff[MSA_CUTOFF_NC1]; hmm->nc2 = msa->cutoff[MSA_CUTOFF_NC2]; }
-
-      /* Record some other miscellaneous information in the HMM,
-       * like its name, and how/when we built it.
-       */
-      set_model_name(hmm, cfg.setname, msa->name, alifile, nali);
-      Plan7ComlogAppend(hmm, argc, argv);
-      Plan7SetCtime(hmm);
-      hmm->nseq = msa->nseq;
-
-      /* Print information for the user
-       */
-      printf("\nConstructed a profile HMM (length %d)\n", hmm->M);
-      print_statistics(stdout, hmm, dsq, msa->nseq, tr);
-      printf("\n");
-
-
-      /* Configure the model for chosen algorithm.
-       * For an ASCII text model format, this isn't actually necessary any more.
-       */
-      printf("%-40s ... ", "Finalizing model configuration");
-      fflush(stdout);
-      switch (cfg.mode) {
-      case P7_S_MODE:   Plan7GlobalConfig(hmm);        break;
-      case P7_SW_MODE:  Plan7SWConfig(hmm, 0.5, 0.5);  break;
-      case P7_LS_MODE:  Plan7LSConfig(hmm);            break;
-      case P7_FS_MODE:  Plan7FSConfig(hmm, 0.5, 0.5);  break;
-      default:          Die("bogus configuration choice");
-      }
-      printf("done.\n");
-
-      /* Save new HMM to disk: open a file for appending or writing.
-       */
-      printf("%-40s ... ", "Saving model to file");  fflush(stdout);
-      if (cfg.do_binary) WriteBinHMM(hmmfp, hmm);
-      else               WriteAscHMM(hmmfp, hmm);
-      printf("done.\n");
-
-      /* the annotated alignment may be resaved */
-      if (cfg.alignfp != NULL)
-  save_hmmbuild_alignment(cfg.alignfp, msa, dsq, hmm, tr);
-
-      /* Verbose output; show scores for each sequence
-       */
-      if (cfg.verbose)
-  print_all_scores(stdout, hmm, dsq, msa, tr);
-
-      /* Clean up before moving on to next alignment
-       */
-      for (idx = 0; idx < msa->nseq; idx++) P7FreeTrace(tr[idx]);
-      free(tr);
-      FreePlan7(hmm);
-      Free2DArray((void **) dsq, msa->nseq);
-      free(rlen);
-      free(isfrag);
-      MSAFree(msa);
-      fflush(hmmfp);
-      if (cfg.cfp != NULL)     fflush(cfg.cfp);
-      if (cfg.alignfp != NULL) fflush(cfg.alignfp);
-
-      puts("//\n");
-      nali++;
+      AdjustAveInfoContent(hmm, cfg.info, cfg.matrixfile);  /* DJB */
     }
+
+    /* Model configuration, temporary.  hmmbuild assumes that it's
+     * given an alignment of single domains, and the alignment may
+     * contain fragments. So, for the purpose of scoring the
+     * sequences (or, optionally, MD/ME weighting), configure the
+     * model into S/W mode. Later we'll configure the model
+     * according to how the user wants to use it.
+     */
+    Plan7SWConfig(hmm, 0.5, 0.5);
+    /* Plan7_DumpScores(stdout, hmm); */
+
+
+    /* Maximum entropy is the one relative weighting strategy
+     * that requires having a model architecture, and a model
+     * scoring configuration.
+     */
+    if (cfg.w_strategy == WGT_ME)
+      maximum_entropy(hmm, dsq, msa, cfg.eff_nseq, pri, tr);
+
+    /* Transfer other information from the alignment to
+     * the HMM. This typically only works for Stockholm or SELEX format
+     * alignments, so these things are conditional/optional.
+     */
+    if (msa->acc  != NULL) Plan7SetAccession(hmm,   msa->acc);
+    if (msa->desc != NULL) Plan7SetDescription(hmm, msa->desc);
+
+    if (msa->cutoff_is_set[MSA_CUTOFF_GA1] && msa->cutoff_is_set[MSA_CUTOFF_GA2]) {
+      hmm->flags |= PLAN7_GA;
+      hmm->ga1 = msa->cutoff[MSA_CUTOFF_GA1];
+      hmm->ga2 = msa->cutoff[MSA_CUTOFF_GA2];
+    }
+    if (msa->cutoff_is_set[MSA_CUTOFF_TC1] && msa->cutoff_is_set[MSA_CUTOFF_TC2]) {
+      hmm->flags |= PLAN7_TC;
+      hmm->tc1 = msa->cutoff[MSA_CUTOFF_TC1];
+      hmm->tc2 = msa->cutoff[MSA_CUTOFF_TC2];
+    }
+    if (msa->cutoff_is_set[MSA_CUTOFF_NC1] && msa->cutoff_is_set[MSA_CUTOFF_NC2]) {
+      hmm->flags |= PLAN7_NC;
+      hmm->nc1 = msa->cutoff[MSA_CUTOFF_NC1];
+      hmm->nc2 = msa->cutoff[MSA_CUTOFF_NC2];
+    }
+
+    /* Record some other miscellaneous information in the HMM,
+     * like its name, and how/when we built it.
+     */
+    set_model_name(hmm, cfg.setname, msa->name, alifile, nali);
+    Plan7ComlogAppend(hmm, argc, argv);
+    Plan7SetCtime(hmm);
+    hmm->nseq = msa->nseq;
+
+    /* Print information for the user
+     */
+    printf("\nConstructed a profile HMM (length %d)\n", hmm->M);
+    print_statistics(stdout, hmm, dsq, msa->nseq, tr);
+    printf("\n");
+
+
+    /* Configure the model for chosen algorithm.
+     * For an ASCII text model format, this isn't actually necessary any more.
+     */
+    printf("%-40s ... ", "Finalizing model configuration");
+    fflush(stdout);
+    switch (cfg.mode) {
+    case P7_S_MODE:
+      Plan7GlobalConfig(hmm);
+      break;
+    case P7_SW_MODE:
+      Plan7SWConfig(hmm, 0.5, 0.5);
+      break;
+    case P7_LS_MODE:
+      Plan7LSConfig(hmm);
+      break;
+    case P7_FS_MODE:
+      Plan7FSConfig(hmm, 0.5, 0.5);
+      break;
+    default:
+      Die("bogus configuration choice");
+    }
+    printf("done.\n");
+
+    /* Save new HMM to disk: open a file for appending or writing.
+     */
+    printf("%-40s ... ", "Saving model to file");
+    fflush(stdout);
+    if (cfg.do_binary) WriteBinHMM(hmmfp, hmm);
+    else               WriteAscHMM(hmmfp, hmm);
+    printf("done.\n");
+
+    /* the annotated alignment may be resaved */
+    if (cfg.alignfp != NULL)
+      save_hmmbuild_alignment(cfg.alignfp, msa, dsq, hmm, tr);
+
+    /* Verbose output; show scores for each sequence
+     */
+    if (cfg.verbose)
+      print_all_scores(stdout, hmm, dsq, msa, tr);
+
+    /* Clean up before moving on to next alignment
+     */
+    for (idx = 0; idx < msa->nseq; idx++) P7FreeTrace(tr[idx]);
+    free(tr);
+    FreePlan7(hmm);
+    Free2DArray((void **) dsq, msa->nseq);
+    free(rlen);
+    free(isfrag);
+    MSAFree(msa);
+    fflush(hmmfp);
+    if (cfg.cfp != NULL)     fflush(cfg.cfp);
+    if (cfg.alignfp != NULL) fflush(cfg.alignfp);
+
+    puts("//\n");
+    nali++;
+  }
 
 
   /* Clean up and exit
@@ -473,8 +496,7 @@ main(int argc, char **argv){
  *
  */
 static void
-default_config(struct p7config_s *cfg)
-{
+default_config(struct p7config_s *cfg) {
   cfg->setname      = NULL;
   cfg->rndfile      = NULL;
   FSet(cfg->randomseq, MAXABET, 0.); /* not set yet */
@@ -508,8 +530,7 @@ default_config(struct p7config_s *cfg)
 }
 
 static void
-process_cmdline(int argc, char **argv, struct p7config_s *cfg, char **hmmfile, char **alifile, int *ret_format)
-{
+process_cmdline(int argc, char **argv, struct p7config_s *cfg, char **hmmfile, char **alifile, int *ret_format) {
   char *optname;                /* name of option found by Getopt()      */
   char *optarg;                 /* argument found by Getopt()            */
   int   optind;                 /* index in argv[]                       */
@@ -529,12 +550,18 @@ process_cmdline(int argc, char **argv, struct p7config_s *cfg, char **hmmfile, c
     else if (strcmp(optname, "--effclust")== 0) cfg->eff_strategy  = EFF_NCLUSTERS;
     else if (strcmp(optname, "--effent")  == 0) cfg->eff_strategy  = EFF_ENTROPY;
     else if (strcmp(optname, "--effnone") == 0) cfg->eff_strategy  = EFF_NONE;
-    else if (strcmp(optname, "--effset")  == 0) { cfg->eff_strategy= EFF_USERSET; cfg->eff_nseq = atof(optarg); }
-    else if (strcmp(optname, "--eidlevel")== 0) cfg->eidlevel      = atof(optarg);
-    else if (strcmp(optname, "--eloss")   == 0) { cfg->eloss       = atof(optarg); cfg->eloss_set  = TRUE; }
-    else if (strcmp(optname, "--evolve")  == 0) cfg->evolve_ic     = TRUE;
-    else if (strcmp(optname, "--evolveic")== 0) { cfg->evolve_ic   = TRUE; cfg->info          = atof(optarg); }
-    else if (strcmp(optname, "--hand")    == 0) cfg->c_strategy    = P7_HAND_CONSTRUCTION;
+    else if (strcmp(optname, "--effset")  == 0) {
+      cfg->eff_strategy= EFF_USERSET;
+      cfg->eff_nseq = atof(optarg);
+    } else if (strcmp(optname, "--eidlevel")== 0) cfg->eidlevel      = atof(optarg);
+    else if (strcmp(optname, "--eloss")   == 0) {
+      cfg->eloss       = atof(optarg);
+      cfg->eloss_set  = TRUE;
+    } else if (strcmp(optname, "--evolve")  == 0) cfg->evolve_ic     = TRUE;
+    else if (strcmp(optname, "--evolveic")== 0) {
+      cfg->evolve_ic   = TRUE;
+      cfg->info          = atof(optarg);
+    } else if (strcmp(optname, "--hand")    == 0) cfg->c_strategy    = P7_HAND_CONSTRUCTION;
     else if (strcmp(optname, "--matrix")  == 0) cfg->matrixfile    = optarg;
     else if (strcmp(optname, "--nucleic") == 0) SetAlphabet(hmmNUCLEIC);
     else if (strcmp(optname, "--null")    == 0) cfg->rndfile       = optarg;
@@ -542,8 +569,10 @@ process_cmdline(int argc, char **argv, struct p7config_s *cfg, char **hmmfile, c
     else if (strcmp(optname, "--pamwgt")  == 0) cfg->pamwgt        = atof(optarg);
     else if (strcmp(optname, "--pbswitch")== 0) cfg->pbswitch      = atoi(optarg);
     else if (strcmp(optname, "--prior")   == 0) cfg->prifile       = optarg;
-    else if (strcmp(optname, "--symfrac") == 0) { cfg->symfrac     = atof(optarg); cfg->symfrac_set = TRUE; }
-    else if (strcmp(optname, "--verbose") == 0) cfg->verbose       = TRUE;
+    else if (strcmp(optname, "--symfrac") == 0) {
+      cfg->symfrac     = atof(optarg);
+      cfg->symfrac_set = TRUE;
+    } else if (strcmp(optname, "--verbose") == 0) cfg->verbose       = TRUE;
     else if (strcmp(optname, "--wgsc")    == 0) cfg->w_strategy    = WGT_GSC;
     else if (strcmp(optname, "--wblosum") == 0) cfg->w_strategy    = WGT_BLOSUM;
     else if (strcmp(optname, "--widlevel")== 0) cfg->widlevel      = atof(optarg);
@@ -554,11 +583,10 @@ process_cmdline(int argc, char **argv, struct p7config_s *cfg, char **hmmfile, c
     else if (strcmp(optname, "--informat") == 0) {
       *ret_format = String2SeqfileFormat(optarg);
       if (*ret_format == MSAFILE_UNKNOWN)
-  Die("unrecognized sequence file format \"%s\"", optarg);
+        Die("unrecognized sequence file format \"%s\"", optarg);
       if (! IsAlignmentFormat(*ret_format))
-  Die("%s is an unaligned format, can't read as an alignment", optarg);
-    }
-    else if (strcmp(optname, "-h") == 0) {
+        Die("%s is an unaligned format, can't read as an alignment", optarg);
+    } else if (strcmp(optname, "-h") == 0) {
       HMMERBanner(stdout, banner);
       puts(usage);
       puts(experts);
@@ -580,8 +608,7 @@ process_cmdline(int argc, char **argv, struct p7config_s *cfg, char **hmmfile, c
  * improved command line parser.
  */
 static void
-verify_options(struct p7config_s *cfg, char *hmmfile)
-{
+verify_options(struct p7config_s *cfg, char *hmmfile) {
   if (cfg->symfrac < 0. || cfg->symfrac > 1.)
     Die("--symfrac must be a value from 0 to 1\n%s\n", usage);
 
@@ -600,8 +627,7 @@ verify_options(struct p7config_s *cfg, char *hmmfile)
  * Open the output hmmfile, return a writable FILE ptr.
  */
 static FILE *
-open_hmmfile(struct p7config_s *cfg, char *hmmfile)
-{
+open_hmmfile(struct p7config_s *cfg, char *hmmfile) {
   FILE *hmmfp;
   char  fpopts[3];   /* options to open with, e.g. "ab"  */
 
@@ -610,7 +636,7 @@ open_hmmfile(struct p7config_s *cfg, char *hmmfile)
   if (cfg->do_binary) strcat(fpopts, "b");
   if ((hmmfp = fopen(hmmfile, fpopts)) == NULL)
     Die("Failed to open HMM file %s for %s\n", hmmfile,
-  cfg->do_append ? "appending" : "writing");
+        cfg->do_append ? "appending" : "writing");
 
   return hmmfp;
 }
@@ -620,15 +646,14 @@ open_hmmfile(struct p7config_s *cfg, char *hmmfile)
  * counts file, alignment resave file...
  */
 static void
-open_optional_outputfiles(struct p7config_s *cfg)
-{
-          /* optional count vector save file */
+open_optional_outputfiles(struct p7config_s *cfg) {
+  /* optional count vector save file */
   cfg->cfp = NULL;
   if (cfg->cfile != NULL)
     if ((cfg->cfp = fopen(cfg->cfile, "w")) == NULL)
       Die("Failed to open count vector file %s for writing\n", cfg->cfile);
 
-        /* optional alignment resave file */
+  /* optional alignment resave file */
   cfg->alignfp = NULL;
   if (cfg->align_ofile != NULL)
     if ((cfg->alignfp = fopen(cfg->align_ofile, "w")) == NULL)
@@ -642,13 +667,12 @@ open_optional_outputfiles(struct p7config_s *cfg)
  * output.
  */
 static void
-print_config_header(struct p7config_s *cfg, char *alifile, int aliformat, char *hmmfile)
-{
+print_config_header(struct p7config_s *cfg, char *alifile, int aliformat, char *hmmfile) {
   HMMERBanner(stdout, banner);
   printf("Alignment file:                    %s\n",
-   alifile);
+         alifile);
   printf("File format:                       %s\n",
-   SeqfileFormat2String(aliformat));
+         SeqfileFormat2String(aliformat));
 
   printf("Search algorithm configuration:    ");
   if      (cfg->mode == P7_S_MODE)   puts("Global alignment (hmms)");
@@ -662,10 +686,10 @@ print_config_header(struct p7config_s *cfg, char *alifile, int aliformat, char *
   else if (cfg->c_strategy==P7_FAST_CONSTRUCTION) printf("Fast/ad hoc (symfrac %.2f)\n", cfg->symfrac);
 
   printf("Null model used:                   %s\n",
-   (cfg->rndfile == NULL) ? "(default)" : cfg->rndfile);
+         (cfg->rndfile == NULL) ? "(default)" : cfg->rndfile);
 
   printf("Prior used:                        %s\n",
-   (cfg->prifile == NULL) ? "(default)" : cfg->prifile);
+         (cfg->prifile == NULL) ? "(default)" : cfg->prifile);
 
   printf("Effective sequence # calculation:  ");
   if      (cfg->eff_strategy == EFF_NONE)      puts("none; using actual seq #");
@@ -673,8 +697,7 @@ print_config_header(struct p7config_s *cfg, char *alifile, int aliformat, char *
   else if (cfg->eff_strategy == EFF_NCLUSTERS) {
     puts("# single-linkage clusters");
     printf("  by single-linkage clustering at: %.2f identity\n", cfg->eidlevel);
-  }
-  else if (cfg->eff_strategy == EFF_ENTROPY) {
+  } else if (cfg->eff_strategy == EFF_ENTROPY) {
     puts("entropy targeting");
     if (cfg->eloss_set)
       printf("  mean target entropy loss:        %.2f bits\n", cfg->eloss);
@@ -691,7 +714,7 @@ print_config_header(struct p7config_s *cfg, char *alifile, int aliformat, char *
   else if (cfg->w_strategy == WGT_ME)     puts("Maximum entropy");
 
   printf("New HMM file:                      %s %s\n",
-   hmmfile, cfg->do_append? "[appending]" : "");
+         hmmfile, cfg->do_append? "[appending]" : "");
   if (cfg->cfile != NULL)
     printf("Count vectors saved to:            %s\n", cfg->cfile);
   if (cfg->align_ofile != NULL)
@@ -709,8 +732,7 @@ print_config_header(struct p7config_s *cfg, char *alifile, int aliformat, char *
  * alphabet, and set the globals accordingly.
  */
 static void
-set_alphabet(MSA *msa)
-{
+set_alphabet(MSA *msa) {
   printf("%-40s ... ", "Determining alphabet");
   fflush(stdout);
   DetermineAlphabet(msa->aseq, msa->nseq);
@@ -741,13 +763,13 @@ set_alphabet(MSA *msa)
  * LSJ's optimizations on the ASTRAL benchmark.
  */
 static float
-set_entropy_target(int eloss_set, float eloss, int mode, float *randomseq){
+set_entropy_target(int eloss_set, float eloss, int mode, float *randomseq) {
 
   /* explicit setting? */
   if (eloss_set) return FEntropy(randomseq, Alphabet_size) - eloss;
 
   /* if not, protein defaults: */
-  if (Alphabet_type == hmmAMINO){
+  if (Alphabet_type == hmmAMINO) {
     float etarget = 0.0;
     if   (mode == P7_FS_MODE || mode == P7_SW_MODE)
       etarget = FEntropy(randomseq, Alphabet_size) - ENTROPYLOSS_FS_AMINO_DEFAULT;
@@ -777,30 +799,26 @@ To use --effent on DNA models (or other alphabets), you must set\n\
  * set msa->wgt array accordingly.
  */
 static void
-set_relative_weights(MSA *msa, struct p7config_s *cfg)
-{
+set_relative_weights(MSA *msa, struct p7config_s *cfg) {
   if (cfg->w_strategy == WGT_GSC     ||
       cfg->w_strategy == WGT_BLOSUM  ||
       cfg->w_strategy == WGT_VORONOI ||
-      cfg->w_strategy == WGT_PB)
-    {
-      printf("%-40s ... ", "Weighting sequences heuristically");
-      fflush(stdout);
+      cfg->w_strategy == WGT_PB) {
+    printf("%-40s ... ", "Weighting sequences heuristically");
+    fflush(stdout);
 
-      if (cfg->w_strategy != WGT_PB && msa->nseq >= cfg->pbswitch)
-  {
-    printf("[big alignment! doing PB]... ");
-    PositionBasedWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
+    if (cfg->w_strategy != WGT_PB && msa->nseq >= cfg->pbswitch) {
+      printf("[big alignment! doing PB]... ");
+      PositionBasedWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
+    } else if (cfg->w_strategy == WGT_GSC)
+      GSCWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
+    else if (cfg->w_strategy == WGT_BLOSUM)
+      BlosumWeights(msa->aseq, msa->nseq, msa->alen, cfg->widlevel, msa->wgt);
+    else if (cfg->w_strategy == WGT_PB)
+      PositionBasedWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
+    else if (cfg->w_strategy ==  WGT_VORONOI)
+      VoronoiWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
   }
-      else if (cfg->w_strategy == WGT_GSC)
-  GSCWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
-      else if (cfg->w_strategy == WGT_BLOSUM)
-  BlosumWeights(msa->aseq, msa->nseq, msa->alen, cfg->widlevel, msa->wgt);
-      else if (cfg->w_strategy == WGT_PB)
-  PositionBasedWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
-      else if (cfg->w_strategy ==  WGT_VORONOI)
-  VoronoiWeights(msa->aseq, msa->nseq, msa->alen, msa->wgt);
-    }
   printf("done.\n");
 }
 
@@ -839,8 +857,7 @@ set_relative_weights(MSA *msa, struct p7config_s *cfg)
  * Returns:   # of fragments that were flagged.
  */
 static int
-tag_candidate_seq_fragments(MSA *msa, float thresh, int *rlen, char *isfrag)
-{
+tag_candidate_seq_fragments(MSA *msa, float thresh, int *rlen, char *isfrag) {
   int i;
   float mean;
   float totwgt;
@@ -851,20 +868,20 @@ tag_candidate_seq_fragments(MSA *msa, float thresh, int *rlen, char *isfrag)
   /* Calculate lengths of each seq, and mean length */
   mean   = 0.;
   totwgt = 0.;
-  for (i = 0; i < msa->nseq; i++)
-    {
-      rlen[i] = DealignedLength(msa->aseq[i]);
-      mean   += msa->wgt[i] * (float) rlen[i];
-      totwgt += msa->wgt[i];
-    }
+  for (i = 0; i < msa->nseq; i++) {
+    rlen[i] = DealignedLength(msa->aseq[i]);
+    mean   += msa->wgt[i] * (float) rlen[i];
+    totwgt += msa->wgt[i];
+  }
   mean /= totwgt;
 
   /* any seq < threshold * mean is identified as a fragment */
   nfrags = 0;
   for (i = 0; i < msa->nseq; i++)
-    if (rlen[i] < (int) (thresh * mean))
-      { isfrag[i] = TRUE; nfrags++; }
-    else
+    if (rlen[i] < (int) (thresh * mean)) {
+      isfrag[i] = TRUE;
+      nfrags++;
+    } else
       isfrag[i] = FALSE;
 
   printf("done.\n");
@@ -879,8 +896,7 @@ tag_candidate_seq_fragments(MSA *msa, float thresh, int *rlen, char *isfrag)
  */
 static void
 construct_model(struct p7config_s *cfg, MSA *msa, unsigned char **dsq, char *isfrag,
-    struct plan7_s **ret_hmm, struct p7trace_s ***ret_tr)
-{
+                struct plan7_s **ret_hmm, struct p7trace_s ***ret_tr) {
   int checksum;
 
   printf("%-40s ... ", "Constructing model architecture");
@@ -899,36 +915,31 @@ construct_model(struct p7config_s *cfg, MSA *msa, unsigned char **dsq, char *isf
 
 
 static void
-set_effective_seqnumber(struct p7config_s *cfg, MSA *msa, struct plan7_s *hmm, struct p7prior_s *pri)
-{
-  if (cfg->eff_strategy == EFF_NONE)
-    {
-      printf("%-40s ... ", "Set effective seq # to just nseq");
-      cfg->eff_nseq     = (float) msa->nseq;
-    }
+set_effective_seqnumber(struct p7config_s *cfg, MSA *msa, struct plan7_s *hmm, struct p7prior_s *pri) {
+  if (cfg->eff_strategy == EFF_NONE) {
+    printf("%-40s ... ", "Set effective seq # to just nseq");
+    cfg->eff_nseq     = (float) msa->nseq;
+  }
 
-  else if (cfg->eff_strategy == EFF_USERSET)
-    {
-      printf("%-40s ... ", "Set effective seq #");
-    }
+  else if (cfg->eff_strategy == EFF_USERSET) {
+    printf("%-40s ... ", "Set effective seq #");
+  }
 
-  else if (cfg->eff_strategy == EFF_NCLUSTERS)
-    {
-      float *wgt;    /* dummy weights array to feed BlosumWeights*/
-      wgt = MallocOrDie(sizeof(float) * msa->nseq);
-      printf("%-40s ... ", "Determining eff seq # by clustering");
-      fflush(stdout);
-      BlosumWeights(msa->aseq, msa->nseq, msa->alen, cfg->eidlevel, wgt);
-      cfg->eff_nseq = FSum(wgt, msa->nseq);
-      free(wgt);
-    }
+  else if (cfg->eff_strategy == EFF_NCLUSTERS) {
+    float *wgt;    /* dummy weights array to feed BlosumWeights*/
+    wgt = MallocOrDie(sizeof(float) * msa->nseq);
+    printf("%-40s ... ", "Determining eff seq # by clustering");
+    fflush(stdout);
+    BlosumWeights(msa->aseq, msa->nseq, msa->alen, cfg->eidlevel, wgt);
+    cfg->eff_nseq = FSum(wgt, msa->nseq);
+    free(wgt);
+  }
 
-  else if (cfg->eff_strategy == EFF_ENTROPY)
-    {
-      printf("%-40s ... ", "Determining eff seq # by entropy target");
-      fflush(stdout);
-      cfg->eff_nseq = Eweight(hmm, pri, (float) msa->nseq, cfg->etarget);
-    }
+  else if (cfg->eff_strategy == EFF_ENTROPY) {
+    printf("%-40s ... ", "Determining eff seq # by entropy target");
+    fflush(stdout);
+    cfg->eff_nseq = Eweight(hmm, pri, (float) msa->nseq, cfg->etarget);
+  }
 
   else
     Die("no effective seq # strategy: shouldn't happen");
@@ -953,25 +964,23 @@ set_effective_seqnumber(struct p7config_s *cfg, MSA *msa, struct plan7_s *hmm, s
  */
 static void
 print_all_scores(FILE *fp, struct plan7_s *hmm,
-     unsigned char **dsq, MSA *msa, struct p7trace_s **tr)
-{
+                 unsigned char **dsq, MSA *msa, struct p7trace_s **tr) {
   int idx;      /* counter for sequences */
 
-          /* make sure model scores are ready */
+  /* make sure model scores are ready */
   P7Logoddsify(hmm, TRUE);
-        /* header */
+  /* header */
   fputs("**\n", fp);
   fputs("Individual training sequence scores:\n", fp);
-        /* score for each sequence */
-  for (idx = 0; idx < msa->nseq; idx++)
-    {
-      fprintf(fp, "%7.2f %-12s %s\n",
-        P7TraceScore(hmm, dsq[idx], tr[idx]),
-        msa->sqname[idx],
-        (MSAGetSeqDescription(msa,idx) != NULL) ?
-         MSAGetSeqDescription(msa,idx) : "");
-      P7PrintTrace(fp, tr[idx], hmm, dsq[idx]);
-    }
+  /* score for each sequence */
+  for (idx = 0; idx < msa->nseq; idx++) {
+    fprintf(fp, "%7.2f %-12s %s\n",
+            P7TraceScore(hmm, dsq[idx], tr[idx]),
+            msa->sqname[idx],
+            (MSAGetSeqDescription(msa,idx) != NULL) ?
+            MSAGetSeqDescription(msa,idx) : "");
+    P7PrintTrace(fp, tr[idx], hmm, dsq[idx]);
+  }
   fputs("\n", fp);
 }
 
@@ -998,59 +1007,55 @@ print_all_scores(FILE *fp, struct plan7_s *hmm,
  *           hmm    - counts-based HMM
  */
 static void
-save_countvectors(FILE *cfp, char *cfile, char *name, struct plan7_s *hmm)
-{
+save_countvectors(FILE *cfp, char *cfile, char *name, struct plan7_s *hmm) {
   int k, x;
 
   printf("%-40s ... ", "Saving count vector file");
   fflush(stdout);
-        /* match emission vectors */
-  for (k = 1; k <= hmm->M; k++)
-    {
-      fputs("M ", cfp);
-      for (x = 0; x < Alphabet_size; x++)
-  fprintf(cfp, "%8.2f ", hmm->mat[k][x]);
+  /* match emission vectors */
+  for (k = 1; k <= hmm->M; k++) {
+    fputs("M ", cfp);
+    for (x = 0; x < Alphabet_size; x++)
+      fprintf(cfp, "%8.2f ", hmm->mat[k][x]);
 
-      fprintf(cfp, "%15s %6d %6d ", name, hmm->map[k], k);
-      if ((hmm->flags & PLAN7_CS) && hmm->flags & PLAN7_CA)
-  fprintf(cfp, "%c %c", hmm->cs[k], hmm->ca[k]);
-      else
-  fputs("- -", cfp);
-      fputs("\n", cfp);
-    }
-        /* insert emission vectors */
-  for (k = 1; k < hmm->M; k++)
-    {
-      fputs("I ", cfp);
-      for (x = 0; x < Alphabet_size; x++)
-  fprintf(cfp, "%8.2f ", hmm->ins[k][x]);
+    fprintf(cfp, "%15s %6d %6d ", name, hmm->map[k], k);
+    if ((hmm->flags & PLAN7_CS) && hmm->flags & PLAN7_CA)
+      fprintf(cfp, "%c %c", hmm->cs[k], hmm->ca[k]);
+    else
+      fputs("- -", cfp);
+    fputs("\n", cfp);
+  }
+  /* insert emission vectors */
+  for (k = 1; k < hmm->M; k++) {
+    fputs("I ", cfp);
+    for (x = 0; x < Alphabet_size; x++)
+      fprintf(cfp, "%8.2f ", hmm->ins[k][x]);
 
-      fprintf(cfp, "%15s %6d %6d ", name, hmm->map[k], k);
-      if ((hmm->flags & PLAN7_CS) && hmm->flags & PLAN7_CA)
-  fprintf(cfp, "%c %c", hmm->cs[k], hmm->ca[k]);
-      else
-  fputs("- -", cfp);
+    fprintf(cfp, "%15s %6d %6d ", name, hmm->map[k], k);
+    if ((hmm->flags & PLAN7_CS) && hmm->flags & PLAN7_CA)
+      fprintf(cfp, "%c %c", hmm->cs[k], hmm->ca[k]);
+    else
+      fputs("- -", cfp);
 
-      fputs("\n", cfp);
-    }
-        /* transition vectors */
-    for (k = 1; k < hmm->M; k++)
-    {
-      fputs("T ", cfp);
+    fputs("\n", cfp);
+  }
+  /* transition vectors */
+  for (k = 1; k < hmm->M; k++) {
+    fputs("T ", cfp);
 
-      for (x = 0; x < 7; x++)
-  fprintf(cfp, "%8.2f ", hmm->t[k][x]);
+    for (x = 0; x < 7; x++)
+      fprintf(cfp, "%8.2f ", hmm->t[k][x]);
 
-      fprintf(cfp, "%15s %6d %6d ", name, hmm->map[k], k);
-      if ((hmm->flags & PLAN7_CS) && hmm->flags & PLAN7_CA)
-  fprintf(cfp, "%c %c %c %c",
-    hmm->cs[k], hmm->cs[k+1],
-    hmm->ca[k], hmm->ca[k+1]);
-      else
-  fputs("- -", cfp);
-      fputs("\n", cfp);
-    }
-    printf("done. [%s]\n", cfile);
+    fprintf(cfp, "%15s %6d %6d ", name, hmm->map[k], k);
+    if ((hmm->flags & PLAN7_CS) && hmm->flags & PLAN7_CA)
+      fprintf(cfp, "%c %c %c %c",
+              hmm->cs[k], hmm->cs[k+1],
+              hmm->ca[k], hmm->ca[k+1]);
+    else
+      fputs("- -", cfp);
+    fputs("\n", cfp);
+  }
+  printf("done. [%s]\n", cfile);
 }
 
 
@@ -1080,13 +1085,12 @@ save_countvectors(FILE *cfp, char *cfile, char *name, struct plan7_s *hmm)
  */
 static void
 position_average_score(struct plan7_s    *hmm,
-           unsigned char    **dsq,
-           float             *wgt,
-           int                nseq,
-           struct p7trace_s **tr,
-           float             *pernode,
-           float             *ret_avg)
-{
+                       unsigned char    **dsq,
+                       float             *wgt,
+                       int                nseq,
+                       struct p7trace_s **tr,
+                       float             *pernode,
+                       float             *ret_avg) {
   unsigned char sym;
 //  int    pos;                   /* position in seq */
   int    tpos;                  /* position in trace/state sequence */
@@ -1104,43 +1108,41 @@ position_average_score(struct plan7_s    *hmm,
   /* Loop over traces, accumulate weighted scores per position
    */
   for (idx = 0; idx < nseq; idx++)
-    for (tpos = 0; tpos < tr[idx]->tlen; tpos++)
-      {
-  //pos = tr[idx]->pos[tpos];
-  sym = dsq[idx][tr[idx]->pos[tpos]];
-  k   = tr[idx]->nodeidx[tpos];
+    for (tpos = 0; tpos < tr[idx]->tlen; tpos++) {
+      //pos = tr[idx]->pos[tpos];
+      sym = dsq[idx][tr[idx]->pos[tpos]];
+      k   = tr[idx]->nodeidx[tpos];
 
-  /* Counts: how many times did we use this model position 1..M?
-         * (weighted)
-   */
-  if (tr[idx]->statetype[tpos] == STM || tr[idx]->statetype[tpos] == STD)
-    counts[k] += wgt[idx];
+      /* Counts: how many times did we use this model position 1..M?
+             * (weighted)
+       */
+      if (tr[idx]->statetype[tpos] == STM || tr[idx]->statetype[tpos] == STD)
+        counts[k] += wgt[idx];
 
-  /* Emission scores.
-   */
-  if (tr[idx]->statetype[tpos] == STM)
-    pernode[k] += wgt[idx] * Scorify(hmm->msc[sym][k]);
-  else if (tr[idx]->statetype[tpos] == STI)
-    pernode[k] += wgt[idx] * Scorify(hmm->isc[sym][k]);
+      /* Emission scores.
+       */
+      if (tr[idx]->statetype[tpos] == STM)
+        pernode[k] += wgt[idx] * Scorify(hmm->msc[sym][k]);
+      else if (tr[idx]->statetype[tpos] == STI)
+        pernode[k] += wgt[idx] * Scorify(hmm->isc[sym][k]);
 
-  /* Transition scores.
-   */
-  if (tr[idx]->statetype[tpos] == STM ||
-      tr[idx]->statetype[tpos] == STD ||
-      tr[idx]->statetype[tpos] == STI)
-    pernode[k] += wgt[idx] *
-      Scorify(TransitionScoreLookup(hmm, tr[idx]->statetype[tpos], tr[idx]->nodeidx[tpos],
-            tr[idx]->statetype[tpos+1],tr[idx]->nodeidx[tpos+1]));
-      }
+      /* Transition scores.
+       */
+      if (tr[idx]->statetype[tpos] == STM ||
+          tr[idx]->statetype[tpos] == STD ||
+          tr[idx]->statetype[tpos] == STI)
+        pernode[k] += wgt[idx] *
+                      Scorify(TransitionScoreLookup(hmm, tr[idx]->statetype[tpos], tr[idx]->nodeidx[tpos],
+                              tr[idx]->statetype[tpos+1],tr[idx]->nodeidx[tpos+1]));
+    }
 
   /* Divide accumulated scores by accumulated weighted counts
    */
   avg = 0.;
-  for (k = 1; k <= hmm->M; k++)
-    {
-      pernode[k] /= counts[k];
-      avg += pernode[k];
-    }
+  for (k = 1; k <= hmm->M; k++) {
+    pernode[k] /= counts[k];
+    avg += pernode[k];
+  }
 
   free(counts);
   *ret_avg = avg;
@@ -1161,25 +1163,24 @@ position_average_score(struct plan7_s    *hmm,
  */
 static float
 frag_trace_score(struct plan7_s *hmm, unsigned char *dsq, struct p7trace_s *tr,
-                 float *pernode, float expected)
-{
+                 float *pernode, float expected) {
   float sc;      /* corrected score  */
   float fragexp;    /* expected score for a trace like this */
   int   tpos;      /* position in trace */
 
-                                /* get uncorrected score */
+  /* get uncorrected score */
   sc = P7TraceScore(hmm, dsq, tr);
 
-                               /* calc expected score for trace like this */
+  /* calc expected score for trace like this */
   fragexp = 0.;
   for (tpos = 0; tpos < tr->tlen; tpos++)
     if (tr->statetype[tpos] == STM || tr->statetype[tpos] == STD)
       fragexp += pernode[tr->nodeidx[tpos]];
 
-        /* correct for multihits */
+  /* correct for multihits */
   fragexp /= (float) TraceDomainNumber(tr);
 
-                                /* extrapolate to full-length, one-hit score */
+  /* extrapolate to full-length, one-hit score */
   sc = sc * expected / fragexp;
   return sc;
 }
@@ -1216,8 +1217,7 @@ frag_trace_score(struct plan7_s *hmm, unsigned char *dsq, struct p7trace_s *tr,
  */
 static void
 maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
-    float eff_nseq, struct p7prior_s *prior, struct p7trace_s **tr)
-{
+                float eff_nseq, struct p7prior_s *prior, struct p7trace_s **tr) {
   float *wgt;                  /* current best set of ME weights   */
   float *new_wgt;              /* new set of ME weights to try     */
   float *sc;                    /* log-odds score of each sequence */
@@ -1262,10 +1262,10 @@ maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
   printf("iter avg-sc min-sc max-sc min-wgt max-wgt +wgt ++wgt rel.ent convergence\n");
   printf("---- ------ ------ ------ ------- ------- ---- ----- ------- -----------\n");
   mins = maxs = avgs = sc[0];
-  for (idx = 1; idx < msa->nseq; idx++){
-      if (sc[idx] < mins) mins = sc[idx];
-      if (sc[idx] > maxs) maxs = sc[idx];
-      avgs += sc[idx];
+  for (idx = 1; idx < msa->nseq; idx++) {
+    if (sc[idx] < mins) mins = sc[idx];
+    if (sc[idx] > maxs) maxs = sc[idx];
+    avgs += sc[idx];
   }
   avgs /= (float) msa->nseq;
   printf("%4d %6.1f %6.1f %6.1f %7.2f %7.2f %4d %5d %7.2f %8s\n",
@@ -1276,7 +1276,7 @@ maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
    * iterate until relative entropy converges.
    */
   i1 = 0;
-  while (++i1 < max_iter){
+  while (++i1 < max_iter) {
     /* Gradient gives us a line of steepest descents.
      * (Roughly speaking, anyway. We actually have a constraint
      * that weights are nonnegative and normalized, and the
@@ -1285,91 +1285,90 @@ maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
      * if new point is better, accept; if new point is worse,
      * move back along the line by half the distance and re-evaluate.
      */
-     float  new_entropy;           /* relative entropy at new weights */
-     float  use_epsilon;           /* current epsilon value in use    */
+    float  new_entropy;           /* relative entropy at new weights */
+    float  use_epsilon;           /* current epsilon value in use    */
     use_epsilon = epsilon;
     new_entropy = relative_entropy + 1.0;    /* just ensure new > old */
 
     int i2;    /* counters for iterations         */
     i2 = 0;
-    while (new_entropy > relative_entropy && ++i2 < max_iter){
+    while (new_entropy > relative_entropy && ++i2 < max_iter) {
       last_new_entropy = new_entropy;
 
-                            /* find a new point in weight space */
-      for (idx = 0; idx < msa->nseq; idx++){
-          new_wgt[idx] = wgt[idx] + use_epsilon * grad[idx];
-          if (new_wgt[idx] < 0.) new_wgt[idx] = 0.0;
+      /* find a new point in weight space */
+      for (idx = 0; idx < msa->nseq; idx++) {
+        new_wgt[idx] = wgt[idx] + use_epsilon * grad[idx];
+        if (new_wgt[idx] < 0.) new_wgt[idx] = 0.0;
       }
       FNorm(new_wgt, msa->nseq);
       FScale(new_wgt, msa->nseq, eff_nseq);
 
-                            /* Make new HMM using these weights */
+      /* Make new HMM using these weights */
       ZeroPlan7(hmm);
       for (idx = 0; idx < msa->nseq; idx++)
         P7TraceCount(hmm, dsq[idx], new_wgt[idx], tr[idx]);
       P7PriorifyHMM(hmm, prior);
 
 
-                                /* Evaluate new point */
-    Plan7SWConfig(hmm, 0.5, 0.5);
-    P7Logoddsify(hmm, TRUE);
-    position_average_score(hmm, dsq, new_wgt, msa->nseq, tr, pernode, &expscore);
-    for (idx = 0; idx < msa->nseq; idx++)
-      sc[idx]      = frag_trace_score(hmm, dsq[idx], tr[idx], pernode, expscore);
-    new_entropy = FDot(sc, new_wgt, msa->nseq) / (float) msa->nseq;
-
-    use_epsilon /= 2.0;
-    /* Failsafe: we're not converging. Set epsilon to zero,
-     * do one more round.
-     */
-    if (use_epsilon < 1e-6) use_epsilon = 0.0;
-    if (use_epsilon == 0.0) break;
-
-          /* Failsafe: avoid infinite loops. Sometimes the
-             new entropy converges without ever being better
-             than the previous point, probably as a result
-             of minor roundoff error. */
-          if (last_new_entropy == new_entropy) break;
-        }
-      if (i2 == max_iter) printf("   -- exceeded maximum iterations; giving up --\n");
-
-      /* Evaluate convergence before accepting the new weights;
-       * then, accept the new point and evaluate the gradient there.
-       */
-      float  converge_criterion;
-      converge_criterion = fabs((relative_entropy-new_entropy)/relative_entropy);
-      relative_entropy = new_entropy;
-      FCopy(wgt, new_wgt, msa->nseq);
+      /* Evaluate new point */
+      Plan7SWConfig(hmm, 0.5, 0.5);
+      P7Logoddsify(hmm, TRUE);
+      position_average_score(hmm, dsq, new_wgt, msa->nseq, tr, pernode, &expscore);
       for (idx = 0; idx < msa->nseq; idx++)
+        sc[idx]      = frag_trace_score(hmm, dsq[idx], tr[idx], pernode, expscore);
+      new_entropy = FDot(sc, new_wgt, msa->nseq) / (float) msa->nseq;
+
+      use_epsilon /= 2.0;
+      /* Failsafe: we're not converging. Set epsilon to zero,
+       * do one more round.
+       */
+      if (use_epsilon < 1e-6) use_epsilon = 0.0;
+      if (use_epsilon == 0.0) break;
+
+      /* Failsafe: avoid infinite loops. Sometimes the
+         new entropy converges without ever being better
+         than the previous point, probably as a result
+         of minor roundoff error. */
+      if (last_new_entropy == new_entropy) break;
+    }
+    if (i2 == max_iter) printf("   -- exceeded maximum iterations; giving up --\n");
+
+    /* Evaluate convergence before accepting the new weights;
+     * then, accept the new point and evaluate the gradient there.
+     */
+    float  converge_criterion;
+    converge_criterion = fabs((relative_entropy-new_entropy)/relative_entropy);
+    relative_entropy = new_entropy;
+    FCopy(wgt, new_wgt, msa->nseq);
+    for (idx = 0; idx < msa->nseq; idx++)
       grad[idx] = relative_entropy - sc[idx];
 
-      /* Print some statistics about this iteration
-       */
-       float  minw, maxw;            /* min, max weight                 */
-       int    posw, highw;           /* number of positive weights      */
-      mins = maxs = avgs = sc[0];
-      minw = maxw = wgt[0];
-      posw = (wgt[0] > 0.0) ? 1 : 0;
-      highw = (wgt[0] > 1.0) ? 1 : 0;
-      for (idx = 1; idx < msa->nseq; idx++)
-        {
-          if (sc[idx] < mins) mins = sc[idx];
-          if (sc[idx] > maxs) maxs = sc[idx];
-          if (wgt[idx] < minw) minw = wgt[idx];
-          if (wgt[idx] > maxw) maxw = wgt[idx];
-          if (wgt[idx] > 0.0)  posw++;
-          if (wgt[idx] > 1.0)  highw++;
-          avgs += sc[idx];
-        }
-      avgs /= (float) msa->nseq;
-      printf("%4d %6.1f %6.1f %6.1f %7.2f %7.2f %4d %5d %7.2f %8.5f\n",
-             i1,
-             avgs, mins, maxs,
-             minw, maxw, posw, highw,
-             relative_entropy, converge_criterion);
-
-      if (converge_criterion < 1e-5) break;
+    /* Print some statistics about this iteration
+     */
+    float  minw, maxw;            /* min, max weight                 */
+    int    posw, highw;           /* number of positive weights      */
+    mins = maxs = avgs = sc[0];
+    minw = maxw = wgt[0];
+    posw = (wgt[0] > 0.0) ? 1 : 0;
+    highw = (wgt[0] > 1.0) ? 1 : 0;
+    for (idx = 1; idx < msa->nseq; idx++) {
+      if (sc[idx] < mins) mins = sc[idx];
+      if (sc[idx] > maxs) maxs = sc[idx];
+      if (wgt[idx] < minw) minw = wgt[idx];
+      if (wgt[idx] > maxw) maxw = wgt[idx];
+      if (wgt[idx] > 0.0)  posw++;
+      if (wgt[idx] > 1.0)  highw++;
+      avgs += sc[idx];
     }
+    avgs /= (float) msa->nseq;
+    printf("%4d %6.1f %6.1f %6.1f %7.2f %7.2f %4d %5d %7.2f %8.5f\n",
+           i1,
+           avgs, mins, maxs,
+           minw, maxw, posw, highw,
+           relative_entropy, converge_criterion);
+
+    if (converge_criterion < 1e-5) break;
+  }
   if (i1 == max_iter) printf("   -- exceeded maximum iterations; giving up --\n");
 
   /* Renormalize weights to sum to eff_nseq, and save.
@@ -1377,7 +1376,7 @@ maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
   FNorm(wgt, msa->nseq);
   FScale(wgt, msa->nseq, (float) eff_nseq);
   FCopy(msa->wgt, wgt, msa->nseq);
-      /* Make final HMM using these adjusted weights */
+  /* Make final HMM using these adjusted weights */
   ZeroPlan7(hmm);
   for (idx = 0; idx < msa->nseq; idx++)
     P7TraceCount(hmm, dsq[idx], wgt[idx], tr[idx]);
@@ -1416,27 +1415,23 @@ maximum_entropy(struct plan7_s *hmm, unsigned char **dsq, MSA *msa,
  * Oh well.
  */
 static void
-set_model_name(struct plan7_s *hmm, char *setname, char *msa_name, char *alifile, int nali)
-{
+set_model_name(struct plan7_s *hmm, char *setname, char *msa_name, char *alifile, int nali) {
   char *name = NULL;
 
   printf("%-40s ... ", "Set model name, record commandline");
   fflush(stdout);
 
-  if (nali == 0)    /* first (only?) HMM in file:  */
-    {
-      if      (setname  != NULL) name = Strdup(setname);
-      else if (msa_name != NULL) name = Strdup(msa_name);
-      else                       name = FileTail(alifile, TRUE);
-    }
-  else
-    {
-      if (setname != NULL)
-  Die("Oops. Wait. You can't use -n with an alignment database.");
-      else if (msa_name != NULL) name = Strdup(msa_name);
-      else
-  Die("Oops. Wait. I need name annotation on each alignment.\n");
-    }
+  if (nali == 0) {  /* first (only?) HMM in file:  */
+    if      (setname  != NULL) name = Strdup(setname);
+    else if (msa_name != NULL) name = Strdup(msa_name);
+    else                       name = FileTail(alifile, TRUE);
+  } else {
+    if (setname != NULL)
+      Die("Oops. Wait. You can't use -n with an alignment database.");
+    else if (msa_name != NULL) name = Strdup(msa_name);
+    else
+      Die("Oops. Wait. I need name annotation on each alignment.\n");
+  }
   Plan7SetName(hmm, name);
   if(name) free(name);
   printf("done. [%s]\n", hmm->name);
@@ -1458,15 +1453,14 @@ set_model_name(struct plan7_s *hmm, char *setname, char *msa_name, char *alifile
  */
 static void
 print_statistics(FILE *fp, struct plan7_s *hmm, unsigned char **dsq, int nseq,
-     struct p7trace_s **tr)
-{
+                 struct p7trace_s **tr) {
   int   idx;      /* counter for sequences                */
   float score;      /* an individual trace score            */
   float total, best, worst;  /* for the avg. and range of the scores */
   float sqsum, stddev;    /* for the std. deviation of the scores */
 
   P7Logoddsify(hmm, TRUE);
-        /* find individual trace scores */
+  /* find individual trace scores */
   score = P7TraceScore(hmm, dsq[0], tr[0]);
   total = best = worst = score;
   sqsum = score * score;
@@ -1482,7 +1476,7 @@ print_statistics(FILE *fp, struct plan7_s *hmm, unsigned char **dsq, int nseq,
     stddev = (sqsum - (total * total / (float) nseq)) / ((float) nseq - 1.);
     stddev = (stddev > 0) ? sqrt(stddev) : 0.0;
   } else stddev = 0.0;
-        /* print out stuff. */
+  /* print out stuff. */
   fprintf(fp, "Average score:  %10.2f bits\n", total / (float) nseq);
   fprintf(fp, "Minimum score:  %10.2f bits\n", worst);
   fprintf(fp, "Maximum score:  %10.2f bits\n", best);
@@ -1504,8 +1498,7 @@ print_statistics(FILE *fp, struct plan7_s *hmm, unsigned char **dsq, int nseq,
  */
 static void
 save_hmmbuild_alignment(FILE *alignfp, MSA *msa, unsigned char **dsq, struct plan7_s *hmm,
-      struct p7trace_s **tr)
-{
+                        struct p7trace_s **tr) {
   MSA    *new_msa;
   SQINFO *sqinfo;
   int     idx;
@@ -1514,7 +1507,7 @@ save_hmmbuild_alignment(FILE *alignfp, MSA *msa, unsigned char **dsq, struct pla
   fflush(stdout);
   sqinfo  = MSAToSqinfo(msa);
   new_msa = P7Traces2Alignment(dsq, sqinfo, msa->wgt, msa->nseq,
-             hmm->M, tr, FALSE);
+                               hmm->M, tr, FALSE);
   WriteStockholm(alignfp, new_msa);
   MSAFree(new_msa);
   for (idx = 0; idx < msa->nseq; idx++)

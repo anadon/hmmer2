@@ -57,21 +57,21 @@ static char experts[] = "\
 ";
 
 static struct opt_s OPTIONS[] = {
-   { "-h",         TRUE,  sqdARG_NONE  },
-   { "--cpu",      FALSE, sqdARG_INT },
-   { "--fixed",    FALSE, sqdARG_INT   },
-   { "--histfile", FALSE, sqdARG_STRING },
-   { "--mean",     FALSE, sqdARG_FLOAT },
-   { "--num",      FALSE, sqdARG_INT   },
-   { "--sd",       FALSE, sqdARG_FLOAT },
-   { "--seed",     FALSE, sqdARG_INT},
+  { "-h",         TRUE,  sqdARG_NONE  },
+  { "--cpu",      FALSE, sqdARG_INT },
+  { "--fixed",    FALSE, sqdARG_INT   },
+  { "--histfile", FALSE, sqdARG_STRING },
+  { "--mean",     FALSE, sqdARG_FLOAT },
+  { "--num",      FALSE, sqdARG_INT   },
+  { "--sd",       FALSE, sqdARG_FLOAT },
+  { "--seed",     FALSE, sqdARG_INT},
 };
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
 
 static void main_loop_serial(struct plan7_s *hmm, int seed, int nsample,
-           float lenmean, float lensd, int fixedlen,
-           struct histogram_s **ret_hist, float *ret_max);
+                             float lenmean, float lensd, int fixedlen,
+                             struct histogram_s **ret_hist, float *ret_max);
 
 
 /* A structure of this type is shared by worker threads in the POSIX
@@ -105,23 +105,22 @@ struct workpool_s {
   pthread_mutex_t output_lock;  /* a mutex protecting output fields */
 };
 static void main_loop_threaded(struct plan7_s *hmm, int seed, int nsample,
-             float lenmean, float lensd, int fixedlen,
-             int nthreads,
-             struct histogram_s **ret_hist, float *ret_max,
-             Stopwatch_t *twatch);
+                               float lenmean, float lensd, int fixedlen,
+                               int nthreads,
+                               struct histogram_s **ret_hist, float *ret_max,
+                               Stopwatch_t *twatch);
 static struct workpool_s *workpool_start(struct plan7_s *hmm,
-         float lenmean, float lensd, int fixedlen,
-         float *randomseq, int nsample,
-         struct histogram_s *hist,
-         int num_threads);
+    float lenmean, float lensd, int fixedlen,
+    float *randomseq, int nsample,
+    struct histogram_s *hist,
+    int num_threads);
 static void  workpool_stop(struct workpool_s *wpool);
 static void  workpool_free(struct workpool_s *wpool);
 static void *worker_thread(void *ptr);
 
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char    *hmmfile;             /* HMM file to open                */
   char    *tmpfile;             /* temporary calibrated HMM file   */
   HMMFILE *hmmfp;               /* opened hmm file pointer         */
@@ -174,23 +173,21 @@ main(int argc, char **argv)
   num_threads  = sysconf(_SC_NPROCESSORS_ONLN);
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
-    &optind, &optname, &optarg))
-    {
-      if      (strcmp(optname, "--cpu")      == 0) num_threads  = atoi(optarg);
-      else if (strcmp(optname, "--fixed")    == 0) fixedlen = atoi(optarg);
-      else if (strcmp(optname, "--histfile") == 0) histfile = optarg;
-      else if (strcmp(optname, "--mean")     == 0) lenmean  = atof(optarg);
-      else if (strcmp(optname, "--num")      == 0) nsample  = atoi(optarg);
-      else if (strcmp(optname, "--sd")       == 0) lensd    = atof(optarg);
-      else if (strcmp(optname, "--seed")     == 0) seed     = atoi(optarg);
-      else if (strcmp(optname, "-h") == 0)
-  {
-    HMMERBanner(stdout, banner);
-    puts(usage);
-    puts(experts);
-    exit(0);
-  }
+                &optind, &optname, &optarg)) {
+    if      (strcmp(optname, "--cpu")      == 0) num_threads  = atoi(optarg);
+    else if (strcmp(optname, "--fixed")    == 0) fixedlen = atoi(optarg);
+    else if (strcmp(optname, "--histfile") == 0) histfile = optarg;
+    else if (strcmp(optname, "--mean")     == 0) lenmean  = atof(optarg);
+    else if (strcmp(optname, "--num")      == 0) nsample  = atoi(optarg);
+    else if (strcmp(optname, "--sd")       == 0) lensd    = atof(optarg);
+    else if (strcmp(optname, "--seed")     == 0) seed     = atoi(optarg);
+    else if (strcmp(optname, "-h") == 0) {
+      HMMERBanner(stdout, banner);
+      puts(usage);
+      puts(experts);
+      exit(0);
     }
+  }
 
   if (argc - optind != 1) Die("Incorrect number of arguments.\n%s\n", usage);
   hmmfile = argv[optind++];
@@ -200,11 +197,11 @@ main(int argc, char **argv)
    * Open our i/o file pointers, make sure all is well
    ***********************************************/
 
-        /* HMM file */
+  /* HMM file */
   if ((hmmfp = HMMFileOpen(hmmfile, NULL)) == NULL)
     Die("failed to open HMM file %s for reading.", hmmfile);
 
-        /* histogram file */
+  /* histogram file */
   hfp = NULL;
   if (histfile != NULL) {
     if ((hfp = fopen(histfile, "w")) == NULL)
@@ -243,7 +240,7 @@ main(int argc, char **argv)
   printf("Number of samples:        %d\n", nsample);
   printf("random seed:              %d\n", seed);
   printf("histogram(s) saved to:    %s\n",
-   histfile != NULL ? histfile : "[not saved]");
+         histfile != NULL ? histfile : "[not saved]");
   if (num_threads > 0)
     printf("POSIX threads:            %d\n", num_threads);
   printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
@@ -260,55 +257,53 @@ main(int argc, char **argv)
   mu     = MallocOrDie(sizeof(float) * mu_lumpsize);
   lambda = MallocOrDie(sizeof(float) * mu_lumpsize);
 
-  while (HMMFileRead(hmmfp, &hmm))
-    {
-      if (hmm == NULL)
-  Die("HMM file may be corrupt or in incorrect format; parse failed");
+  while (HMMFileRead(hmmfp, &hmm)) {
+    if (hmm == NULL)
+      Die("HMM file may be corrupt or in incorrect format; parse failed");
 
-      if (num_threads <= 1)
-  main_loop_serial(hmm, seed, nsample, lenmean, lensd, fixedlen,
-       &hist, &max);
-      else if (num_threads > 0)
-  main_loop_threaded(hmm, seed, nsample, lenmean, lensd, fixedlen,
-         num_threads, &hist, &max, &extrawatch);
-      else
-  Die("wait. that can't happen. I didn't do anything.");
+    if (num_threads <= 1)
+      main_loop_serial(hmm, seed, nsample, lenmean, lensd, fixedlen,
+                       &hist, &max);
+    else if (num_threads > 0)
+      main_loop_threaded(hmm, seed, nsample, lenmean, lensd, fixedlen,
+                         num_threads, &hist, &max, &extrawatch);
+    else
+      Die("wait. that can't happen. I didn't do anything.");
 
 
-      /* Fit an EVD to the observed histogram.
-       * The TRUE left-censors and fits only the right slope of the histogram.
-       * The 9999. is an arbitrary high number that means we won't trim
-       * outliers on the right.
-       */
-      if (! ExtremeValueFitHistogram(hist, TRUE, 9999.))
-  Die("fit failed; --num may be set too small?\n");
+    /* Fit an EVD to the observed histogram.
+     * The TRUE left-censors and fits only the right slope of the histogram.
+     * The 9999. is an arbitrary high number that means we won't trim
+     * outliers on the right.
+     */
+    if (! ExtremeValueFitHistogram(hist, TRUE, 9999.))
+      Die("fit failed; --num may be set too small?\n");
 
-      mu[nhmm]     = hist->param[EVD_MU];
-      lambda[nhmm] = hist->param[EVD_LAMBDA];
-      nhmm++;
-      if (nhmm % 100 == 0) {
-  mu     = ReallocOrDie(mu,     sizeof(float) * (nhmm+mu_lumpsize));
-  lambda = ReallocOrDie(lambda, sizeof(float) * (nhmm+mu_lumpsize));
-      }
-
-      /* Output
-       */
-      printf("HMM    : %s\n",   hmm->name);
-      printf("mu     : %12f\n", hist->param[EVD_MU]);
-      printf("lambda : %12f\n", hist->param[EVD_LAMBDA]);
-      printf("max    : %12f\n", max);
-      printf("//\n");
-
-      if (hfp != NULL)
-  {
-    fprintf(hfp, "HMM: %s\n", hmm->name);
-    PrintASCIIHistogram(hfp, hist);
-    fprintf(hfp, "//\n");
-  }
-
-      FreeHistogram(hist);
-      FreePlan7(hmm);
+    mu[nhmm]     = hist->param[EVD_MU];
+    lambda[nhmm] = hist->param[EVD_LAMBDA];
+    nhmm++;
+    if (nhmm % 100 == 0) {
+      mu     = ReallocOrDie(mu,     sizeof(float) * (nhmm+mu_lumpsize));
+      lambda = ReallocOrDie(lambda, sizeof(float) * (nhmm+mu_lumpsize));
     }
+
+    /* Output
+     */
+    printf("HMM    : %s\n",   hmm->name);
+    printf("mu     : %12f\n", hist->param[EVD_MU]);
+    printf("lambda : %12f\n", hist->param[EVD_LAMBDA]);
+    printf("max    : %12f\n", max);
+    printf("//\n");
+
+    if (hfp != NULL) {
+      fprintf(hfp, "HMM: %s\n", hmm->name);
+      PrintASCIIHistogram(hfp, hist);
+      fprintf(hfp, "//\n");
+    }
+
+    FreeHistogram(hist);
+    FreePlan7(hmm);
+  }
   SQD_DPRINTF1(("Main body believes it has calibrations for %d HMMs\n", nhmm));
 
   /*****************************************************************
@@ -322,29 +317,28 @@ main(int argc, char **argv)
   if ((outfp = fopen(tmpfile, mode)) == NULL)
     Die("Ouch. Temporary file %s couldn't be opened for writing.", tmpfile);
 
-  for (idx = 0; idx < nhmm; idx++)
-    {
-      /* Sanity checks
-       */
-      if (!HMMFileRead(hmmfp, &hmm))
-  Die("Ran out of HMMs too early in pass 2");
-      if (hmm == NULL)
-  Die("HMM file %s was corrupted? Parse failed in pass 2", hmmfile);
+  for (idx = 0; idx < nhmm; idx++) {
+    /* Sanity checks
+     */
+    if (!HMMFileRead(hmmfp, &hmm))
+      Die("Ran out of HMMs too early in pass 2");
+    if (hmm == NULL)
+      Die("HMM file %s was corrupted? Parse failed in pass 2", hmmfile);
 
-      /* Put results in HMM
-       */
-      hmm->mu     = mu[idx];
-      hmm->lambda = lambda[idx];
-      hmm->flags |= PLAN7_STATS;
-      Plan7ComlogAppend(hmm, argc, argv);
+    /* Put results in HMM
+     */
+    hmm->mu     = mu[idx];
+    hmm->lambda = lambda[idx];
+    hmm->flags |= PLAN7_STATS;
+    Plan7ComlogAppend(hmm, argc, argv);
 
-      /* Save HMM to tmpfile
-       */
-      if (hmmfp->is_binary) WriteBinHMM(outfp, hmm);
-      else                  WriteAscHMM(outfp, hmm);
+    /* Save HMM to tmpfile
+     */
+    if (hmmfp->is_binary) WriteBinHMM(outfp, hmm);
+    else                  WriteAscHMM(outfp, hmm);
 
-      FreePlan7(hmm);
-    }
+    FreePlan7(hmm);
+  }
 
   /*****************************************************************
    * Now, carefully remove original file and replace it
@@ -398,9 +392,8 @@ main(int argc, char **argv)
  */
 static void
 main_loop_serial(struct plan7_s *hmm, int seed, int nsample,
-     float lenmean, float lensd, int fixedlen,
-     struct histogram_s **ret_hist, float *ret_max)
-{
+                 float lenmean, float lensd, int fixedlen,
+                 struct histogram_s **ret_hist, float *ret_max) {
   struct histogram_s *hist;
   struct dpmatrix_s  *mx;
   float  randomseq[MAXABET];
@@ -419,11 +412,12 @@ main_loop_serial(struct plan7_s *hmm, int seed, int nsample,
   mx = CreatePlan7Matrix(1, hmm->M, 25, 0);
   max = -FLT_MAX;
 
-  for (int idx = 0; idx < nsample; idx++){
+  for (int idx = 0; idx < nsample; idx++) {
     float  score;
     /* choose length of random sequence */
     if (fixedlen) sqlen = fixedlen;
-    else do sqlen = (int) Gaussrandom(lenmean, lensd); while (sqlen < 1);
+    else do sqlen = (int) Gaussrandom(lenmean, lensd);
+      while (sqlen < 1);
     /* generate it */
     char  *seq;
     unsigned char  *dsq;
@@ -481,11 +475,10 @@ main_loop_serial(struct plan7_s *hmm, int seed, int nsample,
  */
 static void
 main_loop_threaded(struct plan7_s *hmm, int seed, int nsample,
-       float lenmean, float lensd, int fixedlen,
-       int nthreads,
-       struct histogram_s **ret_hist, float *ret_max,
-       Stopwatch_t *twatch)
-{
+                   float lenmean, float lensd, int fixedlen,
+                   int nthreads,
+                   struct histogram_s **ret_hist, float *ret_max,
+                   Stopwatch_t *twatch) {
   struct histogram_s *hist;
   float  randomseq[MAXABET];
   float  p1;
@@ -501,7 +494,7 @@ main_loop_threaded(struct plan7_s *hmm, int seed, int nsample,
   hist = AllocHistogram(-200, 200, 100);
 
   wpool = workpool_start(hmm, lenmean, lensd, fixedlen, randomseq, nsample,
-       hist, nthreads);
+                         hist, nthreads);
   workpool_stop(wpool);
 
   *ret_hist = hist;
@@ -544,9 +537,8 @@ main_loop_threaded(struct plan7_s *hmm, int seed, int nsample,
  */
 static struct workpool_s *
 workpool_start(struct plan7_s *hmm, float lenmean, float lensd, int fixedlen,
-         float *randomseq, int nsample, struct histogram_s *hist,
-         int num_threads)
-{
+               float *randomseq, int nsample, struct histogram_s *hist,
+               int num_threads) {
   struct workpool_s *wpool;
   pthread_attr_t    attr;
   int i;
@@ -579,7 +571,7 @@ workpool_start(struct plan7_s *hmm, float lenmean, float lensd, int fixedlen,
   pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
   for (i = 0; i < num_threads; i++)
     if ((rtn = pthread_create(&(wpool->thread[i]), &attr,
-            worker_thread , (void *) wpool)) != 0)
+                              worker_thread, (void *) wpool)) != 0)
       Die("Failed to create thread %d; return code %d\n", i, rtn);
 
   pthread_attr_destroy(&attr);
@@ -597,10 +589,9 @@ workpool_start(struct plan7_s *hmm, float lenmean, float lensd, int fixedlen,
  * Returns:  (void)
  */
 static void
-workpool_stop(struct workpool_s *wpool)
-{
+workpool_stop(struct workpool_s *wpool) {
   int i;
-        /* wait for threads to stop */
+  /* wait for threads to stop */
   for (i = 0; i < wpool->num_threads; i++)
     if (pthread_join(wpool->thread[i],NULL) != 0)
       Die("pthread_join failed");
@@ -618,8 +609,7 @@ workpool_stop(struct workpool_s *wpool)
  * Returns:  (void)
  */
 static void
-workpool_free(struct workpool_s *wpool)
-{
+workpool_free(struct workpool_s *wpool) {
   free(wpool->thread);
   free(wpool);
   return;
@@ -636,8 +626,7 @@ workpool_free(struct workpool_s *wpool)
  * Returns:  (void *)
  */
 void *
-worker_thread(void *ptr)
-{
+worker_thread(void *ptr) {
   struct plan7_s    *hmm;
   struct dpmatrix_s *mx;
   struct workpool_s *wpool;
@@ -649,77 +638,77 @@ worker_thread(void *ptr)
   wpool = (struct workpool_s *) ptr;
   hmm   = wpool->hmm;
   mx    = CreatePlan7Matrix(1, hmm->M, 25, 0);
-  for (;;)
-    {
-      /* 1. Synthesize a random sequence.
-       *    The input sequence number is a shared resource,
-       *    and sre_random() isn't thread-safe, so protect
-       *    the whole section with mutex.
-       */
-        /* acquire a lock */
-      if ((rtn = pthread_mutex_lock(&(wpool->input_lock))) != 0)
-  Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
-        /* generate a sequence */
-      wpool->nseq++;
-      if (wpool->nseq > wpool->nsample)
-  { /* we're done; release input lock, break loop */
+  for (;;) {
+    /* 1. Synthesize a random sequence.
+     *    The input sequence number is a shared resource,
+     *    and sre_random() isn't thread-safe, so protect
+     *    the whole section with mutex.
+     */
+    /* acquire a lock */
+    if ((rtn = pthread_mutex_lock(&(wpool->input_lock))) != 0)
+      Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
+    /* generate a sequence */
+    wpool->nseq++;
+    if (wpool->nseq > wpool->nsample) {
+      /* we're done; release input lock, break loop */
+      if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
+        Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+      break;
+    }
+    if (wpool->fixedlen) len = wpool->fixedlen;
+    else do len = (int) Gaussrandom(wpool->lenmean, wpool->lensd);
+      while (len < 1);
+    char *seq;
+    seq = RandomSequence(Alphabet, wpool->randomseq, Alphabet_size, len);
+
+    /* release the lock */
     if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
       Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-    break;
-  }
-      if (wpool->fixedlen) len = wpool->fixedlen;
-      else do len = (int) Gaussrandom(wpool->lenmean, wpool->lensd); while (len < 1);
-      char *seq;
-      seq = RandomSequence(Alphabet, wpool->randomseq, Alphabet_size, len);
 
-        /* release the lock */
-      if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
-  Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+    /* 2. Score the sequence against the model.
+     */
+    unsigned char *dsq;
+    dsq = DigitizeSequence(seq, len);
 
-      /* 2. Score the sequence against the model.
-       */
-      unsigned char *dsq;
-      dsq = DigitizeSequence(seq, len);
-
-      float       sc;
+    float       sc;
 #ifdef ALTIVEC
-      /* We only need the score here (not the trace), so we can just
-       * call the fast Altivec routine directly. The memory needs in this
-       * routine is only proportional to the modem length (hmm->M), and
-       * preallocated, so we don't have to consider the low-memory alternative.
-       */
-      sc = P7ViterbiNoTrace(dsq, len, hmm, mx);
+    /* We only need the score here (not the trace), so we can just
+     * call the fast Altivec routine directly. The memory needs in this
+     * routine is only proportional to the modem length (hmm->M), and
+     * preallocated, so we don't have to consider the low-memory alternative.
+     */
+    sc = P7ViterbiNoTrace(dsq, len, hmm, mx);
 #else
-      if (P7ViterbiSpaceOK(len, hmm->M, mx))
-          sc = P7Viterbi(dsq, len, hmm, mx, NULL);
-      else
-          sc = P7SmallViterbi(dsq, len, hmm, mx, NULL);
+    if (P7ViterbiSpaceOK(len, hmm->M, mx))
+      sc = P7Viterbi(dsq, len, hmm, mx, NULL);
+    else
+      sc = P7SmallViterbi(dsq, len, hmm, mx, NULL);
 #endif
 
-      free(dsq);
-      free(seq);
+    free(dsq);
+    free(seq);
 
-      /* 3. Save the output; hist and max_score are shared,
-       *    so protect this section with the output mutex.
-       */
-      /* acquire lock on the output queue */
-      if ((rtn = pthread_mutex_lock(&(wpool->output_lock))) != 0)
-          Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
-      /* save output */
-      AddToHistogram(wpool->hist, sc);
-      if (sc > wpool->max_score) wpool->max_score = sc;
-      /* release our lock */
-      if ((rtn = pthread_mutex_unlock(&(wpool->output_lock))) != 0)
-          Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-    }
+    /* 3. Save the output; hist and max_score are shared,
+     *    so protect this section with the output mutex.
+     */
+    /* acquire lock on the output queue */
+    if ((rtn = pthread_mutex_lock(&(wpool->output_lock))) != 0)
+      Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
+    /* save output */
+    AddToHistogram(wpool->hist, sc);
+    if (sc > wpool->max_score) wpool->max_score = sc;
+    /* release our lock */
+    if ((rtn = pthread_mutex_unlock(&(wpool->output_lock))) != 0)
+      Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+  }
 
   StopwatchStop(&thread_watch);
   /* acquire lock on the output queue */
   if ((rtn = pthread_mutex_lock(&(wpool->output_lock))) != 0)
     Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
-        /* accumulate cpu time into main stopwatch */
+  /* accumulate cpu time into main stopwatch */
   StopwatchInclude(&(wpool->watch), &thread_watch);
-            /* release our lock */
+  /* release our lock */
   if ((rtn = pthread_mutex_unlock(&(wpool->output_lock))) != 0)
     Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
 

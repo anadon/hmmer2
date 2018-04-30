@@ -2,17 +2,17 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
  *****************************************************************/
 
 /* translate_main.c
- * 
+ *
  * translate - create a file of all possible protein ORFs, given
  *             an input nucleic acid sequence
- * 
+ *
  * 1.02 Thu Apr 20 16:12:41 1995
  *     + incorporated into squid
  *     +  -a, -s options added
@@ -51,13 +51,13 @@ static char experts[] = "\
 ";
 
 static struct opt_s OPTIONS[] = {
-  { "-a", TRUE, sqdARG_NONE },    
-  { "-h", TRUE, sqdARG_NONE },    
+  { "-a", TRUE, sqdARG_NONE },
+  { "-h", TRUE, sqdARG_NONE },
   { "-l", TRUE, sqdARG_INT  },
   { "-m", TRUE, sqdARG_NONE },
   { "-o", TRUE, sqdARG_STRING },
   { "-q", TRUE, sqdARG_NONE },
-  { "-c", TRUE, sqdARG_STRING },    
+  { "-c", TRUE, sqdARG_STRING },
   { "--longest",     FALSE, sqdARG_NONE   },
   { "--tetrahymena", FALSE, sqdARG_NONE   },
   { "--watson",      FALSE, sqdARG_NONE   },
@@ -68,42 +68,41 @@ static struct opt_s OPTIONS[] = {
 static int longest_orf(char *aaseq[6], int do_frame[6]);
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char        *seqfile;         /* name of seq file to read             */
-  SQFILE      *seqfp;		/* ptr to opened seq file               */
-  int          format;		/* format of sequence file              */
+  SQFILE      *seqfp;   /* ptr to opened seq file               */
+  int          format;    /* format of sequence file              */
   char        *seq;             /* ptr to current sequence              */
   SQINFO       sqinfo;          /* sequence information                 */
-  char        *revseq;		/* reverse complement of seq            */
-  int          start, end;	/* coords of ORF in current seq         */
-  int          orfnumber;	/* counter for ORFs in current seq      */
+  char        *revseq;    /* reverse complement of seq            */
+  int          start, end;  /* coords of ORF in current seq         */
+  int          orfnumber; /* counter for ORFs in current seq      */
   char        *aaseq[6];        /* full translations in all 6 frames    */
-  int          do_frame[6];	/* TRUE/FALSE for which frames to do    */
+  int          do_frame[6]; /* TRUE/FALSE for which frames to do    */
   char        *orf;             /* ptr to translated ORF sequence       */
-  char        *sptr;		/* ptr into orf                         */
-  int          len;		/* length of an ORF                     */
-  int          frame;		/* counter for frames (3..5 are reverse)*/
+  char        *sptr;    /* ptr into orf                         */
+  int          len;   /* length of an ORF                     */
+  int          frame;   /* counter for frames (3..5 are reverse)*/
 
-  int          minimum_len;	/* minimum length of ORFs to print out  */
+  int          minimum_len; /* minimum length of ORFs to print out  */
   char        *outfile;         /* file to save output in               */
-  FILE        *ofp;		/* where to direct output               */
-  char         stopchar;	/* what to use as a stop character      */
-  int          keepstops;	/* TRUE to do six big ORFs              */
-  int          quiet;		/* TRUE to silence banner               */
-  int          require_met;	/* TRUE to start orfs with M            */
-  int          do_tetrahymena;	/* TRUE to use the tetrahymena code     */
-  int          do_longest;	/* TRUE to show longest ORF report      */
+  FILE        *ofp;   /* where to direct output               */
+  char         stopchar;  /* what to use as a stop character      */
+  int          keepstops; /* TRUE to do six big ORFs              */
+  int          quiet;   /* TRUE to silence banner               */
+  int          require_met; /* TRUE to start orfs with M            */
+  int          do_tetrahymena;  /* TRUE to use the tetrahymena code     */
+  int          do_longest;  /* TRUE to show longest ORF report      */
 
-  char *optname;		/* option character */
+  char *optname;    /* option character */
   char *optarg;                 /* for Getopt() */
-  int   optind;		        /* for Getopt() */
+  int   optind;           /* for Getopt() */
 
   /***********************************************
    * Parse the command line
    ***********************************************/
 
-  format      = SQFILE_UNKNOWN;	/* autodetect by default */
+  format      = SQFILE_UNKNOWN; /* autodetect by default */
   minimum_len = 20;
   outfile     = NULL;
   stopchar    = '*';
@@ -126,11 +125,9 @@ main(int argc, char **argv)
     else if (strcmp(optname, "--tetrahymena") == 0) do_tetrahymena = TRUE;
     else if (strcmp(optname, "--crick")       == 0) {
       for (frame = 0; frame < 3; frame++) do_frame[frame] = FALSE;
-    }
-    else if (strcmp(optname, "--watson")     == 0) {
+    } else if (strcmp(optname, "--watson")     == 0) {
       for (frame = 3; frame < 6; frame++) do_frame[frame] = FALSE;
-    }
-    else if (strcmp(optname, "-h") == 0) {
+    } else if (strcmp(optname, "-h") == 0) {
       SqdBanner(stdout, banner);
       puts(usage);
       puts(experts);
@@ -141,37 +138,37 @@ main(int argc, char **argv)
   if (argc - optind != 1)
     Die("Incorrect number of command line arguments\n%s\n", usage);
   seqfile = argv[optind];
-  
+
   /***********************************************
    * Open sequence file and output file
    ***********************************************/
 
   seqfp = SeqfileOpen(seqfile, format, NULL);
   if (seqfp == NULL)
-    Die("Failed to open sequence file %s\n%s\n", 
-	seqfile, usage);
+    Die("Failed to open sequence file %s\n%s\n",
+        seqfile, usage);
 
-  if (outfile != NULL)
-    {
-      if ((ofp = fopen(outfile, "w")) == NULL)
-	Die("Failed to open output file %s\n", outfile);
-    }
-  else
+  if (outfile != NULL) {
+    if ((ofp = fopen(outfile, "w")) == NULL)
+      Die("Failed to open output file %s\n", outfile);
+  } else
     ofp = stdout;
-	
+
   /***********************************************
    * Set up alternative genetic codes; overwrite stdcode1
    *   UAA = 48    in this coding  A=0 C=1 G=2 T=3
    *   UAG = 50                    XYZ = 16*X + 4*Y + Z
    *   UGA = 56
-   *   
-   *   http://prowl.rockefeller.edu/aainfo/gencode.html is 
+   *
+   *   http://prowl.rockefeller.edu/aainfo/gencode.html is
    *   a quick reference for alternative codes.
    ***********************************************/
-  
+
   if (do_tetrahymena) {
-    stdcode1[48] = "Q"; stdcode3[48] = "Gln"; /* UAA */
-    stdcode1[50] = "Q"; stdcode3[50] = "Gln"; /* UAG */
+    stdcode1[48] = "Q";
+    stdcode3[48] = "Gln"; /* UAA */
+    stdcode1[50] = "Q";
+    stdcode3[50] = "Gln"; /* UAG */
   }
 
   /***********************************************
@@ -180,107 +177,97 @@ main(int argc, char **argv)
 
   if (! quiet) printf("translate %s, %s\n", SQUID_VERSION, SQUID_DATE);
 
-  while (ReadSeq(seqfp, seqfp->format, &seq, &sqinfo))
-    {
-      s2upper(seq); 
-      revseq = (char *) malloc (sqinfo.len + 1);
-      revcomp(revseq, seq);
-      orfnumber = 1;
+  while (ReadSeq(seqfp, seqfp->format, &seq, &sqinfo)) {
+    s2upper(seq);
+    revseq = (char *) malloc (sqinfo.len + 1);
+    revcomp(revseq, seq);
+    orfnumber = 1;
 
-				/* Translate seq in all six frames */
-      aaseq[0] = Translate(seq, stdcode1);
-      aaseq[1] = Translate(seq + 1, stdcode1);
-      aaseq[2] = Translate(seq + 2, stdcode1);
-      aaseq[3] = Translate(revseq, stdcode1);
-      aaseq[4] = Translate(revseq + 1, stdcode1);
-      aaseq[5] = Translate(revseq + 2, stdcode1);
-      
-      /* Special case: a longest orf report */
-      if (do_longest)
-	{
-	  len = longest_orf(aaseq, do_frame);
-	  printf("%-20s %d\n", sqinfo.name, len);
-	  continue;
-	}
+    /* Translate seq in all six frames */
+    aaseq[0] = Translate(seq, stdcode1);
+    aaseq[1] = Translate(seq + 1, stdcode1);
+    aaseq[2] = Translate(seq + 2, stdcode1);
+    aaseq[3] = Translate(revseq, stdcode1);
+    aaseq[4] = Translate(revseq + 1, stdcode1);
+    aaseq[5] = Translate(revseq + 2, stdcode1);
 
-      if (keepstops)
-	{			/* full translation including stops */
-	  for (frame = 0; frame < 6; frame++)
-	    { 
-	      if (! do_frame[frame]) continue;
-
-	      fprintf(ofp, ">%s:%d", sqinfo.name, frame);
-	      for (sptr = aaseq[frame]; *sptr; sptr++)
-		{
-		  if (*sptr == '*') *sptr = stopchar;
-		  if (! ((sptr - aaseq[frame]) % 50)) putc('\n', ofp);
-		  putc((int) *sptr, ofp);
-		}
-	      putc('\n', ofp);
-	    }		  
-	}
-      else
-	{			/* Print all decent ORF's in FASTA format */
-	  for (frame = 0; frame < 6; frame++)
-	    {
-	      if (! do_frame[frame]) continue;
-
-				/* initialize strtok on the first ORF;
-				   termination codons are '*' symbols */
-	      orf = strtok(aaseq[frame], "*");
-	      while (orf != NULL && *orf != '\0')
-		{
-		  if (require_met) {
-		    while (*orf != 'M' && *orf != '\0') orf++;
-		  } 
-
-		  if (*orf != '\0') {
-		    len = strlen(orf);	      
-		    if (len > minimum_len)
-		      {
-				/* calculate coords */
-			start = (orf - aaseq[frame]) * 3 + 1;
-			if (frame < 3) start += frame; /* frame corrections */
-			else       start     += frame-3;
-		      
-			if (frame < 3) 
-			  end = start + len * 3 - 1;
-			else
-			  {
-			    start = -1 * (start - sqinfo.len - 1);
-			    end = start - len * 3 + 1;
-			  }
-		  
-			fprintf(ofp, ">%s.%d    length %d, nt %d..%d",
-				sqinfo.name,
-				orfnumber,
-				len,
-				start,
-				end);
-
-			for (sptr = orf; *sptr; sptr++)
-			  {
-			    if (! ((sptr - orf) % 50))
-			      putc('\n', ofp);
-			    putc((int) *sptr, ofp);
-			  }
-			putc('\n', ofp);
-		  
-			orfnumber++;
-		      }
-		  }
-				/* pick off next orf */
-		  orf = strtok(NULL, "*");
-		  
-		}
-	    }
-	}
-
-      for (frame = 0; frame < 6; frame++)
-	free(aaseq[frame]);
-      FreeSequence(seq, &sqinfo);
-      free(revseq);
+    /* Special case: a longest orf report */
+    if (do_longest) {
+      len = longest_orf(aaseq, do_frame);
+      printf("%-20s %d\n", sqinfo.name, len);
+      continue;
     }
+
+    if (keepstops) {
+      /* full translation including stops */
+      for (frame = 0; frame < 6; frame++) {
+        if (! do_frame[frame]) continue;
+
+        fprintf(ofp, ">%s:%d", sqinfo.name, frame);
+        for (sptr = aaseq[frame]; *sptr; sptr++) {
+          if (*sptr == '*') *sptr = stopchar;
+          if (! ((sptr - aaseq[frame]) % 50)) putc('\n', ofp);
+          putc((int) *sptr, ofp);
+        }
+        putc('\n', ofp);
+      }
+    } else {
+      /* Print all decent ORF's in FASTA format */
+      for (frame = 0; frame < 6; frame++) {
+        if (! do_frame[frame]) continue;
+
+        /* initialize strtok on the first ORF;
+           termination codons are '*' symbols */
+        orf = strtok(aaseq[frame], "*");
+        while (orf != NULL && *orf != '\0') {
+          if (require_met) {
+            while (*orf != 'M' && *orf != '\0') orf++;
+          }
+
+          if (*orf != '\0') {
+            len = strlen(orf);
+            if (len > minimum_len) {
+              /* calculate coords */
+              start = (orf - aaseq[frame]) * 3 + 1;
+              if (frame < 3) start += frame; /* frame corrections */
+              else       start     += frame-3;
+
+              if (frame < 3)
+                end = start + len * 3 - 1;
+              else {
+                start = -1 * (start - sqinfo.len - 1);
+                end = start - len * 3 + 1;
+              }
+
+              fprintf(ofp, ">%s.%d    length %d, nt %d..%d",
+                      sqinfo.name,
+                      orfnumber,
+                      len,
+                      start,
+                      end);
+
+              for (sptr = orf; *sptr; sptr++) {
+                if (! ((sptr - orf) % 50))
+                  putc('\n', ofp);
+                putc((int) *sptr, ofp);
+              }
+              putc('\n', ofp);
+
+              orfnumber++;
+            }
+          }
+          /* pick off next orf */
+          orf = strtok(NULL, "*");
+
+        }
+      }
+    }
+
+    for (frame = 0; frame < 6; frame++)
+      free(aaseq[frame]);
+    FreeSequence(seq, &sqinfo);
+    free(revseq);
+  }
 
   SeqfileClose(seqfp);
 
@@ -292,44 +279,39 @@ main(int argc, char **argv)
 
 /* SRE, Fri Feb 18 08:30:24 2005 */
 static int
-longest_orf(char *aaseq[6], int do_frame[6])
-{
-  int f;			/* frame */
-  int i;			/* position */
-  int n;			/* an orf length */
-  int max = 0;			/* result: maximum orf length */
+longest_orf(char *aaseq[6], int do_frame[6]) {
+  int f;      /* frame */
+  int i;      /* position */
+  int n;      /* an orf length */
+  int max = 0;      /* result: maximum orf length */
   int in_orf;
-  
-  for (f = 0; f < 6; f++)
-    {
-      if (! do_frame[f]) continue;
 
-      /* Allow 5' truncation:
-       * ORF may start on any *initial* aa.
-       */
-      n = 0;
-      for (i = 0; aaseq[f][i] != '\0'; i++)
-	{
-	  if (aaseq[f][i] == '*') break;
-	  n++;
-	}
-      if (n > max) max = n;
+  for (f = 0; f < 6; f++) {
+    if (! do_frame[f]) continue;
 
-      /* Otherwise, look at Met-initiated ORF lengths
-       */
-      n = 0;
-      for (i = 0; aaseq[f][i] != '\0'; i++)
-	{
-	  if (aaseq[f][i] == 'M') in_orf = TRUE;
-	  if (aaseq[f][i] == '*') 
-	    {
-	      if (n > max) max = n;
-	      n = 0;
-	      in_orf = FALSE;
-	    }
-	  if (in_orf) n++;
-	}
+    /* Allow 5' truncation:
+     * ORF may start on any *initial* aa.
+     */
+    n = 0;
+    for (i = 0; aaseq[f][i] != '\0'; i++) {
+      if (aaseq[f][i] == '*') break;
+      n++;
     }
+    if (n > max) max = n;
+
+    /* Otherwise, look at Met-initiated ORF lengths
+     */
+    n = 0;
+    for (i = 0; aaseq[f][i] != '\0'; i++) {
+      if (aaseq[f][i] == 'M') in_orf = TRUE;
+      if (aaseq[f][i] == '*') {
+        if (n > max) max = n;
+        n = 0;
+        in_orf = FALSE;
+      }
+      if (in_orf) n++;
+    }
+  }
   return max;
 }
-      
+

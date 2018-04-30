@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,10 +10,10 @@
 
 /* hmmalign.c
  * SRE, Thu Dec 18 16:05:29 1997 [St. Louis]
- * 
+ *
  * main() for aligning a set of sequences to an HMM.
  * CVS $Id: hmmalign.c 912 2003-10-03 19:12:59Z eddy $
- */ 
+ */
 
 #include "config.h"    /* compile-time configuration constants */
 #include "squidconf.h"
@@ -49,8 +49,8 @@ static char experts[] = "\
 \n";
 
 static struct opt_s OPTIONS[] = {
-  { "-h", TRUE, sqdARG_NONE   }, 
-  { "-m", TRUE, sqdARG_NONE   } ,
+  { "-h", TRUE, sqdARG_NONE   },
+  { "-m", TRUE, sqdARG_NONE   },
   { "-o", TRUE, sqdARG_STRING },
   { "-q", TRUE, sqdARG_NONE   },
   { "--informat",  FALSE, sqdARG_STRING },
@@ -62,23 +62,22 @@ static struct opt_s OPTIONS[] = {
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
 static void include_alignment(char *seqfile, struct plan7_s *hmm, int do_mapped,
-            char ***rseq, unsigned char ***dsq, SQINFO **sqinfo, 
-            struct p7trace_s ***tr, int *nseq);
+                              char ***rseq, unsigned char ***dsq, SQINFO **sqinfo,
+                              struct p7trace_s ***tr, int *nseq);
 
 int
-main(int argc, char **argv) 
-{
+main(int argc, char **argv) {
   char            *hmmfile;  /* file to read HMMs from                  */
   HMMFILE         *hmmfp;       /* opened hmmfile for reading              */
-  struct plan7_s  *hmm;         /* HMM to align to                         */ 
-  char            *seqfile;     /* file to read target sequence from       */ 
+  struct plan7_s  *hmm;         /* HMM to align to                         */
+  char            *seqfile;     /* file to read target sequence from       */
   int              format;  /* format of seqfile                       */
-  char           **rseq;        /* raw, unaligned sequences                */ 
+  char           **rseq;        /* raw, unaligned sequences                */
   SQINFO          *sqinfo;      /* info associated with sequences          */
   unsigned char  **dsq;         /* digitized raw sequences                 */
-  int              nseq;        /* number of sequences                     */  
+  int              nseq;        /* number of sequences                     */
   float           *wgt;    /* weights to assign to alignment          */
-  MSA             *msa;         /* alignment that's created                */    
+  MSA             *msa;         /* alignment that's created                */
   int              i;
   struct dpmatrix_s *mx;        /* growable DP matrix                      */
   struct p7trace_s **tr;        /* traces for aligned sequences            */
@@ -94,11 +93,11 @@ main(int argc, char **argv)
   FILE *ofp;                    /* handle on alignment output file          */
   char *withali;                /* name of additional alignment file to align */
   char *mapali;                 /* name of additional alignment file to map   */
-  
-  /*********************************************** 
+
+  /***********************************************
    * Parse command line
    ***********************************************/
-  
+
   format     = SQFILE_UNKNOWN;    /* default: autodetect input format     */
   outfmt     = MSAFILE_STOCKHOLM; /* default: output in Stockholm format  */
   do_oneline = FALSE;      /* default: interleaved format          */
@@ -112,37 +111,32 @@ main(int argc, char **argv)
                 &optind, &optname, &optarg))  {
     if      (strcmp(optname, "-m")        == 0) matchonly  = TRUE;
     else if (strcmp(optname, "-o")        == 0) outfile    = optarg;
-    else if (strcmp(optname, "-q")        == 0) be_quiet   = TRUE; 
+    else if (strcmp(optname, "-q")        == 0) be_quiet   = TRUE;
     else if (strcmp(optname, "--mapali")  == 0) mapali     = optarg;
     else if (strcmp(optname, "--oneline") == 0) do_oneline = TRUE;
     else if (strcmp(optname, "--withali") == 0) withali    = optarg;
-    else if (strcmp(optname, "--informat") == 0) 
-      {
-  format = String2SeqfileFormat(optarg);
-  if (format == SQFILE_UNKNOWN) 
-    Die("unrecognized sequence file format \"%s\"", optarg);
-      }
-    else if (strcmp(optname, "--outformat") == 0) 
-      {
-  outfmt = String2SeqfileFormat(optarg);
-  if (outfmt == MSAFILE_UNKNOWN) 
-    Die("unrecognized output alignment file format \"%s\"", optarg);
-  if (! IsAlignmentFormat(outfmt))
-    Die("\"%s\" is not a multiple alignment format", optarg);
-      }
-    else if (strcmp(optname, "-h") == 0) 
-      {
-  HMMERBanner(stdout, banner);
-  puts(usage);
-  puts(experts);
-  exit(EXIT_SUCCESS);
-      }
+    else if (strcmp(optname, "--informat") == 0) {
+      format = String2SeqfileFormat(optarg);
+      if (format == SQFILE_UNKNOWN)
+        Die("unrecognized sequence file format \"%s\"", optarg);
+    } else if (strcmp(optname, "--outformat") == 0) {
+      outfmt = String2SeqfileFormat(optarg);
+      if (outfmt == MSAFILE_UNKNOWN)
+        Die("unrecognized output alignment file format \"%s\"", optarg);
+      if (! IsAlignmentFormat(outfmt))
+        Die("\"%s\" is not a multiple alignment format", optarg);
+    } else if (strcmp(optname, "-h") == 0) {
+      HMMERBanner(stdout, banner);
+      puts(usage);
+      puts(experts);
+      exit(EXIT_SUCCESS);
+    }
   }
   if (argc - optind != 2)
     Die("Incorrect number of arguments.\n%s\n", usage);
 
   hmmfile = argv[optind++];
-  seqfile = argv[optind++]; 
+  seqfile = argv[optind++];
 
   /* Try to work around inability to autodetect from a pipe or .gz:
    * assume FASTA format
@@ -151,32 +145,32 @@ main(int argc, char **argv)
       (Strparse("^.*\\.gz$", seqfile, 0) || strcmp(seqfile, "-") == 0))
     format = SQFILE_FASTA;
 
- /*********************************************** 
-  * Open HMM file (might be in HMMERDB or current directory).
-  * Read a single HMM from it.
-  * 
-  * Currently hmmalign disallows the J state and
-  * only allows one domain per sequence. To preserve
-  * the S/W entry information, the J state is explicitly
-  * disallowed, rather than calling a Plan7*Config() function.
-  * this is a workaround in 2.1 for the 2.0.x "yo!" bug.
-  ***********************************************/
+  /***********************************************
+   * Open HMM file (might be in HMMERDB or current directory).
+   * Read a single HMM from it.
+   *
+   * Currently hmmalign disallows the J state and
+   * only allows one domain per sequence. To preserve
+   * the S/W entry information, the J state is explicitly
+   * disallowed, rather than calling a Plan7*Config() function.
+   * this is a workaround in 2.1 for the 2.0.x "yo!" bug.
+   ***********************************************/
 
   if ((hmmfp = HMMFileOpen(hmmfile, "HMMERDB")) == NULL)
     Die("Failed to open HMM file %s\n%s", hmmfile, usage);
-  if (!HMMFileRead(hmmfp, &hmm)) 
+  if (!HMMFileRead(hmmfp, &hmm))
     Die("Failed to read any HMMs from %s\n", hmmfile);
   HMMFileClose(hmmfp);
-  if (hmm == NULL) 
+  if (hmm == NULL)
     Die("HMM file %s corrupt or in incorrect format? Parse failed", hmmfile);
   hmm->xt[XTE][MOVE] = 1.;        /* only 1 domain/sequence ("global" alignment) */
   hmm->xt[XTE][LOOP] = 0.;
   P7Logoddsify(hmm, TRUE);
-        /* do we have the map we might need? */
+  /* do we have the map we might need? */
   if (mapali != NULL && ! (hmm->flags & PLAN7_MAP))
     Die("HMMER: HMM file %s has no map; you can't use --mapali.", hmmfile);
 
-  /*********************************************** 
+  /***********************************************
    * Open sequence file in current directory.
    * Read all seqs from it.
    ***********************************************/
@@ -184,19 +178,18 @@ main(int argc, char **argv)
   if (! ReadMultipleRseqs(seqfile, format, &rseq, &sqinfo, &nseq))
     Die("Failed to read any sequences from file %s", seqfile);
 
-  /*********************************************** 
+  /***********************************************
    * Show the banner
    ***********************************************/
 
-  if (! be_quiet) 
-    {
-      HMMERBanner(stdout, banner);
-      printf(   "HMM file:             %s\n", hmmfile);
-      printf(   "Sequence file:        %s\n", seqfile);
-      printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
-    }
+  if (! be_quiet) {
+    HMMERBanner(stdout, banner);
+    printf(   "HMM file:             %s\n", hmmfile);
+    printf(   "Sequence file:        %s\n", seqfile);
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
+  }
 
-  /*********************************************** 
+  /***********************************************
    * Do the work
    ***********************************************/
 
@@ -208,54 +201,50 @@ main(int argc, char **argv)
 
   /* Align each sequence to the model, collect traces
    */
-  for (i = 0; i < nseq; i++)
-    {
-      dsq[i] = DigitizeSequence(rseq[i], sqinfo[i].len);
+  for (i = 0; i < nseq; i++) {
+    dsq[i] = DigitizeSequence(rseq[i], sqinfo[i].len);
 
-      if (P7ViterbiSpaceOK(sqinfo[i].len, hmm->M, mx))
-  (void) P7Viterbi(dsq[i], sqinfo[i].len, hmm, mx, &(tr[i]));
-      else
-  (void) P7SmallViterbi(dsq[i], sqinfo[i].len, hmm, mx, &(tr[i]));
-    }
+    if (P7ViterbiSpaceOK(sqinfo[i].len, hmm->M, mx))
+      (void) P7Viterbi(dsq[i], sqinfo[i].len, hmm, mx, &(tr[i]));
+    else
+      (void) P7SmallViterbi(dsq[i], sqinfo[i].len, hmm, mx, &(tr[i]));
+  }
   FreePlan7Matrix(mx);
 
   /* Include an aligned alignment, if desired.
    */
   if (mapali != NULL)
     include_alignment(mapali, hmm, TRUE, &rseq, &dsq, &sqinfo, &tr, &nseq);
-  if (withali != NULL) 
+  if (withali != NULL)
     include_alignment(withali, hmm, FALSE, &rseq, &dsq, &sqinfo, &tr, &nseq);
 
   /* Turn traces into a multiple alignment
-   */ 
+   */
   wgt = MallocOrDie(sizeof(float) * nseq);
   FSet(wgt, nseq, 1.0);
   msa = P7Traces2Alignment(dsq, sqinfo, wgt, nseq, hmm->M, tr, matchonly);
 
-  /*********************************************** 
+  /***********************************************
    * Output the alignment
    ***********************************************/
-  
-  if (outfile != NULL && (ofp = fopen(outfile, "w")) != NULL)
-    {
-      MSAFileWrite(ofp, msa, outfmt, do_oneline);
-      printf("Alignment saved in file %s\n", outfile);
-      fclose(ofp);
-    }
-  else
+
+  if (outfile != NULL && (ofp = fopen(outfile, "w")) != NULL) {
+    MSAFileWrite(ofp, msa, outfmt, do_oneline);
+    printf("Alignment saved in file %s\n", outfile);
+    fclose(ofp);
+  } else
     MSAFileWrite(stdout, msa, outfmt, do_oneline);
 
 
-  /*********************************************** 
+  /***********************************************
    * Cleanup and exit
    ***********************************************/
-  
-  for (i = 0; i < nseq; i++) 
-    {
-      P7FreeTrace(tr[i]);
-      FreeSequence(rseq[i], &(sqinfo[i]));
-      free(dsq[i]);
-    }
+
+  for (i = 0; i < nseq; i++) {
+    P7FreeTrace(tr[i]);
+    FreeSequence(rseq[i], &(sqinfo[i]));
+    free(dsq[i]);
+  }
   MSAFree(msa);
   FreePlan7(hmm);
   free(sqinfo);
@@ -285,16 +274,15 @@ main(int argc, char **argv)
  *           dsq      - RETURN: array of dsq to add to
  *           sqinfo   - RETURN: array of SQINFO to add to
  *           tr       - RETURN: array of traces to add to
- *           nseq     - RETURN: number of seqs           
+ *           nseq     - RETURN: number of seqs
  *
  * Returns:  new, realloc'ed arrays for rsq, dsq, sqinfo, tr; nseq is
  *           increased to nseq+ainfo.nseq.
  */
 static void
 include_alignment(char *seqfile, struct plan7_s *hmm, int do_mapped,
-      char ***rsq, unsigned char ***dsq, SQINFO **sqinfo, 
-      struct p7trace_s ***tr, int *nseq)
-{
+                  char ***rsq, unsigned char ***dsq, SQINFO **sqinfo,
+                  struct p7trace_s ***tr, int *nseq) {
   int format;      /* format of alignment file */
   MSA   *msa;      /* alignment to align to    */
   MSAFILE *afp;
@@ -315,20 +303,20 @@ include_alignment(char *seqfile, struct plan7_s *hmm, int do_mapped,
     s2upper(msa->aseq[idx]);
   newinfo = MSAToSqinfo(msa);
 
-        /* Verify checksums before mapping */
+  /* Verify checksums before mapping */
   if (do_mapped && GCGMultchecksum(msa->aseq, msa->nseq) != hmm->checksum)
-    Die("The checksums for alignment file %s and the HMM alignment map don't match.", 
-  seqfile);
-        /* Get a master trace */
+    Die("The checksums for alignment file %s and the HMM alignment map don't match.",
+        seqfile);
+  /* Get a master trace */
   if (do_mapped) master = MasterTraceFromMap(hmm->map, hmm->M, msa->alen);
   else           master = P7ViterbiAlignAlignment(msa, hmm);
 
-        /* convert to individual traces */
+  /* convert to individual traces */
   ImposeMasterTrace(msa->aseq, msa->nseq, master, &addtr);
-        /* add those traces to existing ones */
+  /* add those traces to existing ones */
   *tr = MergeTraceArrays(*tr, *nseq, addtr, msa->nseq);
-  
-        /* additional bookkeeping: add to dsq, sqinfo */
+
+  /* additional bookkeeping: add to dsq, sqinfo */
   *rsq = ReallocOrDie((*rsq), sizeof(char *) * (*nseq + msa->nseq));
   DealignAseqs(msa->aseq, msa->nseq, &newrseq);
   for (idx = *nseq; idx < *nseq + msa->nseq; idx++)
@@ -340,18 +328,18 @@ include_alignment(char *seqfile, struct plan7_s *hmm, int do_mapped,
   for (idx = *nseq; idx < *nseq + msa->nseq; idx++)
     (*dsq)[idx] = newdsq[idx - (*nseq)];
   free(newdsq);
-      /* unnecessarily complex, but I can't be bothered... */
+  /* unnecessarily complex, but I can't be bothered... */
   *sqinfo = ReallocOrDie((*sqinfo), sizeof(SQINFO) * (*nseq + msa->nseq));
   for (idx = *nseq; idx < *nseq + msa->nseq; idx++)
     SeqinfoCopy(&((*sqinfo)[idx]), &(newinfo[idx - (*nseq)]));
   free(newinfo);
-  
+
   *nseq = *nseq + msa->nseq;
 
-        /* Cleanup */
+  /* Cleanup */
   P7FreeTrace(master);
   MSAFree(msa);
-        /* Return */
+  /* Return */
   return;
 }
 

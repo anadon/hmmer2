@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -13,10 +13,10 @@
 
 /* gki.h
  * SRE, Sat May  1 15:07:22 1999
- * 
+ *
  * Declarations of structures, functions for generic key index
  * module: emulation of Perl hashes. See gki.c.
- * 
+ *
  * SVN $Id: gki.h 1530 2005-12-13 20:53:08Z eddy $
  */
 
@@ -30,12 +30,12 @@ struct gki_elem {
 };
 
 /* gki:
- *    a dynamically resized hash structure; 
+ *    a dynamically resized hash structure;
  *    contains a hash table and associated data
  */
 typedef struct {
   struct gki_elem **table;
-  
+
   int primelevel;
   int nhash;
   int nkeys;

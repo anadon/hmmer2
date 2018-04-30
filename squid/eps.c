@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -10,10 +10,10 @@
 
 /* eps.c
  * SRE, Thu Jun 21 18:02:31 2001 [St. Louis]
- * 
+ *
  * Some crude support for Encapsulated PostScript (EPS) output,
  * DSC compliant.
- * 
+ *
  * SVN $Id: eps.c 1530 2005-12-13 20:53:08Z eddy $
  */
 
@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "squid.h"
-#include "msa.h"       
+#include "msa.h"
 
 /* Function: EPSWriteSmallMSA()
  * Date:     SRE, Thu Jun 21 18:15:21 2001 [St. Louis]
@@ -35,23 +35,22 @@
  *           it doesn't think it will fit on a single page.
  *
  * Args:     fp  - open file for writing
- *           msa - alignment to write     
+ *           msa - alignment to write
  *
  * Returns:  (void)
  */
 void
-EPSWriteSmallMSA(FILE *fp, MSA *msa)
-{
-  int namewidth;		/* namewidth in PostScript units */
-  int fontwidth;		/* width of a character in this font */
-  int hspace;		        /* horizontal space between aligned chars */
-  int vspace;			/* vertical space between sequences */
+EPSWriteSmallMSA(FILE *fp, MSA *msa) {
+  int namewidth;    /* namewidth in PostScript units */
+  int fontwidth;    /* width of a character in this font */
+  int hspace;           /* horizontal space between aligned chars */
+  int vspace;     /* vertical space between sequences */
   char *font;                   /* font name, e.g. "Courier" */
-  int fontsize;			/* font size in pts */
-  int  i,j;			/* counter over sequences, columns */
-  int  len;			/* tmp var holding length of something */
-  int  width, height;		/* width and height of bounding box */
-  int  xpos, ypos;		/* x,y position */
+  int fontsize;     /* font size in pts */
+  int  i,j;     /* counter over sequences, columns */
+  int  len;     /* tmp var holding length of something */
+  int  width, height;   /* width and height of bounding box */
+  int  xpos, ypos;    /* x,y position */
 
   /* Set some font characteristics; done here, so it'll
    * be easy to change. Magic numbers for Courier 12 determined
@@ -69,7 +68,7 @@ EPSWriteSmallMSA(FILE *fp, MSA *msa)
   for (i = 0; i < msa->nseq; i++)
     if ((len = (int) strlen(msa->sqname[i])) > namewidth)
       namewidth = len;
-  namewidth += 1;		/* add a space to separate name & aligned seq */
+  namewidth += 1;   /* add a space to separate name & aligned seq */
   namewidth *= fontwidth;
 
   /* Determine bounding box
@@ -85,7 +84,7 @@ EPSWriteSmallMSA(FILE *fp, MSA *msa)
   fprintf(fp, "%%!PS-Adobe-3.0 EPSF-3.0\n");
   fprintf(fp, "%%%%BoundingBox: %d %d %d %d\n", 0, 0, width, height);
   fprintf(fp, "%%%%Pages: 1\n");
-  fprintf(fp, "%%%%EndComments\n");  
+  fprintf(fp, "%%%%EndComments\n");
 
   /* More postscript magic before we start the alignment
    */
@@ -96,21 +95,19 @@ EPSWriteSmallMSA(FILE *fp, MSA *msa)
 
   /* Write the alignment in PostScript in a single block
    */
-  for (i = 0; i < msa->nseq; i++)
-    {
-      ypos = (msa->nseq-i-1)*vspace;
-				/* name first */
-      fprintf(fp, "%d %d moveto\n", 0, ypos);
-      fprintf(fp, "(%s) show\n", msa->sqname[i]);
-				/* now seq */
-      xpos = namewidth;
-      for (j = 0; j < msa->alen; j++)
-	{
-	  fprintf(fp, "%d %d moveto\n", xpos, ypos);
-	  fprintf(fp, "(%c) show\n", msa->aseq[i][j]);
-	  xpos+= hspace;
-	}
+  for (i = 0; i < msa->nseq; i++) {
+    ypos = (msa->nseq-i-1)*vspace;
+    /* name first */
+    fprintf(fp, "%d %d moveto\n", 0, ypos);
+    fprintf(fp, "(%s) show\n", msa->sqname[i]);
+    /* now seq */
+    xpos = namewidth;
+    for (j = 0; j < msa->alen; j++) {
+      fprintf(fp, "%d %d moveto\n", xpos, ypos);
+      fprintf(fp, "(%c) show\n", msa->aseq[i][j]);
+      xpos+= hspace;
     }
+  }
 
   free(font);
 }

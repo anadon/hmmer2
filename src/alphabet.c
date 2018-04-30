@@ -39,8 +39,7 @@ static void set_degenerate(char iupac, char *syms);
  *           and we just set the other globals accordingly.
  */
 void
-DetermineAlphabet(char **rseqs, int  nseq)
-{
+DetermineAlphabet(char **rseqs, int  nseq) {
   int idx;
   int other, nucleic, amino;
   int type;
@@ -51,11 +50,20 @@ DetermineAlphabet(char **rseqs, int  nseq)
   other = nucleic = amino = 0;
   for (idx = 0; idx < nseq; idx++) {
     switch (Seqtype(rseqs[idx])) {
-    case kRNA:      nucleic++;   break;
-    case kDNA:      nucleic++;   break;
-    case kAmino:    amino++;     break;
-    case kOtherSeq: other++;     break;
-    default: Die("No such alphabet type");
+    case kRNA:
+      nucleic++;
+      break;
+    case kDNA:
+      nucleic++;
+      break;
+    case kAmino:
+      amino++;
+      break;
+    case kOtherSeq:
+      other++;
+      break;
+    default:
+      Die("No such alphabet type");
     }
   }
 
@@ -64,12 +72,10 @@ DetermineAlphabet(char **rseqs, int  nseq)
   else if (nucleic > amino && nucleic > other) {
     Warn("Looks like nucleic acid sequence, hope that's right");
     type = hmmNUCLEIC;
-  }
-  else if (amino > nucleic && amino > other) {
+  } else if (amino > nucleic && amino > other) {
     Warn("Looks like amino acid sequence, hope that's right");
     type = hmmAMINO;
-  }
-  else Die("Sorry, I can't tell if that's protein or DNA");
+  } else Die("Sorry, I can't tell if that's protein or DNA");
 
   /* Now set up the alphabet.
    */
@@ -83,8 +89,7 @@ DetermineAlphabet(char **rseqs, int  nseq)
  *           of either hmmAMINO or hmmNUCLEIC.
  */
 void
-SetAlphabet(int type)
-{
+SetAlphabet(int type) {
   int x;
   pthread_mutex_t  alphabet_lock; /* alphabet is global; must protect to be threadsafe */
   int              rtn;      /* return code from pthreads */
@@ -94,23 +99,22 @@ SetAlphabet(int type)
   if ((rtn = pthread_mutex_lock(&alphabet_lock)) != 0)
     Die("pthread_mutex_lock FAILED: %s\n", strerror(rtn));
 
- /* Because the alphabet information is global, we must
-  * be careful to make this a thread-safe function. The mutex
-  * (above) takes care of that. But, indeed, it's also
-  * just good sense (and more efficient) to simply never
-  * allow resetting the alphabet. If type is Alphabet_type,
-  * silently return; else die with an alphabet mismatch
-  * warning.
-  */
-  if (Alphabet_type != hmmNOTSETYET)
-    {
-      if (type != Alphabet_type)
-  Die("An alphabet type conflict occurred.\nYou probably mixed a DNA seq file with a protein model, or vice versa.");
+  /* Because the alphabet information is global, we must
+   * be careful to make this a thread-safe function. The mutex
+   * (above) takes care of that. But, indeed, it's also
+   * just good sense (and more efficient) to simply never
+   * allow resetting the alphabet. If type is Alphabet_type,
+   * silently return; else die with an alphabet mismatch
+   * warning.
+   */
+  if (Alphabet_type != hmmNOTSETYET) {
+    if (type != Alphabet_type)
+      Die("An alphabet type conflict occurred.\nYou probably mixed a DNA seq file with a protein model, or vice versa.");
 
-      if ((rtn = pthread_mutex_unlock(&alphabet_lock)) != 0)
-  Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-      return;
-    }
+    if ((rtn = pthread_mutex_unlock(&alphabet_lock)) != 0)
+      Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+    return;
+  }
 
   switch(type) {
   case hmmAMINO:
@@ -156,7 +160,8 @@ SetAlphabet(int type)
     set_degenerate('V', "ACG");
     set_degenerate('D', "AGT");
     break;
-  default: Die("No support for non-nucleic or protein alphabets");
+  default:
+    Die("No support for non-nucleic or protein alphabets");
   }
 
   if ((rtn = pthread_mutex_unlock(&alphabet_lock)) != 0)
@@ -171,11 +176,10 @@ SetAlphabet(int type)
  *           presumably slower.
  */
 unsigned char
-SymbolIndex(char sym)
-{
+SymbolIndex(char sym) {
   char *s;
   return ((s = strchr(Alphabet, (char) toupper((int) sym))) == NULL) ?
-    Alphabet_iupac-1 : s - Alphabet;
+         Alphabet_iupac-1 : s - Alphabet;
 }
 
 
@@ -197,8 +201,7 @@ SymbolIndex(char sym)
  *           dsq is allocated here and must be free'd by caller.
  */
 unsigned char *
-DigitizeSequence(char *seq, int L)
-{
+DigitizeSequence(char *seq, int L) {
   unsigned char *dsq;
   int i;
 
@@ -217,8 +220,7 @@ DigitizeSequence(char *seq, int L)
  *           dsq back to the real alphabet.
  */
 char *
-DedigitizeSequence(unsigned char *dsq, int L)
-{
+DedigitizeSequence(unsigned char *dsq, int L) {
   char *seq;
   int i;
 
@@ -244,8 +246,7 @@ DedigitizeSequence(unsigned char *dsq, int L)
  *           dsqs is alloced here. Free2DArray(dseqs, nseq).
  */
 void
-DigitizeAlignment(MSA *msa, unsigned char ***ret_dsqs)
-{
+DigitizeAlignment(MSA *msa, unsigned char ***ret_dsqs) {
   unsigned char **dsq;
   int    idx;      /* counter for sequences     */
   int    dpos;      /* position in digitized seq */
@@ -259,7 +260,7 @@ DigitizeAlignment(MSA *msa, unsigned char ***ret_dsqs)
 
     for (apos = 0, dpos = 1; apos < msa->alen; apos++) {
       if (! isgap(msa->aseq[idx][apos]))  /* skip gaps */
-  dsq[idx][dpos++] = SymbolIndex(msa->aseq[idx][apos]);
+        dsq[idx][dpos++] = SymbolIndex(msa->aseq[idx][apos]);
     }
     dsq[idx][dpos] = (unsigned char) Alphabet_iupac; /* sentinel byte at end */
   }
@@ -280,7 +281,7 @@ DigitizeAlignment(MSA *msa, unsigned char ***ret_dsqs)
  * Return:   (void)
  */
 void
-P7CountSymbol(float *counters, unsigned char symidx, float wt){
+P7CountSymbol(float *counters, unsigned char symidx, float wt) {
 
   if (symidx < Alphabet_size)
     counters[symidx] += wt;
@@ -408,12 +409,11 @@ DefaultCodonBias(float *codebias)
  *           Degenerate[][] global for the alphabet.
  */
 static void
-set_degenerate(char iupac, char *syms)
-{
+set_degenerate(char iupac, char *syms) {
   DegenCount[strchr(Alphabet,iupac)-Alphabet] = strlen(syms);
   while (*syms) {
     Degenerate[strchr(Alphabet,iupac)-Alphabet]
-              [strchr(Alphabet,*syms)-Alphabet] = 1;
+    [strchr(Alphabet,*syms)-Alphabet] = 1;
     syms++;
   }
 }

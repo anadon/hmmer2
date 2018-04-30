@@ -41,8 +41,7 @@
  * Return:   (void)
  */
 void
-AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile)
-{
+AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile) {
   float time;          /* current time used to evolve emissions       */
   float time_above;    /* last time giving an info content > that desired   */
   float time_below;    /* last time giving an info content < that desired   */
@@ -82,8 +81,7 @@ AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile)
 
   match = CalculateEmitsEntropy(temp_emits, hmm -> M);
   observed = background - match;
-  if (observed < desired)
-  {
+  if (observed < desired) {
     printf ("your information content is already %f\n", observed);
     return;
   }
@@ -94,18 +92,18 @@ AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile)
   /* or if asked, read in a symmetric matrix(ces) and corresponding frequencies */
   else ReadAAMatrices(&Sij, &pi, matrixfile, environ, matrix_n);
 
-    /* convert each symmetric matrix to a rate matrix */
+  /* convert each symmetric matrix to a rate matrix */
   Qij = (double *) MallocOrDie(sizeof(double) * environ * matrix_size);
   SymToRateMatrices(Qij, Sij, pi, matrix_n, environ);
 
-    /* normalize each rate matrix */
+  /* normalize each rate matrix */
   NormRateMatrices(Qij, pi, matrix_n, environ);
 
   evolve_matrix = (double *) MallocOrDie(sizeof(double) * environ * matrix_size);
 
-    /* determine the branch length needed to evolve emits
-      to desired info_content and evolve them */
-  while (desired - observed > threshold  || observed - desired > threshold ){
+  /* determine the branch length needed to evolve emits
+    to desired info_content and evolve them */
+  while (desired - observed > threshold  || observed - desired > threshold ) {
     float last_observed; // previous observed information content
     last_observed = observed;
     iteration++;
@@ -114,31 +112,30 @@ AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile)
       for (i = 0; i  < Alphabet_size; i++)
         temp_emits[(k-1) * Alphabet_size + i] = hmm-> mat[k][i];
 
-      /* zero in on the correct time by adjusting 'time_above' and
-            'time_below' and then recalculating 'time' in each iteration */
+    /* zero in on the correct time by adjusting 'time_above' and
+          'time_below' and then recalculating 'time' in each iteration */
     if (observed < desired) time_below = time;
     else time_above = time;
-      /* evolve emissions by new time
-           where new time = (time_above + time_below) / 2 */
+    /* evolve emissions by new time
+         where new time = (time_above + time_below) / 2 */
     time = (time_above + time_below)/2;
 
-      /* assign conditional matrix for time t to evolve_matrix
-        for each rate and environmental class modeled */
+    /* assign conditional matrix for time t to evolve_matrix
+      for each rate and environmental class modeled */
 
     AssignMatrixNotLog(Qij, matrix_n, time, evolve_matrix);
     EvolveEmits(temp_emits, evolve_matrix, hmm -> M);
     NormalizeEmits(temp_emits, hmm -> M);
 
-      /* calculate average information content of MATCH emissions */
+    /* calculate average information content of MATCH emissions */
     match = CalculateEmitsEntropy(temp_emits, hmm -> M);
     observed = background - match;
     /* deal with cases where it's not possible to reach desired info content */
-    if (observed - last_observed < 0.01 && last_observed - observed < 0.01)
-    {
+    if (observed - last_observed < 0.01 && last_observed - observed < 0.01) {
       printf ("unable to reduce information content to less than %f\n", observed);
       printf ("branch length to reach info content of %f = %f \n\n", observed, time);
 
-        /* assign new match emissions to model */
+      /* assign new match emissions to model */
       for (k = 1; k <= hmm -> M; k++)
         for (i = 0; i  < Alphabet_size; i++)
           hmm-> mat[k][i] = temp_emits[(k-1) * Alphabet_size + i];
@@ -151,7 +148,7 @@ AdjustAveInfoContent (struct plan7_s *hmm, float desired, char *matrixfile)
 
   printf ("branch length to reach desired info content = %f \n", time);
 
-   /* assign new match emissions to model */
+  /* assign new match emissions to model */
   for (k = 1; k <= hmm -> M; k++)
     for (i = 0; i  < Alphabet_size; i++)
       hmm-> mat[k][i] = temp_emits[(k-1) * Alphabet_size + i];
@@ -209,8 +206,7 @@ PrintAveInfoContent (struct plan7_s *hmm)
  * Return: (entropy)
  */
 float
-CalculateBackgroundEntropy ()
-{
+CalculateBackgroundEntropy () {
   float entropy = 0.;   /* entropy               */
   float i_priors[20];   /* amino acid residue priors           */
   int i;     /* counter for i_priors           */
@@ -255,8 +251,7 @@ CalculateBackgroundEntropy ()
  * Return: (entropy)
  */
 float
-CalculateEmitsEntropy(double *emits, int L)
-{
+CalculateEmitsEntropy(double *emits, int L) {
   float entropy = 0.;   /* entropy               */
   int k;     /* counter for model nodes           */
   int i;     /* counter for residues           */
@@ -282,12 +277,11 @@ CalculateEmitsEntropy(double *emits, int L)
  * Return: (void)
  */
 void
-NormalizeEmits (double *emits, int L)
-{
+NormalizeEmits (double *emits, int L) {
   int k;     /* counter for model nodes           */
   int i;     /* counter for residues           */
 
-  for (k = 0; k < L; k++){
+  for (k = 0; k < L; k++) {
     double sum; //sum total frequencies
     sum = 0.;
     for (i = 0; i < Alphabet_size; i++) sum += emits[Alphabet_size * k + i];
@@ -310,23 +304,21 @@ NormalizeEmits (double *emits, int L)
  */
 
 void
-EvolveEmits (double *emits, double *P, int L)
-{
+EvolveEmits (double *emits, double *P, int L) {
   int k;     /* counter for model nodes           */
   int i;     /* counter for residues           */
   int j;     /* second counter for residues           */
   double *evolved_emit; /* evolved emissions             */
 
   evolved_emit = (double*) MallocOrDie(sizeof(double) * Alphabet_size);
-    /* step through match states, evolving emissions for each,
-         taking into account the weight of each model  */
-  for (k = 1; k <= L; k++)
-  {
+  /* step through match states, evolving emissions for each,
+       taking into account the weight of each model  */
+  for (k = 1; k <= L; k++) {
     for (i = 0; i < Alphabet_size; i++)
       evolved_emit[i] = 0.0;
     for (i = 0; i < Alphabet_size; i++)
-        for (j = 0; j < Alphabet_size; j++)
-    evolved_emit[i] += emits[(k-1) * Alphabet_size + j] * P[ j * 20 + i];
+      for (j = 0; j < Alphabet_size; j++)
+        evolved_emit[i] += emits[(k-1) * Alphabet_size + j] * P[ j * 20 + i];
     for (i = 0; i < Alphabet_size; i++) emits[(k-1) * Alphabet_size + i] = evolved_emit[i];
   }
   free (evolved_emit);

@@ -1,8 +1,8 @@
 /* dirichlet.h
- * 
+ *
  * Dirichlets, mixture Dirichlets, gamma functions, and beta functions;
  * evaluation and sampling routines.
- * 
+ *
  * SRE, Sat Oct 25 09:47:09 2003
  * SVN $Id: dirichlet.h 1530 2005-12-13 20:53:08Z eddy $
  */
@@ -10,11 +10,11 @@
 #define DIRICHLETH_INCLUDED
 
 typedef struct mixdchlet_s {
-  double  *q;			/* mixture coefficients q[0..N-1]           */
+  double  *q;     /* mixture coefficients q[0..N-1]           */
   double **alpha;               /* Dirichlet params alpha[0..N-1][0..K-1]   */
-  int      N;			/* number of mixtures, e.g. 9 for Sjolander */
-  int      K;			/* alphabet size, e.g. 20                   */
-  char    *alphabet;		/* alphabet, e.g. "ACDEFGHIKLMNPQRSTVWY"    */
+  int      N;     /* number of mixtures, e.g. 9 for Sjolander */
+  int      K;     /* alphabet size, e.g. 20                   */
+  char    *alphabet;    /* alphabet, e.g. "ACDEFGHIKLMNPQRSTVWY"    */
 } MIXDCHLET;
 
 extern MIXDCHLET *AllocDirichlet(int N, char *alphabet);
@@ -36,7 +36,7 @@ extern void       SampleDirichlet(double *alpha, int K, double *p);
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.

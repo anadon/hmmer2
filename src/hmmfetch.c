@@ -42,14 +42,14 @@ static char experts[] = "\
 ";
 
 static struct opt_s OPTIONS[] = {
-   { "-h", TRUE, sqdARG_NONE  },
-   { "-n", TRUE, sqdARG_NONE  },
+  { "-h", TRUE, sqdARG_NONE  },
+  { "-n", TRUE, sqdARG_NONE  },
 };
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
 
 int
-main(int argc, char **argv){
+main(int argc, char **argv) {
   char    *hmmfile;             /* HMM file to open                */
   char    *key;      /* HMM name to retrieve            */
   HMMFILE *hmmfp;               /* opened hmm file pointer         */
@@ -68,17 +68,15 @@ main(int argc, char **argv){
   by_number = FALSE;
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
-    &optind, &optname, &optarg))
-    {
-      if      (strcmp(optname, "-n") == 0) by_number = TRUE;
-      else if (strcmp(optname, "-h") == 0)
-  {
-    HMMERBanner(stdout, banner);
-    puts(usage);
-    puts(experts);
-    exit(0);
-  }
+                &optind, &optname, &optarg)) {
+    if      (strcmp(optname, "-n") == 0) by_number = TRUE;
+    else if (strcmp(optname, "-h") == 0) {
+      HMMERBanner(stdout, banner);
+      puts(usage);
+      puts(experts);
+      exit(0);
     }
+  }
 
   if (argc - optind != 2) Die("Incorrect number of arguments.\n%s\n", usage);
   hmmfile = argv[optind++];

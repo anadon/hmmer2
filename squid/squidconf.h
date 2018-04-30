@@ -4,7 +4,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -47,17 +47,17 @@
  * Sizes of integer types.
  * various things are set by ./configure; the code
  * uses WORDS_BIGENDIAN and USE_HOST_BYTESWAP_FUNCTIONS.
- *****************************************************************/ 
+ *****************************************************************/
 
 /* #undef WORDS_BIGENDIAN */
 #define SIZEOF_UNSIGNED_SHORT 2
 #define SIZEOF_UNSIGNED_INT 4
 #define SIZEOF_UNSIGNED_LONG 8
 #define SIZEOF_UNSIGNED_LONG_LONG 8
-#undef HAVE_NTOHS		/* if defined, system provides ntohs() */
-#undef HAVE_NTOHL		/* if defined, system provides ntohl() */
-#undef HAVE_HTONS		/* if defined, system provides htons() */
-#undef HAVE_HTONL		/* if defined, system provides htonl() */
+#undef HAVE_NTOHS   /* if defined, system provides ntohs() */
+#undef HAVE_NTOHL   /* if defined, system provides ntohl() */
+#undef HAVE_HTONS   /* if defined, system provides htons() */
+#undef HAVE_HTONL   /* if defined, system provides htonl() */
 #define HAVE_STRTOUL 1
 #define HAVE_STRTOULL 1
 #if defined HAVE_NTOHL && defined HAVE_NTOHS && defined HAVE_HTONS && defined HAVE_HTONL
@@ -79,16 +79,16 @@
  *   1. ftello(), fseeko() with 64-bit off_t
  *   2. ftello64(), fseeko64() with 64-bit off64_t
  *   3. ftell64(), fseek64() with 64-bit integer
- *   4. fgetpos(), fsetpos() with an fpos_t that happens to be a 
+ *   4. fgetpos(), fsetpos() with an fpos_t that happens to be a
  *      64-bit integer, even though ANSI says we're not supposed to know
  *      anything about fpos_t's internals.
  * Based on what ./configure tells us about these, we set
- * HAS_64BIT_FILE_OFFSETS or not. 
+ * HAS_64BIT_FILE_OFFSETS or not.
  *
  * In all cases, we also check that we HAVE_STRTOULL; ssi.c has to
  * make a call. HP/UX 11, for example, does not provide strtoull(),
  * despite being 64-bit.
- * 
+ *
  * (This legacy code in squid has been simplified greatly in Easel)
  *****************************************************************/
 
@@ -114,7 +114,7 @@
 #define HAS_64BIT_FILE_OFFSETS 1
 #elif defined HAVE_STRTOULL && defined HAVE_FTELLO64 && defined HAVE_FSEEKO64 && SIZEOF_OFF64_T == 8
 #define HAS_64BIT_FILE_OFFSETS 1
-#elif defined HAVE_STRTOULL && defined HAVE_FTELL64 && defined HAVE_FSEEK64 
+#elif defined HAVE_STRTOULL && defined HAVE_FTELL64 && defined HAVE_FSEEK64
 #define HAS_64BIT_FILE_OFFSETS 1
 #elif defined HAVE_STRTOULL && defined ARITHMETIC_FPOS_T && SIZEOF_FPOS_T == 8
 #define HAS_64BIT_FILE_OFFSETS 1

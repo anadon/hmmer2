@@ -40,8 +40,7 @@
  *           Return the score.
  */
 int
-Prob2Score(float p, float null)
-{
+Prob2Score(float p, float null) {
   if   (p == 0.0) return -INFTY;
   else            return (int) floor(0.5 + INTSCALE * sreLOG2(p/null));
 }
@@ -52,8 +51,7 @@ Prob2Score(float p, float null)
  *           needs the null model probability, if any, to do the conversion.
  */
 float
-Score2Prob(int sc, float null)
-{
+Score2Prob(int sc, float null) {
   if (sc == -INFTY) return 0.;
   else              return (null * sreEXP2((float) sc / INTSCALE));
 }
@@ -65,8 +63,7 @@ Score2Prob(int sc, float null)
  *           point score for output. (could be a macro but who cares.)
  */
 float
-Scorify(int sc)
-{
+Scorify(int sc) {
   return ((float) sc / INTSCALE);
 }
 
@@ -85,17 +82,16 @@ Scorify(int sc)
  * Returns:  P value for score significance.
  */
 double
-PValue(struct plan7_s *hmm, float sc)
-{
+PValue(struct plan7_s *hmm, float sc) {
   double pval;
 
-        /* the bound from Bayes */
+  /* the bound from Bayes */
   if      (sc >= sreLOG2(DBL_MAX))       pval = 0.0;
   else if (sc <= -1. * sreLOG2(DBL_MAX)) pval = 1.0;
   else                        pval = 1. / (1.+sreEXP2(sc));
 
-        /* try for a better estimate from EVD fit */
-  if (hmm != NULL && (hmm->flags & PLAN7_STATS)){
+  /* try for a better estimate from EVD fit */
+  if (hmm != NULL && (hmm->flags & PLAN7_STATS)) {
     double pval2;
     pval2 = ExtremeValueP(sc, hmm->mu, hmm->lambda);
     if (pval2 < pval) pval = pval2;
@@ -110,8 +106,7 @@ PValue(struct plan7_s *hmm, float sc)
  *           Note that this is in natural log space, not log_2.
  */
 float
-LogSum(float p1, float p2)
-{
+LogSum(float p1, float p2) {
   if (p1 > p2)
     return (p1-p2 > 50.) ? p1 : p1 + log1p(exp(p2-p1));
   else
@@ -144,14 +139,14 @@ LogSum(float p1, float p2)
  */
 static int ilogsum_lookup[LOGSUM_TBL];
 static void
-init_ilogsum(void){
+init_ilogsum(void) {
   int i;
   for (i = 0; i < LOGSUM_TBL; i++)
     ilogsum_lookup[i] = (int) (INTSCALE * 1.44269504 *
-     (log1p(exp(0.69314718 * (double) -i/INTSCALE))));
+                               (log1p(exp(0.69314718 * (double) -i/INTSCALE))));
 }
 int
-ILogsum(int p1, int p2){
+ILogsum(int p1, int p2) {
   int    diff;
   static pthread_once_t firsttime = PTHREAD_ONCE_INIT;
   pthread_once(&firsttime, init_ilogsum);
@@ -174,8 +169,7 @@ ILogsum(int p1, int p2){
  *           n   - length of vec
  */
 void
-LogNorm(float *vec, int n)
-{
+LogNorm(float *vec, int n) {
   int   x;
   float max   = -1.0e30;
   float denom = 0.;
@@ -206,22 +200,20 @@ LogNorm(float *vec, int n)
  * Return:   log P(cvec|dirichlet)
  */
 float
-Logp_cvec(float *cvec, int n, float *alpha)
-{
+Logp_cvec(float *cvec, int n, float *alpha) {
   float lnp;                   /* log likelihood of P(cvec | Dirichlet) */
   float sum1, sum2, sum3;
   int   x;
 
   sum1 = sum2 = sum3 = lnp = 0.0;
-  for (x = 0; x < n; x++)
-    {
-      sum1 += cvec[x] + alpha[x];
-      sum2 += alpha[x];
-      sum3 += cvec[x];
-      lnp  += Gammln(alpha[x] + cvec[x]);
-      lnp  -= Gammln(cvec[x] + 1.);
-      lnp  -= Gammln(alpha[x]);
-    }
+  for (x = 0; x < n; x++) {
+    sum1 += cvec[x] + alpha[x];
+    sum2 += alpha[x];
+    sum3 += cvec[x];
+    lnp  += Gammln(alpha[x] + cvec[x]);
+    lnp  -= Gammln(cvec[x] + 1.);
+    lnp  -= Gammln(alpha[x]);
+  }
   lnp -= Gammln(sum1);
   lnp += Gammln(sum2);
   lnp += Gammln(sum3 + 1.);

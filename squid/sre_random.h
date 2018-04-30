@@ -16,4 +16,4 @@ extern void   SampleCountvector(double *p, int K, int ctot, double *c);
 
 #define CHOOSE(a)   ((int) (sre_random() * (a)))
 
-  
+

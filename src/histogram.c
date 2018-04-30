@@ -58,8 +58,7 @@
  *                     by this much (saves excessive reallocation)
  */
 struct histogram_s *
-AllocHistogram(int min, int max, int lumpsize)
-{
+AllocHistogram(int min, int max, int lumpsize) {
   struct histogram_s *h;
   int            newsize;
   int            i;
@@ -88,8 +87,7 @@ AllocHistogram(int min, int max, int lumpsize)
  * Purpose:  free a histogram structure.
  */
 void
-FreeHistogram(struct histogram_s *h)
-{
+FreeHistogram(struct histogram_s *h) {
   free(h->histogram);
   if (h->expect != NULL) free(h->expect);
   free(h);
@@ -100,8 +98,7 @@ FreeHistogram(struct histogram_s *h)
  * Purpose:  Free only the theoretical fit part of a histogram.
  */
 void
-UnfitHistogram(struct histogram_s *h)
-{
+UnfitHistogram(struct histogram_s *h) {
   if (h->expect != NULL) free(h->expect);
   h->expect   = NULL;
   h->fit_type = HISTFIT_NONE;
@@ -116,8 +113,7 @@ UnfitHistogram(struct histogram_s *h)
  *           next lower integer.
  */
 void
-AddToHistogram(struct histogram_s *h, float sc)
-{
+AddToHistogram(struct histogram_s *h, float sc) {
   int score;
   int prevsize;
   int newsize;
@@ -138,7 +134,7 @@ AddToHistogram(struct histogram_s *h, float sc)
 
   /* Check to see if we must reallocate the histogram.
    */
-  if (score < h->min){
+  if (score < h->min) {
     int moveby;
     prevsize = h->max - h->min + 1;
     moveby   = (h->min - score) + h->lumpsize;
@@ -149,7 +145,7 @@ AddToHistogram(struct histogram_s *h, float sc)
     memmove(h->histogram+moveby, h->histogram, sizeof(int) * prevsize);
     for (i = 0; i < moveby; i++)
       h->histogram[i] = 0;
-  }else if (score > h->max){
+  } else if (score > h->max) {
     prevsize = h->max - h->min + 1;
     h->max   = h->lumpsize + score;
     newsize  = h->max - h->min + 1;
@@ -168,7 +164,7 @@ AddToHistogram(struct histogram_s *h, float sc)
   if (score > h->highscore) h->highscore = score;
 
   SQD_DPRINTF3(("AddToHistogram(): added %.1f; rounded to %d; in bin %d (%d-%d)\n",
-    sc, score, score-h->min, h->min, h->max));
+                sc, score, score-h->min, h->min, h->max));
   return;
 }
 
@@ -184,8 +180,7 @@ AddToHistogram(struct histogram_s *h, float sc)
  *           h      - histogram to print
  */
 void
-PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
-{
+PrintASCIIHistogram(FILE *fp, struct histogram_s *h) {
   int units;
   int maxbar;
   int num;
@@ -204,36 +199,45 @@ PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
    */
   maxbar = 0;
   for (i = h->lowscore - h->min; i <= h->highscore - h->min; i++)
-    if (h->histogram[i] > maxbar)
-      {
-  maxbar   = h->histogram[i];     /* max height    */
-  lowbound = i + h->min;       /* peak position */
-      }
+    if (h->histogram[i] > maxbar) {
+      maxbar   = h->histogram[i];     /* max height    */
+      lowbound = i + h->min;       /* peak position */
+    }
 
   /* Truncate histogram display on both sides, ad hoc fashion.
    * Start from the peak; then move out until we see <emptybins> empty bins,
    * and stop.
    */
   highbound = lowbound;    /* start at peak position */
-  for (num = 0; lowbound > h->lowscore; lowbound--)
-    {
-      i = lowbound - h->min;
-      if (h->histogram[i] > 0) { num = 0;               continue; } /* reset */
-      if (++num == emptybins)  { lowbound += emptybins; break;    } /* stop  */
+  for (num = 0; lowbound > h->lowscore; lowbound--) {
+    i = lowbound - h->min;
+    if (h->histogram[i] > 0) {
+      num = 0;                /* reset */
+      continue;
     }
-  for (num = 0; highbound < h->highscore; highbound++)
-    {
-      i = highbound - h->min;
-      if (h->histogram[i] > 0) { num = 0;                continue; } /* reset */
-      if (++num == emptybins)  { highbound -= emptybins; break;    } /* stop  */
+    if (++num == emptybins)  {
+      lowbound += emptybins;  /* stop  */
+      break;
     }
-        /* collect counts outside of bounds */
+  }
+  for (num = 0; highbound < h->highscore; highbound++) {
+    i = highbound - h->min;
+    if (h->histogram[i] > 0) {
+      num = 0;                 /* reset */
+      continue;
+    }
+    if (++num == emptybins)  {
+      highbound -= emptybins;  /* stop  */
+      break;
+    }
+  }
+  /* collect counts outside of bounds */
   for (lowcount = 0, i = h->lowscore - h->min; i <= lowbound - h->min; i++)
     lowcount += h->histogram[i];
   for (highcount = 0, i = h->highscore - h->min; i >= highbound - h->min; i--)
     highcount += h->histogram[i];
 
-        /* maxbar might need raised now; then set our units  */
+  /* maxbar might need raised now; then set our units  */
   if (lowcount  > maxbar) maxbar = lowcount;
   if (highcount > maxbar) maxbar = highcount;
   units = ((maxbar-1)/ 59) + 1;
@@ -242,11 +246,11 @@ PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
   /* Print the histogram
    */
   fprintf(fp, "%5s %6s %6s  (one = represents %d sequences)\n",
-    "score", "obs", "exp", units);
+          "score", "obs", "exp", units);
   fprintf(fp, "%5s %6s %6s\n", "-----", "---", "---");
   buffer[80] = '\0';
   buffer[79] = '\n';
-  for (i = h->lowscore; i <= h->highscore; i++){
+  for (i = h->lowscore; i <= h->highscore; i++) {
     memset(buffer, ' ', 79 * sizeof(char));
 
     int idx;
@@ -255,16 +259,16 @@ PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
     // Deal with special cases at edges
     if      (i < lowbound)  continue;
     else if (i > highbound) continue;
-    else if (i == lowbound && i != h->lowscore){
+    else if (i == lowbound && i != h->lowscore) {
       sprintf(buffer, "<%4d %6d %6s|", i+1, lowcount, "-");
       if (lowcount > 0) {
         num = 1+(lowcount-1) / units;
         if (num > 60) Die("oops");
-          for (pos = 20; num > 0; num--)  buffer[pos++] = '=';
+        for (pos = 20; num > 0; num--)  buffer[pos++] = '=';
       }
       fputs(buffer, fp);
       continue;
-    }else if (i == highbound && i != h->highscore){
+    } else if (i == highbound && i != h->highscore) {
       sprintf(buffer, ">%4d %6d %6s|", i, highcount, "-");
       if (highcount > 0) {
         num = 1+(highcount-1) / units;
@@ -289,14 +293,14 @@ PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
     }
 
     // Mark the theoretically expected value
-    if (h->fit_type != HISTFIT_NONE && (int) h->expect[idx] > 0){
-       pos = 20 + (int)(h->expect[idx]-1) / units;
+    if (h->fit_type != HISTFIT_NONE && (int) h->expect[idx] > 0) {
+      pos = 20 + (int)(h->expect[idx]-1) / units;
       if (pos >= 78) pos = 78; /* be careful of buffer bounds */
-        buffer[pos] = '*';
+      buffer[pos] = '*';
     }
 
-      /* Print the line
-       */
+    /* Print the line
+     */
     fputs(buffer, fp);
   }
 
@@ -338,7 +342,7 @@ PrintASCIIHistogram(FILE *fp, struct histogram_s *h)
 
 //USED EXTERNALLY***************************************************************
 void
-PrintXMGRHistogram(FILE *fp, struct histogram_s *h){
+PrintXMGRHistogram(FILE *fp, struct histogram_s *h) {
   int sc;      // integer score in histogram structure
   double val;
 
@@ -347,19 +351,19 @@ PrintXMGRHistogram(FILE *fp, struct histogram_s *h){
   for (sc = h->lowscore; sc <= h->highscore; sc++)
     if (h->histogram[sc - h->min] > 0)
       fprintf(fp, "%-6d %f\n", sc,
-        (float) h->histogram[sc - h->min]/ (float) h->total);
+              (float) h->histogram[sc - h->min]/ (float) h->total);
   fprintf(fp, "&\n");
 
   // Second data set is the theoretical histogram
 
-  if (h->fit_type != HISTFIT_NONE){
-    for (sc = h->lowscore; sc <= h->highscore; sc++){
+  if (h->fit_type != HISTFIT_NONE) {
+    for (sc = h->lowscore; sc <= h->highscore; sc++) {
       val =
         (1. - ExtremeValueP((float)sc+1, h->param[EVD_MU], h->param[EVD_LAMBDA]))-
         (1. - ExtremeValueP((float)sc, h->param[EVD_MU], h->param[EVD_LAMBDA]));
       fprintf(fp, "%-6d %f\n", sc, val);
     }
-  fprintf(fp, "&\n");
+    fprintf(fp, "&\n");
   }
 }
 //*/
@@ -416,7 +420,7 @@ PrintXMGRDistribution(FILE *fp, struct histogram_s *h)
 
 //USED EXTERNALLY***************************************************************
 void
-PrintXMGRRegressionLine(FILE *fp, struct histogram_s *h){
+PrintXMGRRegressionLine(FILE *fp, struct histogram_s *h) {
   int sc;      // integer score in histogram structure
   int cum;
   double val;      // log log transform
@@ -425,7 +429,7 @@ PrintXMGRRegressionLine(FILE *fp, struct histogram_s *h){
   // histogram bin x contains # of scores between x and x+1,
   // hence the sc+1 offset.
 
-  for (cum = 0, sc = h->lowscore; sc <= h->highscore; sc++){
+  for (cum = 0, sc = h->lowscore; sc <= h->highscore; sc++) {
     cum += h->histogram[sc - h->min];
     val = log (-1. * log((double) cum /  (double) h->total));
     if (cum < h->total)
@@ -435,13 +439,13 @@ PrintXMGRRegressionLine(FILE *fp, struct histogram_s *h){
 
   // Second data set is the theoretical histogram
 
-  if (h->fit_type != HISTFIT_NONE){
-    for (sc = h->lowscore; sc <= h->highscore; sc++){
+  if (h->fit_type != HISTFIT_NONE) {
+    for (sc = h->lowscore; sc <= h->highscore; sc++) {
       val = log(-1. * log(1. - ExtremeValueP((float) sc, h->param[EVD_MU],
-                   h->param[EVD_LAMBDA])));
+                                             h->param[EVD_LAMBDA])));
       fprintf(fp, "%-6d %f\n", sc, val);
     }
-  fprintf(fp, "&\n");
+    fprintf(fp, "&\n");
   }
 }
 //*/
@@ -468,7 +472,7 @@ PrintXMGRRegressionLine(FILE *fp, struct histogram_s *h){
 
 //USED EXTERNALLY***************************************************************
 void
-EVDBasicFit(struct histogram_s *h){
+EVDBasicFit(struct histogram_s *h) {
   float *d;            // distribution P(S < x)
   float *x;            // x-axis of P(S<x) for Linefit()
   int    hsize;
@@ -493,7 +497,7 @@ EVDBasicFit(struct histogram_s *h){
   // x and x+1.
 
   sum = 0;
-  for (sc = h->lowscore; sc <= h->highscore; sc++){
+  for (sc = h->lowscore; sc <= h->highscore; sc++) {
     sum += h->histogram[sc - h->min];
     d[sc - h->lowscore] = (float) sum / (float) h->total;
     x[sc - h->lowscore] = (float) (sc + 1);
@@ -509,7 +513,7 @@ EVDBasicFit(struct histogram_s *h){
 
   // do the linear regression
   FLinefit(x, d, hsize-1, &intercept, &slope, &corr);
-        // calc mu, lambda
+  // calc mu, lambda
   lambda = -1. * slope;
   mu     = intercept / lambda;
 
@@ -545,8 +549,7 @@ EVDBasicFit(struct histogram_s *h){
  *           else 0 if fit is invalid (too few seqs.)
  */
 int
-ExtremeValueFitHistogram(struct histogram_s *h, int censor, float high_hint)
-{
+ExtremeValueFitHistogram(struct histogram_s *h, int censor, float high_hint) {
   float *x;                     /* array of EVD samples to fit */
   int   *y;                     /* histogram counts            */
   int    n;      /* number of observed samples  */
@@ -564,16 +567,14 @@ ExtremeValueFitHistogram(struct histogram_s *h, int censor, float high_hint)
    * if we're not, then we take the whole histogram.
    */
   lowbound = h->lowscore;
-  if (censor)
-    {
-      int max = -1;
-      for (sc = h->lowscore; sc <= h->highscore; sc++)
-  if (h->histogram[sc - h->min] > max)
-    {
-      max      = h->histogram[sc - h->min];
-      lowbound = sc;
-    }
-    }
+  if (censor) {
+    int max = -1;
+    for (sc = h->lowscore; sc <= h->highscore; sc++)
+      if (h->histogram[sc - h->min] > max) {
+        max      = h->histogram[sc - h->min];
+        lowbound = sc;
+      }
+  }
 
   /* Determine initial upper bound on fitted region.
    */
@@ -581,65 +582,60 @@ ExtremeValueFitHistogram(struct histogram_s *h, int censor, float high_hint)
 
   /* Now, iteratively converge on our lambda, mu:
    */
-  for (iteration = 0; iteration < 100; iteration++)
-    {
-      /* Construct x, y vectors.
-       */
-      x = NULL;
-      y = NULL;
-      hsize = highbound - lowbound + 1;
-      if (hsize < 5) goto FITFAILED; /* require at least 5 bins or we don't fit */
+  for (iteration = 0; iteration < 100; iteration++) {
+    /* Construct x, y vectors.
+     */
+    x = NULL;
+    y = NULL;
+    hsize = highbound - lowbound + 1;
+    if (hsize < 5) goto FITFAILED; /* require at least 5 bins or we don't fit */
 
-      x = MallocOrDie(sizeof(float) * hsize);
-      y = MallocOrDie(sizeof(int)   * hsize);
-      n = 0;
-      for (sc = lowbound; sc <= highbound; sc++)
-  {
-    x[sc-lowbound] = (float) sc + 0.5; /* crude, but tests OK */
-    y[sc-lowbound] = h->histogram[sc - h->min];
-    n             += h->histogram[sc - h->min];
-  }
+    x = MallocOrDie(sizeof(float) * hsize);
+    y = MallocOrDie(sizeof(int)   * hsize);
+    n = 0;
+    for (sc = lowbound; sc <= highbound; sc++) {
+      x[sc-lowbound] = (float) sc + 0.5; /* crude, but tests OK */
+      y[sc-lowbound] = h->histogram[sc - h->min];
+      n             += h->histogram[sc - h->min];
+    }
 
-      if (n < 100) goto FITFAILED;  /* require fitting to at least 100 points */
+    if (n < 100) goto FITFAILED;  /* require fitting to at least 100 points */
 
-      /* If we're censoring, estimate z, the number of censored guys
-       * left of the bound. Our initial estimate is crudely that we're
-       * missing e^-1 of the total distribution (which would be exact
-       * if we censored exactly at mu; but we censored at the observed peak).
-       * Subsequent estimates are more exact based on our current estimate of mu.
-       */
-      if (censor)
-  {
-    if (iteration == 0)
-      z = MIN(h->total-n, (int) (0.58198 * (float) n));
-    else
-      {
+    /* If we're censoring, estimate z, the number of censored guys
+     * left of the bound. Our initial estimate is crudely that we're
+     * missing e^-1 of the total distribution (which would be exact
+     * if we censored exactly at mu; but we censored at the observed peak).
+     * Subsequent estimates are more exact based on our current estimate of mu.
+     */
+    if (censor) {
+      if (iteration == 0)
+        z = MIN(h->total-n, (int) (0.58198 * (float) n));
+      else {
         double psx;
         psx = EVDDistribution((float) lowbound, mu, lambda);
         z = MIN(h->total-n, (int) ((double) n * psx / (1. - psx)));
       }
-  }
-
-      /* Do an ML fit
-       */
-      if (censor) {
-  if (! EVDCensoredFit(x, y, hsize, z, (float) lowbound, &mu, &lambda))
-    goto FITFAILED;
-      } else
-  if (! EVDMaxLikelyFit(x, y, hsize, &mu, &lambda))
-    goto FITFAILED;
-
-      /* Find the Eval = 1 point as a new highbound;
-       * the total number of samples estimated to "belong" to the EVD is n+z
-       */
-      new_highbound = (int)
-  (mu - (log (-1. * log((double) (n+z-1) / (double)(n+z))) / lambda));
-
-      free(x);
-      free(y);
-      if (new_highbound >= highbound) break;
-      highbound = new_highbound;
     }
+
+    /* Do an ML fit
+     */
+    if (censor) {
+      if (! EVDCensoredFit(x, y, hsize, z, (float) lowbound, &mu, &lambda))
+        goto FITFAILED;
+    } else if (! EVDMaxLikelyFit(x, y, hsize, &mu, &lambda))
+      goto FITFAILED;
+
+    /* Find the Eval = 1 point as a new highbound;
+     * the total number of samples estimated to "belong" to the EVD is n+z
+     */
+    new_highbound = (int)
+                    (mu - (log (-1. * log((double) (n+z-1) / (double)(n+z))) / lambda));
+
+    free(x);
+    free(y);
+    if (new_highbound >= highbound) break;
+    highbound = new_highbound;
+  }
 
   /* Set the histogram parameters;
    * - we fit from lowbound to highbound; thus we lose 2 degrees of freedom
@@ -673,8 +669,7 @@ FITFAILED:
  */
 void
 ExtremeValueSetHistogram(struct histogram_s *h, float mu, float lambda,
-       float lowbound, float highbound, int ndegrees)
-{
+                         float lowbound, float highbound, int ndegrees) {
   int   sc;
   int   hsize, idx;
   int   nbins;
@@ -695,28 +690,27 @@ ExtremeValueSetHistogram(struct histogram_s *h, float mu, float lambda,
   for (sc = h->min; sc <= h->max; sc++)
     h->expect[sc - h->min] =
       ExtremeValueE((float)(sc), h->param[EVD_MU], h->param[EVD_LAMBDA],
-        h->total) -
+                    h->total) -
       ExtremeValueE((float)(sc+1), h->param[EVD_MU], h->param[EVD_LAMBDA],
-        h->total);
+                    h->total);
 
   /* Calculate the goodness-of-fit (within whole region)
    */
   h->chisq = 0.;
   nbins    = 0;
   for (sc = lowbound; sc <= highbound; sc++)
-    if (h->expect[sc-h->min] >= 5. && h->histogram[sc-h->min] >= 5)
-      {
-  delta = (float) h->histogram[sc-h->min] - h->expect[sc-h->min];
-  h->chisq += delta * delta / h->expect[sc-h->min];
-  nbins++;
-      }
+    if (h->expect[sc-h->min] >= 5. && h->histogram[sc-h->min] >= 5) {
+      delta = (float) h->histogram[sc-h->min] - h->expect[sc-h->min];
+      h->chisq += delta * delta / h->expect[sc-h->min];
+      nbins++;
+    }
 
   /* Since we fit the whole histogram, there is at least
    * one constraint on chi-square: the normalization to h->total.
    */
   if (nbins > 1 + ndegrees)
     h->chip = (float) IncompleteGamma((double)(nbins-1-ndegrees)/2.,
-              (double) h->chisq/2.);
+                                      (double) h->chisq/2.);
   else
     h->chip = 0.;
 }
@@ -737,8 +731,7 @@ ExtremeValueSetHistogram(struct histogram_s *h, float mu, float lambda,
  *           else 0 if fit is invalid (too few seqs.)
  */
 int
-GaussianFitHistogram(struct histogram_s *h, float high_hint)
-{
+GaussianFitHistogram(struct histogram_s *h, float high_hint) {
   float sum;
   float sqsum;
   float delta;
@@ -753,7 +746,10 @@ GaussianFitHistogram(struct histogram_s *h, float high_hint)
   /* Determine if we have enough hits to fit the histogram;
    * arbitrarily require 1000.
    */
-  if (h->total < 1000) { h->fit_type = HISTFIT_NONE; return 0; }
+  if (h->total < 1000) {
+    h->fit_type = HISTFIT_NONE;
+    return 0;
+  }
 
   /* Simplest algorithm for mean and sd;
    * no outlier detection yet (not even using high_hint)
@@ -763,16 +759,15 @@ GaussianFitHistogram(struct histogram_s *h, float high_hint)
    * (roughly) as x + 0.5.
    */
   sum = sqsum = 0.;
-  for (sc = h->lowscore; sc <= h->highscore; sc++)
-    {
-      delta  = (float) sc + 0.5;
-      sum   += (float) h->histogram[sc-h->min] * delta;
-      sqsum += (float) h->histogram[sc-h->min] * delta * delta;
-    }
+  for (sc = h->lowscore; sc <= h->highscore; sc++) {
+    delta  = (float) sc + 0.5;
+    sum   += (float) h->histogram[sc-h->min] * delta;
+    sqsum += (float) h->histogram[sc-h->min] * delta * delta;
+  }
   h->fit_type          = HISTFIT_GAUSSIAN;
   h->param[GAUSS_MEAN] = sum / (float) h->total;
   h->param[GAUSS_SD]   = sqrt((sqsum - (sum*sum/(float)h->total)) /
-            (float)(h->total-1));
+                              (float)(h->total-1));
 
   /* Calculate the expected values for the histogram.
    * Note that the magic 0.5 correction appears again.
@@ -784,29 +779,27 @@ GaussianFitHistogram(struct histogram_s *h, float high_hint)
   for (idx = 0; idx < hsize; idx++)
     h->expect[idx] = 0.;
 
-  for (sc = h->min; sc <= h->max; sc++)
-    {
-      delta = (float) sc + 0.5 - h->param[GAUSS_MEAN];
-      h->expect[sc - h->min] =
-  (float) h->total * ((1. / (h->param[GAUSS_SD] * sqrt(2.*3.14159))) *
-        (exp(-1.* delta*delta / (2. * h->param[GAUSS_SD] * h->param[GAUSS_SD]))));
-    }
+  for (sc = h->min; sc <= h->max; sc++) {
+    delta = (float) sc + 0.5 - h->param[GAUSS_MEAN];
+    h->expect[sc - h->min] =
+      (float) h->total * ((1. / (h->param[GAUSS_SD] * sqrt(2.*3.14159))) *
+                          (exp(-1.* delta*delta / (2. * h->param[GAUSS_SD] * h->param[GAUSS_SD]))));
+  }
 
   /* Calculate the goodness-of-fit (within region that was fitted)
    */
   h->chisq = 0.;
   nbins    = 0;
   for (sc = h->lowscore; sc <= h->highscore; sc++)
-    if (h->expect[sc-h->min] >= 5. && h->histogram[sc-h->min] >= 5)
-      {
-  delta = (float) h->histogram[sc-h->min] - h->expect[sc-h->min];
-  h->chisq += delta * delta / h->expect[sc-h->min];
-  nbins++;
-      }
+    if (h->expect[sc-h->min] >= 5. && h->histogram[sc-h->min] >= 5) {
+      delta = (float) h->histogram[sc-h->min] - h->expect[sc-h->min];
+      h->chisq += delta * delta / h->expect[sc-h->min];
+      nbins++;
+    }
   /* -1 d.f. for normalization; -2 d.f. for two free parameters */
   if (nbins > 3)
     h->chip = (float) IncompleteGamma((double)(nbins-3)/2.,
-              (double) h->chisq/2.);
+                                      (double) h->chisq/2.);
   else
     h->chip = 0.;
 
@@ -900,8 +893,7 @@ EVDDensity(float x, float mu, float lambda)
  *           mu and lambda.
  */
 double
-EVDDistribution(float x, float mu, float lambda)
-{
+EVDDistribution(float x, float mu, float lambda) {
   return (exp(-1. * exp(-1. * lambda * (x - mu))));
 }
 
@@ -923,15 +915,14 @@ EVDDistribution(float x, float mu, float lambda)
  * Return:   P(S>x)
  */
 double
-ExtremeValueP(float x, float mu, float lambda)
-{
+ExtremeValueP(float x, float mu, float lambda) {
   double y;
-      /* avoid exceptions near P=1.0 */
-      /* typical 32-bit sys: if () < -3.6, return 1.0 */
+  /* avoid exceptions near P=1.0 */
+  /* typical 32-bit sys: if () < -3.6, return 1.0 */
   if ((lambda * (x - mu)) <= -1. * log(-1. * log(DBL_EPSILON))) return 1.0;
-      /* avoid underflow fp exceptions near P=0.0*/
+  /* avoid underflow fp exceptions near P=0.0*/
   if ((lambda * (x - mu)) >= 2.3 * (double) DBL_MAX_10_EXP)     return 0.0;
-      /* a roundoff issue arises; use 1 - e^-x --> x for small x */
+  /* a roundoff issue arises; use 1 - e^-x --> x for small x */
   y = exp(-1. * lambda * (x - mu));
   if       (y < 1e-7) return y;
   else     return (1.0 - exp(-1. * y));
@@ -976,8 +967,7 @@ ExtremeValueP2(float x, float mu, float lambda, int N)
  * Return:   E(S>x) for database of size N
  */
 double
-ExtremeValueE(float x, float mu, float lambda, int N)
-{
+ExtremeValueE(float x, float mu, float lambda, int N) {
   return (double)N * ExtremeValueP(x,mu,lambda);
 }
 
@@ -993,7 +983,7 @@ ExtremeValueE(float x, float mu, float lambda, int N)
 
 //USED EXTERNALLY***************************************************************
 float
-EVDrandom(float mu, float lambda){
+EVDrandom(float mu, float lambda) {
   float p = 0.0;
 
   // Very unlikely, but possible,
@@ -1027,8 +1017,7 @@ EVDrandom(float mu, float lambda){
  * Return:   (void)
  */
 void
-Lawless416(float *x, int *y, int n, float lambda, float *ret_f, float *ret_df)
-{
+Lawless416(float *x, int *y, int n, float lambda, float *ret_f, float *ret_df) {
 
   double esum;      /* \sum e^(-lambda xi)      */
   double xesum;      /* \sum xi e^(-lambda xi)   */
@@ -1039,7 +1028,7 @@ Lawless416(float *x, int *y, int n, float lambda, float *ret_f, float *ret_df)
 
 
   esum = xesum = xsum  = xxesum = total = 0.;
-  for (i = 0; i < n; i++){
+  for (i = 0; i < n; i++) {
     double mult; /* histogram count multiplier */
     mult = (y == NULL) ? 1. : (double) y[i];
     xsum   += mult * x[i];
@@ -1050,8 +1039,8 @@ Lawless416(float *x, int *y, int n, float lambda, float *ret_f, float *ret_df)
   }
   *ret_f  = 1./lambda - xsum / total + xesum / esum;
   *ret_df = ((xesum / esum) * (xesum / esum))
-    - (xxesum / esum)
-    - (1. / (lambda * lambda));
+            - (xxesum / esum)
+            - (1. / (lambda * lambda));
 
   return;
 }
@@ -1084,7 +1073,7 @@ Lawless416(float *x, int *y, int n, float lambda, float *ret_f, float *ret_df)
  */
 void
 Lawless422(float *x, int *y, int n, int z, float c,
-     float lambda, float *ret_f, float *ret_df){
+           float lambda, float *ret_f, float *ret_df) {
   double esum;      /* \sum e^(-lambda xi)      + z term    */
   double xesum;      /* \sum xi e^(-lambda xi)   + z term    */
   double xxesum;    /* \sum xi^2 e^(-lambda xi) + z term    */
@@ -1093,7 +1082,7 @@ Lawless422(float *x, int *y, int n, int z, float c,
   int i;
 
   esum = xesum = xsum  = xxesum = total = 0.;
-  for (i = 0; i < n; i++){
+  for (i = 0; i < n; i++) {
     double mult;      /* histogram count multiplier */
     mult = (y == NULL) ? 1. : (double) y[i];
     xsum   += mult * x[i];
@@ -1111,8 +1100,8 @@ Lawless422(float *x, int *y, int n, int z, float c,
 
   *ret_f  = 1./lambda - xsum / total + xesum / esum;
   *ret_df = ((xesum / esum) * (xesum / esum))
-    - (xxesum / esum)
-    - (1. / (lambda * lambda));
+            - (xxesum / esum)
+            - (1. / (lambda * lambda));
 
   return;
 }
@@ -1143,8 +1132,7 @@ Lawless422(float *x, int *y, int n, int z, float c,
  * Return:   1 on success; 0 on any failure
  */
 int
-EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
-{
+EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda) {
   float  lambda, mu;
   float  fx;      /* f(x)  */
   float  dfx;      /* f'(x) */
@@ -1159,7 +1147,7 @@ EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
 
   /* 2. Use Newton/Raphson to solve Lawless 4.1.6 and find ML lambda
    */
-  for (i = 0; i < 100; i++){
+  for (i = 0; i < 100; i++) {
     Lawless416(x, c, n, lambda, &fx, &dfx);
     if (fabs(fx) < tol) break;             /* success */
     lambda = lambda - fx / dfx;       /* Newton/Raphson is simple */
@@ -1173,14 +1161,14 @@ EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
    *      i.e. fx > 0 if we are left of the root, fx < 0 if we
    *      are right of the root.
    */
-  if (i == 100){
+  if (i == 100) {
     float left, right, mid;
     SQD_DPRINTF2(("EVDMaxLikelyFit(): Newton/Raphson failed; switchover to bisection"));
 
-      /* First we need to bracket the root */
+    /* First we need to bracket the root */
     lambda = right = left = 0.2;
     Lawless416(x, c, n, lambda, &fx, &dfx);
-    if (fx < 0.0){      /* fix right; search left. */
+    if (fx < 0.0) {     /* fix right; search left. */
       do {
         left -= 0.1;
         if (left < 0.) {
@@ -1189,7 +1177,7 @@ EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
         }
         Lawless416(x, c, n, left, &fx, &dfx);
       } while (fx < 0.);
-    }else{      /* fix left; search right. */
+    } else {     /* fix left; search right. */
       do {
         right += 0.1;
         Lawless416(x, c, n, right, &fx, &dfx);
@@ -1200,7 +1188,7 @@ EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
       } while (fx > 0.);
     }
     /* now we bisection search in left/right interval */
-    for (i = 0; i < 100; i++){
+    for (i = 0; i < 100; i++) {
       mid = (left + right) / 2.;
       Lawless416(x, c, n, mid, &fx, &dfx);
       if (fabs(fx) < tol) break;             /* success */
@@ -1218,7 +1206,7 @@ EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
    */
   esum = 0.;
   total = 0.;
-  for (i = 0; i < n; i++){
+  for (i = 0; i < n; i++) {
     double mult;
     mult   = (c == NULL) ? 1. : (double) c[i];
     esum  += mult * exp(-1 * lambda * x[i]);
@@ -1261,8 +1249,7 @@ EVDMaxLikelyFit(float *x, int *c, int n, float *ret_mu, float *ret_lambda)
  */
 int
 EVDCensoredFit(float *x, int *y, int n, int z, float c,
-         float *ret_mu, float *ret_lambda)
-{
+               float *ret_mu, float *ret_lambda) {
   float  lambda, mu;
   float  fx;      /* f(x)  */
   float  dfx;      /* f'(x) */
@@ -1277,27 +1264,27 @@ EVDCensoredFit(float *x, int *y, int n, int z, float c,
 
   /* 2. Use Newton/Raphson to solve Lawless 4.2.2 and find ML lambda
    */
-  for (i = 0; i < 100; i++){
+  for (i = 0; i < 100; i++) {
     Lawless422(x, y, n, z, c, lambda, &fx, &dfx);
     if (fabs(fx) < tol) break;             /* success */
     lambda = lambda - fx / dfx;       /* Newton/Raphson is simple */
     if (lambda <= 0.) lambda = 0.001;      /* but be a little careful  */
   }
 
- /* 2.5: If we did 100 iterations but didn't converge, Newton/Raphson failed.
-   *      Resort to a bisection search. Worse convergence speed
-   *      but guaranteed to converge (unlike Newton/Raphson).
-   *      We assume (!?) that fx is a monotonically decreasing function of x;
-   *      i.e. fx > 0 if we are left of the root, fx < 0 if we
-   *      are right of the root.
-   */
-  if (i == 100){
+  /* 2.5: If we did 100 iterations but didn't converge, Newton/Raphson failed.
+    *      Resort to a bisection search. Worse convergence speed
+    *      but guaranteed to converge (unlike Newton/Raphson).
+    *      We assume (!?) that fx is a monotonically decreasing function of x;
+    *      i.e. fx > 0 if we are left of the root, fx < 0 if we
+    *      are right of the root.
+    */
+  if (i == 100) {
     float left, right, mid;
-      /* First we need to bracket the root */
+    /* First we need to bracket the root */
     SQD_DPRINTF2(("EVDCensoredFit(): Newton/Raphson failed; switched to bisection"));
     lambda = right = left = 0.2;
     Lawless422(x, y, n, z, c, lambda, &fx, &dfx);
-    if (fx < 0.){      /* fix right; search left. */
+    if (fx < 0.) {     /* fix right; search left. */
       do {
         left -= 0.03;
         if (left < 0.) {
@@ -1306,7 +1293,7 @@ EVDCensoredFit(float *x, int *y, int n, int z, float c,
         }
         Lawless422(x, y, n, z, c, left, &fx, &dfx);
       } while (fx < 0.);
-    }else{      /* fix left; search right. */
+    } else {     /* fix left; search right. */
       do {
         right += 0.1;
         Lawless422(x, y, n, z, c, left, &fx, &dfx);
@@ -1316,8 +1303,8 @@ EVDCensoredFit(float *x, int *y, int n, int z, float c,
         }
       } while (fx > 0.);
     }
-        /* now we bisection search in left/right interval */
-    for (i = 0; i < 100; i++){
+    /* now we bisection search in left/right interval */
+    for (i = 0; i < 100; i++) {
       mid = (left + right) / 2.;
       Lawless422(x, y, n, z, c, left, &fx, &dfx);
       if (fabs(fx) < tol) break;             /* success */
@@ -1334,7 +1321,7 @@ EVDCensoredFit(float *x, int *y, int n, int z, float c,
   /* 3. Substitute into Lawless 4.2.3 to find mu
    */
   esum =  total = 0.;
-  for (i = 0; i < n; i++){
+  for (i = 0; i < n; i++) {
     double mult;
     mult   = (y == NULL) ? 1. : (double) y[i];
     esum  += mult * exp(-1. * lambda * x[i]);

@@ -79,13 +79,13 @@ static struct opt_s OPTIONS[] = {
 
 
 static void main_loop_serial(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh,
-           int do_forward, int do_null2, int do_xnu,
-           struct histogram_s *histogram, struct tophit_s *ghit,
-           struct tophit_s *dhit, int *ret_nseq);
+                             int do_forward, int do_null2, int do_xnu,
+                             struct histogram_s *histogram, struct tophit_s *ghit,
+                             struct tophit_s *dhit, int *ret_nseq);
 static void main_loop_threaded(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh,
-             int do_forward, int do_null2, int do_xnu, int num_threads,
-             struct histogram_s *histogram, struct tophit_s *ghit,
-             struct tophit_s *dhit, int *ret_nseq);
+                               int do_forward, int do_null2, int do_xnu, int num_threads,
+                               struct histogram_s *histogram, struct tophit_s *ghit,
+                               struct tophit_s *dhit, int *ret_nseq);
 
 
 /* POSIX threads version:
@@ -121,10 +121,10 @@ struct workpool_s {
   int        num_threads;       /* number of threads   */
 };
 static struct workpool_s *workpool_start(struct plan7_s *hmm, SQFILE *sqfp,
-           int do_xnu, int do_forward, int do_null2,
-           struct threshold_s *thresh,
-           struct tophit_s *ghit, struct tophit_s *dhit,
-           struct histogram_s *hist, int num_threads);
+    int do_xnu, int do_forward, int do_null2,
+    struct threshold_s *thresh,
+    struct tophit_s *ghit, struct tophit_s *dhit,
+    struct histogram_s *hist, int num_threads);
 static void  workpool_stop(struct workpool_s *wpool);
 static void  workpool_free(struct workpool_s *wpool);
 static void *worker_thread(void *ptr);
@@ -133,8 +133,7 @@ static void *worker_thread(void *ptr);
 
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char    *hmmfile;          /* file to read HMM(s) from                */
   HMMFILE *hmmfp;               /* opened hmmfile for reading              */
   char    *seqfile;             /* file to read target sequence(s) from    */
@@ -216,9 +215,8 @@ main(int argc, char **argv)
     else if (strcmp(optname, "--informat") == 0) {
       format = String2SeqfileFormat(optarg);
       if (format == SQFILE_UNKNOWN)
-  Die("unrecognized sequence file format \"%s\"", optarg);
-    }
-    else if (strcmp(optname, "-h") == 0) {
+        Die("unrecognized sequence file format \"%s\"", optarg);
+    } else if (strcmp(optname, "-h") == 0) {
       HMMERBanner(stdout, banner);
       puts(usage);
       puts(experts);
@@ -269,7 +267,7 @@ main(int argc, char **argv)
 
   if (! SetAutocuts(&thresh, hmm))
     Die("HMM %s did not contain the GA, TC, or NC cutoffs you needed",
-  hmm->name);
+        hmm->name);
 
   /***********************************************
    * Show the banner
@@ -309,17 +307,17 @@ main(int argc, char **argv)
    * Search HMM against each sequence
    ***********************************************/
 
-        /* set up structures for storing output  */
+  /* set up structures for storing output  */
   histogram = AllocHistogram(-200, 200, 100);  /* keeps full histogram */
   ghit      = AllocTophits(200);         /* per-seq hits: 200=lumpsize */
   dhit      = AllocTophits(200);         /* domain hits:  200=lumpsize */
 
   if (num_threads > 1)
     main_loop_threaded(hmm, sqfp, &thresh, do_forward, do_null2, do_xnu, num_threads,
-           histogram, ghit, dhit, &nseq);
+                       histogram, ghit, dhit, &nseq);
   else
     main_loop_serial(hmm, sqfp, &thresh, do_forward, do_null2, do_xnu,
-         histogram, ghit, dhit, &nseq);
+                     histogram, ghit, dhit, &nseq);
 
   /***********************************************
    * Process hit lists, produce text output
@@ -330,25 +328,22 @@ main(int argc, char **argv)
    */
   if (hmm->flags & PLAN7_STATS)
     ExtremeValueSetHistogram(histogram, hmm->mu, hmm->lambda,
-           histogram->lowscore, histogram->highscore, 0);
+                             histogram->lowscore, histogram->highscore, 0);
   if (!thresh.Z) thresh.Z = nseq;    /* set Z for good now that we're done. */
 
   /* Format and report our output
    */
   /* 1. Report overall sequence hits (sorted on E-value) */
-  if (be_backwards)
-    {
-      printf("\nQuery HMM: %s|%s|%s\n",
-       hmm->name,
-       (hmm->flags & PLAN7_ACC)  ? hmm->acc  : "",
-       (hmm->flags & PLAN7_DESC) ? hmm->desc : "");
-    }
-  else
-    {
-      printf("\nQuery HMM:   %s\n", hmm->name);
-      printf("Accession:   %s\n", (hmm->flags & PLAN7_ACC)  ? hmm->acc  : "[none]");
-      printf("Description: %s\n", (hmm->flags & PLAN7_DESC) ? hmm->desc : "[none]");
-    }
+  if (be_backwards) {
+    printf("\nQuery HMM: %s|%s|%s\n",
+           hmm->name,
+           (hmm->flags & PLAN7_ACC)  ? hmm->acc  : "",
+           (hmm->flags & PLAN7_DESC) ? hmm->desc : "");
+  } else {
+    printf("\nQuery HMM:   %s\n", hmm->name);
+    printf("Accession:   %s\n", (hmm->flags & PLAN7_ACC)  ? hmm->acc  : "[none]");
+    printf("Description: %s\n", (hmm->flags & PLAN7_DESC) ? hmm->desc : "[none]");
+  }
 
   if (hmm->flags & PLAN7_STATS)
     printf("  [HMM has been calibrated; E-values are empirical estimates]\n");
@@ -362,39 +357,36 @@ main(int argc, char **argv)
   printf("\nScores for complete sequences (score includes all domains):\n");
   printf("%-*s %-*s %7s %10s %3s\n", namewidth, "Sequence", descwidth, "Description", "Score", "E-value", " N ");
   printf("%-*s %-*s %7s %10s %3s\n", namewidth, "--------", descwidth, "-----------", "-----", "-------", "---");
-  for (i = 0, nreported = 0; i < ghit->num; i++)
-    {
-      char *safedesc;
-      GetRankedHit(ghit, i,
-       &pvalue, &sc, NULL, NULL,
-       &name, NULL, &desc,
-       NULL, NULL, NULL,               /* sequence positions */
-       NULL, NULL, NULL,               /* HMM positions      */
-       NULL, &ndom,                     /* domain info        */
-       NULL);                     /* alignment info     */
-      evalue = pvalue * (double) thresh.Z;
+  for (i = 0, nreported = 0; i < ghit->num; i++) {
+    char *safedesc;
+    GetRankedHit(ghit, i,
+                 &pvalue, &sc, NULL, NULL,
+                 &name, NULL, &desc,
+                 NULL, NULL, NULL,               /* sequence positions */
+                 NULL, NULL, NULL,               /* HMM positions      */
+                 NULL, &ndom,                     /* domain info        */
+                 NULL);                     /* alignment info     */
+    evalue = pvalue * (double) thresh.Z;
 
-      /* safedesc is a workaround for an apparent Linux printf()
-       * bug with the *.*s format. dbmalloc crashes with a memchr() ptr out of bounds
-       * flaw if the malloc'ed space for desc is short. The workaround
-       * is to make sure the ptr for *.* has a big malloc space.
-       */
-      if (desc != NULL && strlen(desc) < 80)
-  {
-    safedesc = MallocOrDie(sizeof(char) * 80);
-    strcpy(safedesc, desc);
-  }
-      else safedesc = Strdup(desc);
+    /* safedesc is a workaround for an apparent Linux printf()
+     * bug with the *.*s format. dbmalloc crashes with a memchr() ptr out of bounds
+     * flaw if the malloc'ed space for desc is short. The workaround
+     * is to make sure the ptr for *.* has a big malloc space.
+     */
+    if (desc != NULL && strlen(desc) < 80) {
+      safedesc = MallocOrDie(sizeof(char) * 80);
+      strcpy(safedesc, desc);
+    } else safedesc = Strdup(desc);
 
-      if (evalue <= thresh.globE && sc >= thresh.globT) {
-  printf("%-*s %-*.*s %7.1f %10.2g %3d\n",
-         namewidth, name,
-         descwidth, descwidth, safedesc != NULL ? safedesc : "",
-         sc, evalue, ndom);
-  nreported++;
-      }
-      free(safedesc);
+    if (evalue <= thresh.globE && sc >= thresh.globT) {
+      printf("%-*s %-*.*s %7.1f %10.2g %3d\n",
+             namewidth, name,
+             descwidth, descwidth, safedesc != NULL ? safedesc : "",
+             sc, evalue, ndom);
+      nreported++;
     }
+    free(safedesc);
+  }
   if (nreported == 0) printf("\t[no hits above thresholds]\n");
 
 
@@ -404,35 +396,34 @@ main(int argc, char **argv)
 
   printf("\nParsed for domains:\n");
   printf("%-*s %7s %5s %5s    %5s %5s    %7s %8s\n",
-   namewidth, "Sequence", "Domain ", "seq-f", "seq-t", "hmm-f", "hmm-t", "score", "E-value");
+         namewidth, "Sequence", "Domain ", "seq-f", "seq-t", "hmm-f", "hmm-t", "score", "E-value");
   printf("%-*s %7s %5s %5s    %5s %5s    %7s %8s\n",
-   namewidth, "--------", "-------", "-----", "-----", "-----", "-----", "-----", "-------");
+         namewidth, "--------", "-------", "-----", "-----", "-----", "-----", "-----", "-------");
 
-  for (i = 0, nreported = 0; i < dhit->num; i++)
-    {
-      GetRankedHit(dhit, i,
-       &pvalue, &sc, &motherp, &mothersc,
-       &name, NULL, NULL,
-       &sqfrom, &sqto, &sqlen,            /* seq position info  */
-       &hmmfrom, &hmmto, NULL,            /* HMM position info  */
-       &domidx, &ndom,                    /* domain info        */
-       NULL);                        /* alignment info     */
-      evalue = pvalue * (double) thresh.Z;
+  for (i = 0, nreported = 0; i < dhit->num; i++) {
+    GetRankedHit(dhit, i,
+                 &pvalue, &sc, &motherp, &mothersc,
+                 &name, NULL, NULL,
+                 &sqfrom, &sqto, &sqlen,            /* seq position info  */
+                 &hmmfrom, &hmmto, NULL,            /* HMM position info  */
+                 &domidx, &ndom,                    /* domain info        */
+                 NULL);                        /* alignment info     */
+    evalue = pvalue * (double) thresh.Z;
 
-      if (motherp * (double) thresh.Z > thresh.globE || mothersc < thresh.globT)
-  continue;
-      else if (evalue <= thresh.domE && sc >= thresh.domT) {
-  printf("%-*s %3d/%-3d %5d %5d %c%c %5d %5d %c%c %7.1f %8.2g\n",
-         namewidth, name,
-         domidx, ndom,
-         sqfrom, sqto,
-         sqfrom == 1 ? '[' : '.', sqto == sqlen ? ']' : '.',
-         hmmfrom, hmmto,
-         hmmfrom == 1 ? '[':'.', hmmto == hmm->M ? ']' : '.',
-         sc, evalue);
-  nreported++;
-      }
+    if (motherp * (double) thresh.Z > thresh.globE || mothersc < thresh.globT)
+      continue;
+    else if (evalue <= thresh.domE && sc >= thresh.domT) {
+      printf("%-*s %3d/%-3d %5d %5d %c%c %5d %5d %c%c %7.1f %8.2g\n",
+             namewidth, name,
+             domidx, ndom,
+             sqfrom, sqto,
+             sqfrom == 1 ? '[' : '.', sqto == sqlen ? ']' : '.',
+             hmmfrom, hmmto,
+             hmmfrom == 1 ? '[':'.', hmmto == hmm->M ? ']' : '.',
+             sc, evalue);
+      nreported++;
     }
+  }
   if (nreported == 0) printf("\t[no hits above thresholds]\n");
 
 
@@ -441,34 +432,31 @@ main(int argc, char **argv)
    *    Number of displayed alignments is limited by Alimit parameter;
    *    also by domE (evalue threshold), domT (score theshold).
    */
-  if (Alimit != 0)
-    {
-      printf("\nAlignments of top-scoring domains:\n");
-      for (i = 0, nreported = 0; i < dhit->num; i++)
-  {
-    if (nreported == Alimit) break; /* limit to Alimit output alignments */
-    GetRankedHit(dhit, i,
-           &pvalue, &sc, &motherp, &mothersc,
-           &name, NULL, NULL,
-           &sqfrom, &sqto, &sqlen,            /* seq position info  */
-           &hmmfrom, &hmmto, NULL,            /* HMM position info  */
-           &domidx, &ndom,                    /* domain info        */
-           &ali);                        /* alignment info     */
-    evalue = pvalue * (double) thresh.Z;
+  if (Alimit != 0) {
+    printf("\nAlignments of top-scoring domains:\n");
+    for (i = 0, nreported = 0; i < dhit->num; i++) {
+      if (nreported == Alimit) break; /* limit to Alimit output alignments */
+      GetRankedHit(dhit, i,
+                   &pvalue, &sc, &motherp, &mothersc,
+                   &name, NULL, NULL,
+                   &sqfrom, &sqto, &sqlen,            /* seq position info  */
+                   &hmmfrom, &hmmto, NULL,            /* HMM position info  */
+                   &domidx, &ndom,                    /* domain info        */
+                   &ali);                        /* alignment info     */
+      evalue = pvalue * (double) thresh.Z;
 
-    if (motherp * (double) thresh.Z > thresh.globE || mothersc < thresh.globT)
-      continue;
-    else if (evalue <= thresh.domE && sc >= thresh.domT)
-      {
+      if (motherp * (double) thresh.Z > thresh.globE || mothersc < thresh.globT)
+        continue;
+      else if (evalue <= thresh.domE && sc >= thresh.domT) {
         printf("%s: domain %d of %d, from %d to %d: score %.1f, E = %.2g\n",
-         name, domidx, ndom, sqfrom, sqto, sc, evalue);
+               name, domidx, ndom, sqfrom, sqto, sc, evalue);
         PrintFancyAli(stdout, ali);
         nreported++;
       }
-  }
-      if (nreported == 0)      printf("\t[no hits above thresholds]\n");
-      if (nreported == Alimit) printf("\t[output cut off at A = %d top alignments]\n", Alimit);
     }
+    if (nreported == 0)      printf("\t[no hits above thresholds]\n");
+    if (nreported == Alimit) printf("\t[output cut off at A = %d top alignments]\n", Alimit);
+  }
 
   /* 4. Histogram output */
   printf("\nHistogram of all scores:\n");
@@ -522,10 +510,9 @@ main(int argc, char **argv)
  */
 static void
 main_loop_serial(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, int do_forward,
-     int do_null2, int do_xnu,
-     struct histogram_s *histogram,
-     struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq)
-{
+                 int do_null2, int do_xnu,
+                 struct histogram_s *histogram,
+                 struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq) {
   struct dpmatrix_s *mx;        /* DP matrix, growable                     */
   struct p7trace_s *tr;         /* traceback                               */
   char   *seq;                  /* target sequence                         */
@@ -545,157 +532,136 @@ main_loop_serial(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, 
   mx = CreatePlan7Matrix(1, hmm->M, 25, 0);
 
   nseq = 0;
-  while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo))
-    {
-      /* Silently skip length 0 seqs.
-       * What, you think this doesn't occur? Welcome to genomics,
-       * young grasshopper.
-       */
-      if (sqinfo.len == 0) continue;
+  while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) {
+    /* Silently skip length 0 seqs.
+     * What, you think this doesn't occur? Welcome to genomics,
+     * young grasshopper.
+     */
+    if (sqinfo.len == 0) continue;
 
-      nseq++;
-      dsq = DigitizeSequence(seq, sqinfo.len);
+    nseq++;
+    dsq = DigitizeSequence(seq, sqinfo.len);
 
-      if (do_xnu && Alphabet_type == hmmAMINO) XNU(dsq, sqinfo.len);
+    if (do_xnu && Alphabet_type == hmmAMINO) XNU(dsq, sqinfo.len);
 
-      /* 1. Recover a trace by Viterbi.
-       *    In extreme cases, the alignment may be literally impossible;
-       *    in which case, the score comes out ridiculously small (but not
-       *    necessarily <= -INFTY, because we're not terribly careful
-       *    about underflow issues), and tr will be returned as NULL.
-       */
+    /* 1. Recover a trace by Viterbi.
+     *    In extreme cases, the alignment may be literally impossible;
+     *    in which case, the score comes out ridiculously small (but not
+     *    necessarily <= -INFTY, because we're not terribly careful
+     *    about underflow issues), and tr will be returned as NULL.
+     */
 
 #ifdef ALTIVEC
 
-      /* By default we call an Altivec routine that doesn't save the full
-       * trace. This also means the memory usage is just proportional to the
-       * model (hmm->M), so we don't need to check if space is OK unless
-       * we need the trace.
-       */
-      if(do_forward && do_null2)
-      {
-          /* Need the trace - first check space */
-          if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx))
-          {
-              /* Slower altivec */
-              sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
-          }
-          else
-          {
-              /* C code */
-              sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
-          }
+    /* By default we call an Altivec routine that doesn't save the full
+     * trace. This also means the memory usage is just proportional to the
+     * model (hmm->M), so we don't need to check if space is OK unless
+     * we need the trace.
+     */
+    if(do_forward && do_null2) {
+      /* Need the trace - first check space */
+      if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx)) {
+        /* Slower altivec */
+        sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
+      } else {
+        /* C code */
+        sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
+      }
 
-      }
-      else
-      {
-          /* When using Altivec, the new dynamic programming process is so
-          * effective that it is constrained by the memory bandwidth used
-          * for loading/storing values in the dynamic programming matrix.
-          *
-          * In 99% of all cases the score is anyway so low that we are not
-          * interested in the alignment, and thus don't NEED the trace.
-          * which is the only reason to store the full programming matrix.
-          *
-          * Do the programming without a trace first, and recalculate the
-          * trace further down if it turns out we need it.
-          */
-          sc = P7ViterbiNoTrace(dsq, sqinfo.len, hmm, mx);
-          tr = NULL;
-      }
+    } else {
+      /* When using Altivec, the new dynamic programming process is so
+      * effective that it is constrained by the memory bandwidth used
+      * for loading/storing values in the dynamic programming matrix.
+      *
+      * In 99% of all cases the score is anyway so low that we are not
+      * interested in the alignment, and thus don't NEED the trace.
+      * which is the only reason to store the full programming matrix.
+      *
+      * Do the programming without a trace first, and recalculate the
+      * trace further down if it turns out we need it.
+      */
+      sc = P7ViterbiNoTrace(dsq, sqinfo.len, hmm, mx);
+      tr = NULL;
+    }
 
 #else /* not altivec */
 
-      if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx))
-      {
-          sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
-      }
-      else
-      {
-          sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
-      }
+    if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx)) {
+      sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
+    } else {
+      sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
+    }
 
 #endif
 
-      /* 2. If we're using Forward scores, calculate the
-       *    whole sequence score; this overrides anything
-       *    PostprocessSignificantHit() is going to do to the per-seq score.
-       */
-      if (do_forward)
-      {
-          sc  = P7Forward(dsq, sqinfo.len, hmm, NULL);
-          if (do_null2)
-          {
-              /* We need the trace - recalculate it if we didn't already do it */
+    /* 2. If we're using Forward scores, calculate the
+     *    whole sequence score; this overrides anything
+     *    PostprocessSignificantHit() is going to do to the per-seq score.
+     */
+    if (do_forward) {
+      sc  = P7Forward(dsq, sqinfo.len, hmm, NULL);
+      if (do_null2) {
+        /* We need the trace - recalculate it if we didn't already do it */
 #ifdef ALTIVEC
-              if(tr == NULL)
-              {
-                  if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx))
-                  {
-                      sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
-                  }
-                  else
-                  {
-                      sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
-                  }
-              }
-#endif
-              sc -= TraceScoreCorrection(hmm, tr, dsq);
+        if(tr == NULL) {
+          if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx)) {
+            sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
+          } else {
+            sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
           }
+        }
+#endif
+        sc -= TraceScoreCorrection(hmm, tr, dsq);
       }
+    }
 
 #if DEBUGLEVEL >= 2 && !(defined ALTIVEC)
-      P7PrintTrace(stdout, tr, hmm, dsq);
+    P7PrintTrace(stdout, tr, hmm, dsq);
 #endif
 
-      /* 2. Store score/pvalue for global alignment; will sort on score,
-       *    which in hmmsearch is monotonic with E-value.
-       *    Keep all domains in a significant sequence hit.
-       *    We can only make a lower bound estimate of E-value since
-       *    we don't know the final value of nseq yet, so the list
-       *    of hits we keep in memory is >= the list we actually
-       *    output.
-       */
-      pvalue = PValue(hmm, sc);
-      evalue = thresh->Z ? (double) thresh->Z * pvalue : (double) nseq * pvalue;
-      if (sc >= thresh->globT && evalue <= thresh->globE)
-      {
-          /* Recalculate trace if we used altivec */
+    /* 2. Store score/pvalue for global alignment; will sort on score,
+     *    which in hmmsearch is monotonic with E-value.
+     *    Keep all domains in a significant sequence hit.
+     *    We can only make a lower bound estimate of E-value since
+     *    we don't know the final value of nseq yet, so the list
+     *    of hits we keep in memory is >= the list we actually
+     *    output.
+     */
+    pvalue = PValue(hmm, sc);
+    evalue = thresh->Z ? (double) thresh->Z * pvalue : (double) nseq * pvalue;
+    if (sc >= thresh->globT && evalue <= thresh->globE) {
+      /* Recalculate trace if we used altivec */
 #ifdef ALTIVEC
-          if(tr == NULL)
-          {
-              if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx))
-              {
-                  sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
-              }
-              else
-              {
-                  sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
-              }
-          }
-#endif
-          sc = PostprocessSignificantHit(ghit, dhit,
-                                         tr, hmm, dsq, sqinfo.len,
-                                         sqinfo.name,
-                                         (sqinfo.flags & SQINFO_ACC)  ? sqinfo.acc  : NULL,
-                                         (sqinfo.flags & SQINFO_DESC) ? sqinfo.desc : NULL,
-                                         do_forward, sc,
-                                         do_null2,
-                                         thresh,
-                                         FALSE);
-          /* FALSE-> not hmmpfam mode, hmmsearch mode */
+      if(tr == NULL) {
+        if (P7ViterbiSpaceOK(sqinfo.len, hmm->M, mx)) {
+          sc = P7Viterbi(dsq, sqinfo.len, hmm, mx, &tr);
+        } else {
+          sc = P7SmallViterbi(dsq, sqinfo.len, hmm, mx, &tr);
+        }
       }
-      SQD_DPRINTF2(("AddToHistogram: %s\t%f\n", sqinfo.name, sc));
-      AddToHistogram(histogram, sc);
-      FreeSequence(seq, &sqinfo);
-
-      if(tr != NULL)
-          P7FreeTrace(tr);
-
-      tr = NULL;
-
-      free(dsq);
+#endif
+      sc = PostprocessSignificantHit(ghit, dhit,
+                                     tr, hmm, dsq, sqinfo.len,
+                                     sqinfo.name,
+                                     (sqinfo.flags & SQINFO_ACC)  ? sqinfo.acc  : NULL,
+                                     (sqinfo.flags & SQINFO_DESC) ? sqinfo.desc : NULL,
+                                     do_forward, sc,
+                                     do_null2,
+                                     thresh,
+                                     FALSE);
+      /* FALSE-> not hmmpfam mode, hmmsearch mode */
     }
+    SQD_DPRINTF2(("AddToHistogram: %s\t%f\n", sqinfo.name, sc));
+    AddToHistogram(histogram, sc);
+    FreeSequence(seq, &sqinfo);
+
+    if(tr != NULL)
+      P7FreeTrace(tr);
+
+    tr = NULL;
+
+    free(dsq);
+  }
 
   FreePlan7Matrix(mx);
   *ret_nseq = nseq;
@@ -740,15 +706,14 @@ main_loop_serial(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, 
  */
 static void
 main_loop_threaded(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh, int do_forward,
-       int do_null2, int do_xnu, int num_threads,
-       struct histogram_s *histogram,
-       struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq)
-{
+                   int do_null2, int do_xnu, int num_threads,
+                   struct histogram_s *histogram,
+                   struct tophit_s *ghit, struct tophit_s *dhit, int *ret_nseq) {
   struct workpool_s *wpool;  /* pool of worker threads                  */
   int    nseq;      /* number of sequences searched            */
 
   wpool = workpool_start(hmm, sqfp, do_xnu, do_forward, do_null2, thresh,
-       ghit, dhit, histogram, num_threads);
+                         ghit, dhit, histogram, num_threads);
   workpool_stop(wpool);
   nseq = wpool->nseq;
   workpool_free(wpool);
@@ -777,10 +742,9 @@ main_loop_threaded(struct plan7_s *hmm, SQFILE *sqfp, struct threshold_s *thresh
  */
 static struct workpool_s *
 workpool_start(struct plan7_s *hmm, SQFILE *sqfp, int do_xnu,
-         int do_forward, int do_null2, struct threshold_s *thresh,
-         struct tophit_s *ghit, struct tophit_s *dhit,
-         struct histogram_s *hist, int num_threads)
-{
+               int do_forward, int do_null2, struct threshold_s *thresh,
+               struct tophit_s *ghit, struct tophit_s *dhit,
+               struct histogram_s *hist, int num_threads) {
   struct workpool_s *wpool;
   pthread_attr_t    attr;
   int i;
@@ -808,13 +772,13 @@ workpool_start(struct plan7_s *hmm, SQFILE *sqfp, int do_xnu,
 
   wpool->num_threads= num_threads;
 
-  // Create slave threads. 
+  // Create slave threads.
   pthread_attr_init(&attr);
   pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
   /* pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM); */
   for (i = 0; i < num_threads; i++)
     if ((rtn = pthread_create(&(wpool->thread[i]), &attr,
-            worker_thread , (void *) wpool)) != 0)
+                              worker_thread, (void *) wpool)) != 0)
       Die("Failed to create thread %d; return code %d\n", i, rtn);
 
   pthread_attr_destroy(&attr);
@@ -830,10 +794,9 @@ workpool_start(struct plan7_s *hmm, SQFILE *sqfp, int do_xnu,
  * Returns:  (void)
  */
 static void
-workpool_stop(struct workpool_s *wpool)
-{
+workpool_stop(struct workpool_s *wpool) {
   int i;
-        /* wait for threads to stop */
+  /* wait for threads to stop */
   for (i = 0; i < wpool->num_threads; i++)
     if (pthread_join(wpool->thread[i],NULL) != 0)
       Die("pthread_join failed");
@@ -851,8 +814,7 @@ workpool_stop(struct workpool_s *wpool)
  * Returns:  (void)
  */
 static void
-workpool_free(struct workpool_s *wpool)
-{
+workpool_free(struct workpool_s *wpool) {
   free(wpool->thread);
   free(wpool);
   return;
@@ -870,8 +832,7 @@ workpool_free(struct workpool_s *wpool)
  * Returns:  (void *)
  */
 void *
-worker_thread(void *ptr)
-{
+worker_thread(void *ptr) {
   struct workpool_s *wpool;     /* our working threads structure   */
   char  *seq;                   /* target sequence                 */
   SQINFO sqinfo;    /* information assoc w/ seq        */
@@ -895,20 +856,20 @@ worker_thread(void *ptr)
     /* 1. acquire lock on sequence input, and get
      *    the next seq to work on.
      */
-        /* acquire a lock */
+    /* acquire a lock */
     int rtn; // a return code from pthreads lib
     if ((rtn = pthread_mutex_lock(&(wpool->input_lock))) != 0)
       Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
-    if (! ReadSeq(wpool->sqfp, wpool->sqfp->format, &seq, &sqinfo))
-      {  /* we're done. release lock, exit thread */
-  if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
-    Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
-  FreePlan7Matrix(mx);
-  pthread_exit(NULL);
-      }
+    if (! ReadSeq(wpool->sqfp, wpool->sqfp->format, &seq, &sqinfo)) {
+      /* we're done. release lock, exit thread */
+      if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
+        Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+      FreePlan7Matrix(mx);
+      pthread_exit(NULL);
+    }
     SQD_DPRINTF1(("a thread is working on %s\n", sqinfo.name));
     wpool->nseq++;
-        /* release the lock */
+    /* release the lock */
     if ((rtn = pthread_mutex_unlock(&(wpool->input_lock))) != 0)
       Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
 
@@ -928,45 +889,36 @@ worker_thread(void *ptr)
         * we need the trace.
         */
 
-    if(wpool->do_forward && wpool->do_null2)
-    {
-        /* Need the trace, first check space */
-        if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx))
-        {
-            sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-        }
-        else
-        {
-            /* Low-memory version */
-            sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-        }
-    }
-    else
-    {
-        /* When using Altivec, the new dynamic programming process is so
-        * effective that it is constrained by the memory bandwidth used
-        * for loading/storing values in the dynamic programming matrix.
-        *
-        * In 99% of all cases the score is anyway so low that we are not
-        * interested in the alignment, and thus don't NEED the trace.
-        * which is the only reason to store the full programming matrix.
-        *
-        * Do the programming without a trace first, and recalculate the
-        * trace further down if it turns out we need it.
-        */
-        sc = P7ViterbiNoTrace(dsq, sqinfo.len, wpool->hmm, mx);
-        tr = NULL;
+    if(wpool->do_forward && wpool->do_null2) {
+      /* Need the trace, first check space */
+      if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx)) {
+        sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+      } else {
+        /* Low-memory version */
+        sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+      }
+    } else {
+      /* When using Altivec, the new dynamic programming process is so
+      * effective that it is constrained by the memory bandwidth used
+      * for loading/storing values in the dynamic programming matrix.
+      *
+      * In 99% of all cases the score is anyway so low that we are not
+      * interested in the alignment, and thus don't NEED the trace.
+      * which is the only reason to store the full programming matrix.
+      *
+      * Do the programming without a trace first, and recalculate the
+      * trace further down if it turns out we need it.
+      */
+      sc = P7ViterbiNoTrace(dsq, sqinfo.len, wpool->hmm, mx);
+      tr = NULL;
     }
 
 #else /* not altivec */
 
-    if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx))
-    {
-        sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-    }
-    else
-    {
-        sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+    if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx)) {
+      sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+    } else {
+      sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
     }
 
 #endif
@@ -975,76 +927,65 @@ worker_thread(void *ptr)
      *    to get it; else, we already have a Viterbi score
      *    in sc.
      */
-    if (wpool->do_forward)
-    {
-        sc  = P7Forward(dsq, sqinfo.len, wpool->hmm, NULL);
-        if (wpool->do_null2)
-        {
-            /* We need the trace - calculate it if necessary */
+    if (wpool->do_forward) {
+      sc  = P7Forward(dsq, sqinfo.len, wpool->hmm, NULL);
+      if (wpool->do_null2) {
+        /* We need the trace - calculate it if necessary */
 #ifdef ALTIVEC
-            if(tr == NULL)
-            {
-                if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx))
-                {
-                    sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-                }
-                else
-                {
-                    sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-                }
-            }
-#endif
-            sc -= TraceScoreCorrection(wpool->hmm, tr, dsq);
+        if(tr == NULL) {
+          if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx)) {
+            sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+          } else {
+            sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+          }
         }
+#endif
+        sc -= TraceScoreCorrection(wpool->hmm, tr, dsq);
+      }
     }
 
     /* 3. Save the output in tophits and histogram structures, after acquiring a lock
      */
     if ((rtn = pthread_mutex_lock(&(wpool->output_lock))) != 0)
-        Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
+      Die("pthread_mutex_lock failure: %s\n", strerror(rtn));
     SQD_DPRINTF1(("seq %s scores %f\n", sqinfo.name, sc));
 
     pvalue = PValue(wpool->hmm, sc);
     evalue = wpool->thresh->Z ? (double) wpool->thresh->Z * pvalue : (double) wpool->nseq * pvalue;
 
-    if (sc >= wpool->thresh->globT && evalue <= wpool->thresh->globE)
-    {
-        /* Recalculate trace if we used altivec */
+    if (sc >= wpool->thresh->globT && evalue <= wpool->thresh->globE) {
+      /* Recalculate trace if we used altivec */
 #ifdef ALTIVEC
-        if(tr == NULL)
-        {
-            if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx))
-            {
-                sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-            }
-            else
-            {
-                sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
-            }
+      if(tr == NULL) {
+        if (P7ViterbiSpaceOK(sqinfo.len, wpool->hmm->M, mx)) {
+          sc = P7Viterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
+        } else {
+          sc = P7SmallViterbi(dsq, sqinfo.len, wpool->hmm, mx, &tr);
         }
+      }
 #endif
-        sc = PostprocessSignificantHit(wpool->ghit, wpool->dhit,
-                                       tr, wpool->hmm, dsq, sqinfo.len,
-                                       sqinfo.name,
-                                       (sqinfo.flags & SQINFO_ACC)  ? sqinfo.acc  : NULL,
-                                       (sqinfo.flags & SQINFO_DESC) ? sqinfo.desc : NULL,
-                                       wpool->do_forward, sc,
-                                       wpool->do_null2,
-                                       wpool->thresh,
-                                       FALSE);
-        /* FALSE-> not hmmpfam mode, hmmsearch mode */
+      sc = PostprocessSignificantHit(wpool->ghit, wpool->dhit,
+                                     tr, wpool->hmm, dsq, sqinfo.len,
+                                     sqinfo.name,
+                                     (sqinfo.flags & SQINFO_ACC)  ? sqinfo.acc  : NULL,
+                                     (sqinfo.flags & SQINFO_DESC) ? sqinfo.desc : NULL,
+                                     wpool->do_forward, sc,
+                                     wpool->do_null2,
+                                     wpool->thresh,
+                                     FALSE);
+      /* FALSE-> not hmmpfam mode, hmmsearch mode */
     }
     SQD_DPRINTF2(("AddToHistogram: %s\t%f\n", sqinfo.name, sc));
     AddToHistogram(wpool->hist, sc);
     if ((rtn = pthread_mutex_unlock(&(wpool->output_lock))) != 0)
-        Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
+      Die("pthread_mutex_unlock failure: %s\n", strerror(rtn));
 
     if(tr != NULL)
-        P7FreeTrace(tr);
+      P7FreeTrace(tr);
 
     tr = NULL;
     FreeSequence(seq, &sqinfo);
     free(dsq);
   }
-/* end 'infinite' loop over seqs in this thread */
+  /* end 'infinite' loop over seqs in this thread */
 }

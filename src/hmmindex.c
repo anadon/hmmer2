@@ -43,14 +43,13 @@ static char experts[] = "\
 ";
 
 static struct opt_s OPTIONS[] = {
-   { "-h",   TRUE,  sqdARG_NONE  },
-   { "--av", FALSE, sqdARG_NONE  },
+  { "-h",   TRUE,  sqdARG_NONE  },
+  { "--av", FALSE, sqdARG_NONE  },
 };
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char    *hmmfile;             /* HMM file to open                */
   SSIINDEX *ssi;                /* SSI index in memory             */
   char    *ssifile;             /* name of SSI index on disk       */
@@ -74,18 +73,16 @@ main(int argc, char **argv)
   do_av = FALSE;
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
-    &optind, &optname, &optarg))
-    {
-      if (strcmp(optname, "--av")      == 0) do_av = TRUE;
+                &optind, &optname, &optarg)) {
+    if (strcmp(optname, "--av")      == 0) do_av = TRUE;
 
-      if (strcmp(optname, "-h")        == 0)
-  {
-    HMMERBanner(stdout, banner);
-    puts(usage);
-    puts(experts);
-    exit(0);
-  }
+    if (strcmp(optname, "-h")        == 0) {
+      HMMERBanner(stdout, banner);
+      puts(usage);
+      puts(experts);
+      exit(0);
     }
+  }
 
   if (argc - optind != 1) Die("Incorrect number of arguments.\n%s\n", usage);
   hmmfile = argv[optind++];
@@ -126,35 +123,33 @@ main(int argc, char **argv)
   printf("Determining offsets for %s, please be patient...\n", hmmfile);
 
   nhmm = npri = nsec = nacc = 0;
-  while (HMMFileRead(hmmfp, &hmm))
-    {
-      if (hmm == NULL)
-  Die("HMM file %s may be corrupt or in incorrect format; parse failed", hmmfile);
+  while (HMMFileRead(hmmfp, &hmm)) {
+    if (hmm == NULL)
+      Die("HMM file %s may be corrupt or in incorrect format; parse failed", hmmfile);
 
-        /* record name of HMM as the primary retrieval key */
-      status = SSIAddPrimaryKeyToIndex(ssi, hmm->name, fh, &(hmmfp->offset), NULL, 0);
-      if (status != 0) Die("SSIAddPrimaryKeyToIndex() failed");
-      npri++;
+    /* record name of HMM as the primary retrieval key */
+    status = SSIAddPrimaryKeyToIndex(ssi, hmm->name, fh, &(hmmfp->offset), NULL, 0);
+    if (status != 0) Die("SSIAddPrimaryKeyToIndex() failed");
+    npri++;
 
-        /* record accession.version of HMM as a secondary retrieval key */
-      if (hmm->flags & PLAN7_ACC) {
-  status = SSIAddSecondaryKeyToIndex(ssi, hmm->acc, hmm->name);
-  if (status != 0) Die("SSIAddSecondaryKeyToIndex() failed");
-  nsec++;
-      }
-
-      /* optionally, also index accession by itself (without version) as secondary key */
-      if (do_av && (hmm->flags & PLAN7_ACC))
-  {
-    Strparse("(.+)\\.[0-9]+", hmm->acc, 1);
-    status = SSIAddSecondaryKeyToIndex(ssi, sqd_parse[1], hmm->name);
-    if (status != 0) Die("SSIAddSecondaryKeyToIndex() failed");
-    nacc++;
-  }
-
-      nhmm++;
-      FreePlan7(hmm);
+    /* record accession.version of HMM as a secondary retrieval key */
+    if (hmm->flags & PLAN7_ACC) {
+      status = SSIAddSecondaryKeyToIndex(ssi, hmm->acc, hmm->name);
+      if (status != 0) Die("SSIAddSecondaryKeyToIndex() failed");
+      nsec++;
     }
+
+    /* optionally, also index accession by itself (without version) as secondary key */
+    if (do_av && (hmm->flags & PLAN7_ACC)) {
+      Strparse("(.+)\\.[0-9]+", hmm->acc, 1);
+      status = SSIAddSecondaryKeyToIndex(ssi, sqd_parse[1], hmm->name);
+      if (status != 0) Die("SSIAddSecondaryKeyToIndex() failed");
+      nacc++;
+    }
+
+    nhmm++;
+    FreePlan7(hmm);
+  }
   HMMFileClose(hmmfp);
 
   /***********************************************

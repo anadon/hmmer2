@@ -1,6 +1,6 @@
 /* vectorops.h
  * Header file for vectorops.c
- * 
+ *
  * SRE, Tue Oct  1 15:23:37 2002 [St. Louis]
  * SVN $Id: vectorops.h 1530 2005-12-13 20:53:08Z eddy $
  */

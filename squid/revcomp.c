@@ -2,14 +2,14 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
  *****************************************************************/
 
 /* revcomp.c
- * 
+ *
  * Reverse complement of a IUPAC character string
  * SVN $Id: revcomp.c 1530 2005-12-13 20:53:08Z eddy $
  */
@@ -32,8 +32,7 @@
  * Returns:  NULL on failure; or a (useless) pointer to comp.
  */
 char *
-revcomp(char *comp, char *seq)
-{
+revcomp(char *comp, char *seq) {
   char *s;
   char  c;
 
@@ -41,40 +40,69 @@ revcomp(char *comp, char *seq)
   if (seq == NULL)  return NULL;
 
   StrReverse(comp, seq);
-  for (s = comp; *s != '\0'; s++)
-    {
-      c = *s;
-      c = sre_toupper(c);
-      switch (c) {
-      case 'A': c = 'T'; break;
-      case 'C': c = 'G'; break;
-      case 'G': c = 'C'; break;
-      case 'T': c = 'A'; break;
-      case 'U': c = 'A'; break;
-      case 'R': c = 'Y'; break;
-      case 'Y': c = 'R'; break;
-      case 'M': c = 'K'; break;
-      case 'K': c = 'M'; break;
-      case 'S': c = 'S'; break;
-      case 'W': c = 'W'; break;
-      case 'H': c = 'D'; break;
-      case 'D': c = 'H'; break;
-      case 'B': c = 'V'; break;
-      case 'V': c = 'B'; break;
-      default:  break;		/* anything else? leave it; it's prob a gap or an X */
-      }
-      if (islower((int) *s)) c = (char) sre_tolower((int) c);
-      *s = c;
+  for (s = comp; *s != '\0'; s++) {
+    c = *s;
+    c = sre_toupper(c);
+    switch (c) {
+    case 'A':
+      c = 'T';
+      break;
+    case 'C':
+      c = 'G';
+      break;
+    case 'G':
+      c = 'C';
+      break;
+    case 'T':
+      c = 'A';
+      break;
+    case 'U':
+      c = 'A';
+      break;
+    case 'R':
+      c = 'Y';
+      break;
+    case 'Y':
+      c = 'R';
+      break;
+    case 'M':
+      c = 'K';
+      break;
+    case 'K':
+      c = 'M';
+      break;
+    case 'S':
+      c = 'S';
+      break;
+    case 'W':
+      c = 'W';
+      break;
+    case 'H':
+      c = 'D';
+      break;
+    case 'D':
+      c = 'H';
+      break;
+    case 'B':
+      c = 'V';
+      break;
+    case 'V':
+      c = 'B';
+      break;
+    default:
+      break;    /* anything else? leave it; it's prob a gap or an X */
     }
+    if (islower((int) *s)) c = (char) sre_tolower((int) c);
+    *s = c;
+  }
   return comp;
 }
-  
+
 #ifdef REVCOMP_TESTDRIVER
 /* gcc -g -DREVCOMP_TESTDRIVER revcomp.c sre_string.c shuffle.c sre_math.c sre_ctype.c sqerror.c -lm
 */
 int
-main(void)
-{
+main(void) {
   float p[4]     = {0.25, 0.25, 0.25, 0.25};
   char *alphabet = "ACGT";
   int   len      = 10;

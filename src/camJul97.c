@@ -467,8 +467,7 @@ Joint2SubstitutionMatrix(float **jmx, float **smx, int N)
  *           ret_nc - total number of clusters found  (or pass NULL)
  */
 void
-BlosumWeights(char **aseqs, AINFO *ainfo, float maxid, int *clust,int *ret_nc)
-{
+BlosumWeights(char **aseqs, AINFO *ainfo, float maxid, int *clust,int *ret_nc) {
   float         **dmx;          /* difference matrix */
   struct phylo_s *tree;         /* UPGMA tree        */
   float           mindiff;  /* minimum distance between clusters */
@@ -478,9 +477,9 @@ BlosumWeights(char **aseqs, AINFO *ainfo, float maxid, int *clust,int *ret_nc)
   int             i;
 
   mindiff = 1.0 - maxid;
-        /* first we do a difference matrix */
+  /* first we do a difference matrix */
   MakeDiffMx(aseqs, ainfo->nseq, &dmx);
-        /* then we build a tree */
+  /* then we build a tree */
   Cluster(dmx, ainfo->nseq, CLUSTER_MIN, &tree);
 
   /* Find clusters below mindiff.
@@ -489,47 +488,40 @@ BlosumWeights(char **aseqs, AINFO *ainfo, float maxid, int *clust,int *ret_nc)
    *     -if the parent is > mindiff and current < mindiff, then
    *      make current node a cluster.
    */
-  for (i = 0; i < ainfo->nseq; i++)
-    {
-      ainfo->sqinfo[i].weight = 1.0;
-      ainfo->sqinfo[i].flags |= SQINFO_WGT;
-    }
+  for (i = 0; i < ainfo->nseq; i++) {
+    ainfo->sqinfo[i].weight = 1.0;
+    ainfo->sqinfo[i].flags |= SQINFO_WGT;
+  }
 
   stack = CreateNstack();
   PushNstack(stack, 0);  /* push root on stack to start */
   c = 0;
-  while (PopNstack(stack, &node))
-    {
-      if ((node == 0 || tree[tree[node].parent-ainfo->nseq].diff > mindiff) &&
-    tree[node].diff < mindiff)
-  {      /* we're at a cluster */
-    for (i = 0; i < ainfo->nseq;  i++)
-      if (tree[node].is_in[i])
-        {
-    ainfo->sqinfo[i].weight = 1.0 / (float) tree[node].incnum;
-    if (clust != NULL) clust[i] = c;
+  while (PopNstack(stack, &node)) {
+    if ((node == 0 || tree[tree[node].parent-ainfo->nseq].diff > mindiff) &&
+        tree[node].diff < mindiff) {
+      /* we're at a cluster */
+      for (i = 0; i < ainfo->nseq;  i++)
+        if (tree[node].is_in[i]) {
+          ainfo->sqinfo[i].weight = 1.0 / (float) tree[node].incnum;
+          if (clust != NULL) clust[i] = c;
         }
-    c++;
-  }
-      else      /* we're not a cluster, keep traversing */
-  {
-    if (tree[node].right >= ainfo->nseq)
-      PushNstack(stack, tree[node].right - ainfo->nseq);
-    else
-      {
+      c++;
+    } else {  /* we're not a cluster, keep traversing */
+      if (tree[node].right >= ainfo->nseq)
+        PushNstack(stack, tree[node].right - ainfo->nseq);
+      else {
         c++;
         if (clust != NULL) clust[tree[node].right] = c; /* single seq, wgt 1.0 */
       }
 
-    if (tree[node].left >= ainfo->nseq)
-      PushNstack(stack, tree[node].left - ainfo->nseq);
-    else
-      {
+      if (tree[node].left >= ainfo->nseq)
+        PushNstack(stack, tree[node].left - ainfo->nseq);
+      else {
         c++;
         if (clust != NULL) clust[tree[node].left] = c;
       }
-  }
     }
+  }
   FreeNstack(stack);
   FreePhylo(tree, ainfo->nseq);
   FMX2Free(dmx);

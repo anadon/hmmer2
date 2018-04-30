@@ -1,8 +1,8 @@
 /* weeviterbi_test.c
  * Wed Mar  4 17:30:39 1998
- * 
+ *
  * Test driver for Myers/Miller/Hirschberg linear memory Viterbi tracebacks.
- * 
+ *
  * CVS $Id: weeviterbi_test.c 913 2003-10-04 18:26:49Z eddy $
  */
 
@@ -42,21 +42,20 @@ static struct opt_s OPTIONS[] = {
 #define NOPTIONS (sizeof(OPTIONS) / sizeof(struct opt_s))
 
 int
-main(int argc, char **argv)
-{
-  char    *hmmfile;	        /* file to read HMM(s) from                */
+main(int argc, char **argv) {
+  char    *hmmfile;         /* file to read HMM(s) from                */
   HMMFILE *hmmfp;               /* opened hmmfile for reading              */
-  char    *seqfile;             /* file to read target sequence(s) from    */ 
+  char    *seqfile;             /* file to read target sequence(s) from    */
   SQFILE   *sqfp;               /* opened seqfile for reading              */
-  char     *seq;		/* target sequence                         */
-  SQINFO    sqinfo;	        /* optional info for seq                   */
-  unsigned char   *dsq;		/* digitized target sequence               */
-  struct plan7_s  *hmm;         /* HMM to search with                      */ 
+  char     *seq;    /* target sequence                         */
+  SQINFO    sqinfo;         /* optional info for seq                   */
+  unsigned char   *dsq;   /* digitized target sequence               */
+  struct plan7_s  *hmm;         /* HMM to search with                      */
   struct dpmatrix_s *mx;        /* growable, reusable DP matrix            */
-  struct p7trace_s  *t1;	/* standard Viterbi traceback              */
-  struct p7trace_s  *t2;	/* WeeViterbi traceback                    */
+  struct p7trace_s  *t1;  /* standard Viterbi traceback              */
+  struct p7trace_s  *t2;  /* WeeViterbi traceback                    */
   int       nseq;
-  float     sc1,sc2;		/* scores from Viterbi, WeeViterbi         */
+  float     sc1,sc2;    /* scores from Viterbi, WeeViterbi         */
 
   int be_verbose;
 
@@ -64,7 +63,7 @@ main(int argc, char **argv)
   char *optarg;                 /* argument found by Getopt()               */
   int   optind;                 /* index in argv[]                          */
 
-  /*********************************************** 
+  /***********************************************
    * Parse command line
    ***********************************************/
 
@@ -87,65 +86,63 @@ main(int argc, char **argv)
   if (argc - optind != 0)
     Die("Incorrect number of arguments.\n%s\n", usage);
 
-  /*********************************************** 
+  /***********************************************
    * Open test sequence file
    ***********************************************/
 
   if ((sqfp = SeqfileOpen(seqfile, SQFILE_UNKNOWN, "BLASTDB")) == NULL)
     Die("Failed to open sequence database file %s\n%s\n", seqfile, usage);
 
-  /*********************************************** 
-   * Open HMM file 
+  /***********************************************
+   * Open HMM file
    * Read a single HMM from it. (Config HMM, if necessary).
    ***********************************************/
 
   if ((hmmfp = HMMFileOpen(hmmfile, NULL)) == NULL)
     Die("Failed to open HMM file %s\n%s", hmmfile, usage);
-  if (!HMMFileRead(hmmfp, &hmm)) 
+  if (!HMMFileRead(hmmfp, &hmm))
     Die("Failed to read any HMMs from %s\n", hmmfile);
-  if (hmm == NULL) 
+  if (hmm == NULL)
     Die("HMM file %s corrupt or in incorrect format? Parse failed", hmmfile);
   P7Logoddsify(hmm, TRUE);
 
-  /*********************************************** 
+  /***********************************************
    * Search HMM against each sequence
    ***********************************************/
 
   nseq = 0;
   mx = CreatePlan7Matrix(1, hmm->M, 25, 0);
-  while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) 
-    {
-      nseq++;
-      dsq = DigitizeSequence(seq, sqinfo.len);
+  while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) {
+    nseq++;
+    dsq = DigitizeSequence(seq, sqinfo.len);
 
-      sc1 = P7Viterbi(dsq, sqinfo.len, hmm, mx, &t1);
-      sc2 = P7WeeViterbi(dsq, sqinfo.len, hmm, &t2);
+    sc1 = P7Viterbi(dsq, sqinfo.len, hmm, mx, &t1);
+    sc2 = P7WeeViterbi(dsq, sqinfo.len, hmm, &t2);
 
-      if (be_verbose)
-	{
-	  printf("test sequence %d: %s %s\n",
-		 nseq, sqinfo.name, 
-		 sqinfo.flags & SQINFO_DESC ? sqinfo.desc : "");
-	  printf("** P7Viterbi trace:\n");
-	  P7PrintTrace(stdout, t1, hmm, dsq); 
-	  printf("** P7WeeViterbi trace:\n");
-	  P7PrintTrace(stdout, t2, hmm, dsq); 
-	}
-
-      if (! TraceVerify(t1, hmm->M, sqinfo.len))
-	Die("Trace verify failed on Viterbi for seq #%d, %s\n", nseq, sqinfo.name);
-      if (! TraceVerify(t2, hmm->M, sqinfo.len))
-	Die("Trace verify failed on WeeViterbi for seq #%d, %s\n", nseq, sqinfo.name);
-      if (sc1 != sc2)
-	Die("Scores for the two Viterbi implementations are unequal (%.1f,%.1f)", sc1, sc2);
-      if (! TraceCompare(t1, t2))
-	Die("WeeViterbi() trace is not identical to Viterbi() trace");
-
-      FreeSequence(seq, &sqinfo); 
-      P7FreeTrace(t1);
-      P7FreeTrace(t2);
-      free(dsq);
+    if (be_verbose) {
+      printf("test sequence %d: %s %s\n",
+             nseq, sqinfo.name,
+             sqinfo.flags & SQINFO_DESC ? sqinfo.desc : "");
+      printf("** P7Viterbi trace:\n");
+      P7PrintTrace(stdout, t1, hmm, dsq);
+      printf("** P7WeeViterbi trace:\n");
+      P7PrintTrace(stdout, t2, hmm, dsq);
     }
+
+    if (! TraceVerify(t1, hmm->M, sqinfo.len))
+      Die("Trace verify failed on Viterbi for seq #%d, %s\n", nseq, sqinfo.name);
+    if (! TraceVerify(t2, hmm->M, sqinfo.len))
+      Die("Trace verify failed on WeeViterbi for seq #%d, %s\n", nseq, sqinfo.name);
+    if (sc1 != sc2)
+      Die("Scores for the two Viterbi implementations are unequal (%.1f,%.1f)", sc1, sc2);
+    if (! TraceCompare(t1, t2))
+      Die("WeeViterbi() trace is not identical to Viterbi() trace");
+
+    FreeSequence(seq, &sqinfo);
+    P7FreeTrace(t1);
+    P7FreeTrace(t2);
+    free(dsq);
+  }
 
   FreePlan7Matrix(mx);
   FreePlan7(hmm);

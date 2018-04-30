@@ -151,8 +151,7 @@ static struct plan9_s *read_plan9_aschmm(FILE *fp, int version);
  * Return:   Valid HMMFILE *, or NULL on failure.
  */
 HMMFILE *
-HMMFileOpen(char *hmmfile, char *env)
-{
+HMMFileOpen(char *hmmfile, char *env) {
   HMMFILE     *hmmfp;
   unsigned int magic;
   char         buf[512];
@@ -175,29 +174,25 @@ HMMFileOpen(char *hmmfile, char *env)
    */
   hmmfp->f   = NULL;
   hmmfp->ssi = NULL;
-  if ((hmmfp->f = fopen(hmmfile, "r")) != NULL)
-    {
-      ssifile = MallocOrDie(sizeof(char) * (strlen(hmmfile) + 5));
-      sprintf(ssifile, "%s.ssi", hmmfile);
+  if ((hmmfp->f = fopen(hmmfile, "r")) != NULL) {
+    ssifile = MallocOrDie(sizeof(char) * (strlen(hmmfile) + 5));
+    sprintf(ssifile, "%s.ssi", hmmfile);
 
-      if ((hmmfp->mode = SSIRecommendMode(hmmfile)) == -1)
-  Die("SSIRecommendMode() failed");
-    }
-  else if ((hmmfp->f = EnvFileOpen(hmmfile, env, &dir)) != NULL)
-    {
-      char *full;
-      full    = FileConcat(dir, hmmfile);
+    if ((hmmfp->mode = SSIRecommendMode(hmmfile)) == -1)
+      Die("SSIRecommendMode() failed");
+  } else if ((hmmfp->f = EnvFileOpen(hmmfile, env, &dir)) != NULL) {
+    char *full;
+    full    = FileConcat(dir, hmmfile);
 
-      ssifile = MallocOrDie(sizeof(char) * (strlen(full) + strlen(hmmfile) + 5));
-      sprintf(ssifile, "%s.ssi", full);
+    ssifile = MallocOrDie(sizeof(char) * (strlen(full) + strlen(hmmfile) + 5));
+    sprintf(ssifile, "%s.ssi", full);
 
-      if ((hmmfp->mode = SSIRecommendMode(full)) == -1)
-  Die("SSIRecommendMode() failed");
+    if ((hmmfp->mode = SSIRecommendMode(full)) == -1)
+      Die("SSIRecommendMode() failed");
 
-      free(full);
-      free(dir);
-    }
-  else return NULL;
+    free(full);
+    free(dir);
+  } else return NULL;
 
   /* Open the SSI index file. If it doesn't exist, or it's corrupt, or
    * some error happens, hmmfp->ssi stays NULL.
@@ -224,53 +219,44 @@ HMMFileOpen(char *hmmfile, char *env)
     hmmfp->parser    = read_bin20hmm;
     hmmfp->is_binary = TRUE;
     return hmmfp;
-  }
-  else if (magic == v20swap) {
+  } else if (magic == v20swap) {
     SQD_DPRINTF1(("Opened a HMMER 2.0 binary file [byteswapped]\n"));
     hmmfp->parser    = read_bin20hmm;
     hmmfp->is_binary = TRUE;
     hmmfp->byteswap  = TRUE;
     return hmmfp;
-  }
-  else if (magic == v19magic) {
+  } else if (magic == v19magic) {
     hmmfp->parser    = read_bin19hmm;
     hmmfp->is_binary = TRUE;
     return hmmfp;
-  }
-  else if (magic == v19swap) {
+  } else if (magic == v19swap) {
     hmmfp->parser    = read_bin19hmm;
     hmmfp->is_binary = TRUE;
     hmmfp->byteswap  = TRUE;
     return hmmfp;
-  }
-  else if (magic == v17magic) {
+  } else if (magic == v17magic) {
     hmmfp->parser    = read_bin17hmm;
     hmmfp->is_binary = TRUE;
     return hmmfp;
-  }
-  else if (magic == v17swap) {
+  } else if (magic == v17swap) {
     hmmfp->parser    = read_bin17hmm;
     hmmfp->is_binary = TRUE;
     hmmfp->byteswap  = TRUE;
     return hmmfp;
-  }
-  else if (magic == v11magic) {
+  } else if (magic == v11magic) {
     hmmfp->parser    = read_bin11hmm;
     hmmfp->is_binary = TRUE;
     return hmmfp;
-  }
-  else if (magic == v11swap) {
+  } else if (magic == v11swap) {
     hmmfp->parser    = read_bin11hmm;
     hmmfp->is_binary = TRUE;
     hmmfp->byteswap  = TRUE;
     return hmmfp;
-  }
-  else if (magic == v10magic) {
+  } else if (magic == v10magic) {
     hmmfp->parser    = read_bin10hmm;
     hmmfp->is_binary = TRUE;
     return hmmfp;
-  }
-  else if (magic == v10swap) {
+  } else if (magic == v10swap) {
     hmmfp->parser    = read_bin10hmm;
     hmmfp->is_binary = TRUE;
     hmmfp->byteswap  = TRUE;
@@ -320,32 +306,28 @@ or may be a different kind of binary altogether.\n", hmmfile);
   return NULL;
 }
 int
-HMMFileRead(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
-        /* Set the disk position marker. */
+HMMFileRead(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
+  /* Set the disk position marker. */
   if (hmmfp->is_seekable) {
     int status;
     status = SSIGetFilePosition(hmmfp->f, hmmfp->mode, &(hmmfp->offset));
     if (status != 0) Die("SSIGetFilePosition() failed");
   }
-        /* Parse the HMM and return it. */
+  /* Parse the HMM and return it. */
   return (*hmmfp->parser)(hmmfp, ret_hmm);
 }
 void
-HMMFileClose(HMMFILE *hmmfp)
-{
+HMMFileClose(HMMFILE *hmmfp) {
   if (hmmfp->f   != NULL)  fclose(hmmfp->f);
   if (hmmfp->ssi != NULL)  SSIClose(hmmfp->ssi);
   free(hmmfp);
 }
 void
-HMMFileRewind(HMMFILE *hmmfp)
-{
+HMMFileRewind(HMMFILE *hmmfp) {
   rewind(hmmfp->f);
 }
 int
-HMMFilePositionByName(HMMFILE *hmmfp, char *name)
-{
+HMMFilePositionByName(HMMFILE *hmmfp, char *name) {
   SSIOFFSET  offset;    /* offset in hmmfile, from SSI */
   int        fh;    /* ignored.                    */
 
@@ -355,8 +337,8 @@ HMMFilePositionByName(HMMFILE *hmmfp, char *name)
   return 1;
 }
 int
-HMMFilePositionByIndex(HMMFILE *hmmfp, int idx)
-{        /* idx runs from 0..nhmm-1 */
+HMMFilePositionByIndex(HMMFILE *hmmfp, int idx) {
+  /* idx runs from 0..nhmm-1 */
   int        fh;    /* file handle is ignored; only one HMM file */
   SSIOFFSET  offset;    /* file position of HMM */
 
@@ -381,8 +363,7 @@ HMMFilePositionByIndex(HMMFILE *hmmfp, int idx)
  *           hmm       - HMM to save
  */
 void
-WriteAscHMM(FILE *fp, struct plan7_s *hmm)
-{
+WriteAscHMM(FILE *fp, struct plan7_s *hmm) {
   int k;                        /* counter for nodes             */
   int x;                        /* counter for symbols           */
   int ts;      /* counter for state transitions */
@@ -398,7 +379,7 @@ WriteAscHMM(FILE *fp, struct plan7_s *hmm)
     fprintf(fp, "DESC  %s\n", hmm->desc);
   fprintf(fp, "LENG  %d\n", hmm->M);
   fprintf(fp, "ALPH  %s\n",
-    (Alphabet_type == hmmAMINO) ? "Amino":"Nucleic");
+          (Alphabet_type == hmmAMINO) ? "Amino":"Nucleic");
   fprintf(fp, "RF    %s\n", (hmm->flags & PLAN7_RF)  ? "yes" : "no");
   fprintf(fp, "CS    %s\n", (hmm->flags & PLAN7_CS)  ? "yes" : "no");
   fprintf(fp, "MAP   %s\n", (hmm->flags & PLAN7_MAP) ? "yes" : "no");
@@ -450,28 +431,27 @@ WriteAscHMM(FILE *fp, struct plan7_s *hmm)
    */
   fprintf(fp, "       %6s %6s ", prob2ascii(1-hmm->tbd1, 1.0), "*");
   fprintf(fp, "%6s\n", prob2ascii(hmm->tbd1, 1.0));
-  for (k = 1; k <= hmm->M; k++)
-    {
-        /* Line 1: k, match emissions, map */
-      fprintf(fp, " %5d ", k);
-      for (x = 0; x < Alphabet_size; x++)
-        fprintf(fp, "%6s ", prob2ascii(hmm->mat[k][x], hmm->null[x]));
-      if (hmm->flags & PLAN7_MAP) fprintf(fp, "%5d", hmm->map[k]);
-      fputs("\n", fp);
-        /* Line 2: RF and insert emissions */
-      fprintf(fp, " %5c ", (hmm->flags & PLAN7_RF) ? hmm->rf[k] : '-');
-      for (x = 0; x < Alphabet_size; x++)
-  fprintf(fp, "%6s ", (k < hmm->M) ? prob2ascii(hmm->ins[k][x], hmm->null[x]) : "*");
-      fputs("\n", fp);
-        /* Line 3: CS and transition probs */
-      fprintf(fp, " %5c ", (hmm->flags & PLAN7_CS) ? hmm->cs[k] : '-');
-      for (ts = 0; ts < 7; ts++)
-  fprintf(fp, "%6s ", (k < hmm->M) ? prob2ascii(hmm->t[k][ts], 1.0) : "*");
-      fprintf(fp, "%6s ", prob2ascii(hmm->begin[k], 1.0));
-      fprintf(fp, "%6s ", prob2ascii(hmm->end[k], 1.0));
+  for (k = 1; k <= hmm->M; k++) {
+    /* Line 1: k, match emissions, map */
+    fprintf(fp, " %5d ", k);
+    for (x = 0; x < Alphabet_size; x++)
+      fprintf(fp, "%6s ", prob2ascii(hmm->mat[k][x], hmm->null[x]));
+    if (hmm->flags & PLAN7_MAP) fprintf(fp, "%5d", hmm->map[k]);
+    fputs("\n", fp);
+    /* Line 2: RF and insert emissions */
+    fprintf(fp, " %5c ", (hmm->flags & PLAN7_RF) ? hmm->rf[k] : '-');
+    for (x = 0; x < Alphabet_size; x++)
+      fprintf(fp, "%6s ", (k < hmm->M) ? prob2ascii(hmm->ins[k][x], hmm->null[x]) : "*");
+    fputs("\n", fp);
+    /* Line 3: CS and transition probs */
+    fprintf(fp, " %5c ", (hmm->flags & PLAN7_CS) ? hmm->cs[k] : '-');
+    for (ts = 0; ts < 7; ts++)
+      fprintf(fp, "%6s ", (k < hmm->M) ? prob2ascii(hmm->t[k][ts], 1.0) : "*");
+    fprintf(fp, "%6s ", prob2ascii(hmm->begin[k], 1.0));
+    fprintf(fp, "%6s ", prob2ascii(hmm->end[k], 1.0));
 
-      fputs("\n", fp);
-    }
+    fputs("\n", fp);
+  }
   fputs("//\n", fp);
 }
 
@@ -480,8 +460,7 @@ WriteAscHMM(FILE *fp, struct plan7_s *hmm)
  * Purpose:  Write an HMM in binary format.
  */
 void
-WriteBinHMM(FILE *fp, struct plan7_s *hmm)
-{
+WriteBinHMM(FILE *fp, struct plan7_s *hmm) {
   int k;
 
   /* ye olde magic number */
@@ -563,8 +542,7 @@ WriteBinHMM(FILE *fp, struct plan7_s *hmm)
  *****************************************************************/
 
 static int
-read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   struct plan7_s *hmm;
   char  buffer[512];
   char *s;
@@ -589,113 +567,95 @@ read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
     else if (strncmp(buffer, "DESC ", 5) == 0) Plan7SetDescription(hmm, buffer+6);
     else if (strncmp(buffer, "LENG ", 5) == 0) M = atoi(buffer+6);
     else if (strncmp(buffer, "NSEQ ", 5) == 0) hmm->nseq = atoi(buffer+6);
-    else if (strncmp(buffer, "ALPH ", 5) == 0)
-      {        /* Alphabet type */
-  s2upper(buffer+6);
-  if      (strncmp(buffer+6, "AMINO",   5) == 0) atype = hmmAMINO;
-  else if (strncmp(buffer+6, "NUCLEIC", 7) == 0) atype = hmmNUCLEIC;
-  else goto FAILURE;
+    else if (strncmp(buffer, "ALPH ", 5) == 0) {
+      /* Alphabet type */
+      s2upper(buffer+6);
+      if      (strncmp(buffer+6, "AMINO",   5) == 0) atype = hmmAMINO;
+      else if (strncmp(buffer+6, "NUCLEIC", 7) == 0) atype = hmmNUCLEIC;
+      else goto FAILURE;
 
-  if      (Alphabet_type == hmmNOTSETYET) SetAlphabet(atype);
-  else if (atype != Alphabet_type)
-    Die("Alphabet mismatch error.\nI thought we were working with %s, but tried to read a %s HMM.\n", AlphabetType2String(Alphabet_type), AlphabetType2String(atype));
+      if      (Alphabet_type == hmmNOTSETYET) SetAlphabet(atype);
+      else if (atype != Alphabet_type)
+        Die("Alphabet mismatch error.\nI thought we were working with %s, but tried to read a %s HMM.\n", AlphabetType2String(Alphabet_type), AlphabetType2String(atype));
+    } else if (strncmp(buffer, "RF   ", 5) == 0) {
+      /* Reference annotation present? */
+      if (sre_toupper(*(buffer+6)) == 'Y') hmm->flags |= PLAN7_RF;
+    } else if (strncmp(buffer, "CS   ", 5) == 0) {
+      /* Consensus annotation present? */
+      if (sre_toupper(*(buffer+6)) == 'Y') hmm->flags |= PLAN7_CS;
+    } else if (strncmp(buffer, "MAP  ", 5) == 0) {
+      /* Map annotation present? */
+      if (sre_toupper(*(buffer+6)) == 'Y') hmm->flags |= PLAN7_MAP;
+    } else if (strncmp(buffer, "COM  ", 5) == 0) {
+      /* Command line log */
+      StringChop(buffer+6);
+      if (hmm->comlog == NULL)
+        hmm->comlog = Strdup(buffer+6);
+      else {
+        hmm->comlog = ReallocOrDie(hmm->comlog, sizeof(char *) *
+                                   (strlen(hmm->comlog) + 1 + strlen(buffer+6)));
+        strcat(hmm->comlog, "\n");
+        strcat(hmm->comlog, buffer+6);
       }
-    else if (strncmp(buffer, "RF   ", 5) == 0)
-      {        /* Reference annotation present? */
-  if (sre_toupper(*(buffer+6)) == 'Y') hmm->flags |= PLAN7_RF;
-      }
-    else if (strncmp(buffer, "CS   ", 5) == 0)
-      {        /* Consensus annotation present? */
-  if (sre_toupper(*(buffer+6)) == 'Y') hmm->flags |= PLAN7_CS;
-      }
-    else if (strncmp(buffer, "MAP  ", 5) == 0)
-      {        /* Map annotation present? */
-  if (sre_toupper(*(buffer+6)) == 'Y') hmm->flags |= PLAN7_MAP;
-      }
-    else if (strncmp(buffer, "COM  ", 5) == 0)
-      {        /* Command line log */
-  StringChop(buffer+6);
-  if (hmm->comlog == NULL)
-    hmm->comlog = Strdup(buffer+6);
-  else
-    {
-      hmm->comlog = ReallocOrDie(hmm->comlog, sizeof(char *) *
-               (strlen(hmm->comlog) + 1 + strlen(buffer+6)));
-      strcat(hmm->comlog, "\n");
-      strcat(hmm->comlog, buffer+6);
-    }
-      }
-    else if (strncmp(buffer, "DATE ", 5) == 0)
-      {        /* Date file created */
-  StringChop(buffer+6);
-  hmm->ctime= Strdup(buffer+6);
-      }
-    else if (strncmp(buffer, "GA   ", 5) == 0)
-      {
-  if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
-  hmm->ga1 = atof(s);
-  if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
-  hmm->ga2 = atof(s);
-  hmm->flags |= PLAN7_GA;
-      }
-    else if (strncmp(buffer, "TC   ", 5) == 0)
-      {
-  if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
-  hmm->tc1 = atof(s);
-  if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
-  hmm->tc2 = atof(s);
-  hmm->flags |= PLAN7_TC;
-      }
-    else if (strncmp(buffer, "NC   ", 5) == 0)
-      {
-  if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
-  hmm->nc1 = atof(s);
-  if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
-  hmm->nc2 = atof(s);
-  hmm->flags |= PLAN7_NC;
-      }
-    else if (strncmp(buffer, "XT   ", 5) == 0)
-      {        /* Special transition section */
-  if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
-  for (k = 0; k < 4; k++)
-    for (x = 0; x < 2; x++)
-      {
+    } else if (strncmp(buffer, "DATE ", 5) == 0) {
+      /* Date file created */
+      StringChop(buffer+6);
+      hmm->ctime= Strdup(buffer+6);
+    } else if (strncmp(buffer, "GA   ", 5) == 0) {
+      if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
+      hmm->ga1 = atof(s);
+      if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
+      hmm->ga2 = atof(s);
+      hmm->flags |= PLAN7_GA;
+    } else if (strncmp(buffer, "TC   ", 5) == 0) {
+      if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
+      hmm->tc1 = atof(s);
+      if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
+      hmm->tc2 = atof(s);
+      hmm->flags |= PLAN7_TC;
+    } else if (strncmp(buffer, "NC   ", 5) == 0) {
+      if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
+      hmm->nc1 = atof(s);
+      if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
+      hmm->nc2 = atof(s);
+      hmm->flags |= PLAN7_NC;
+    } else if (strncmp(buffer, "XT   ", 5) == 0) {
+      /* Special transition section */
+      if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
+      for (k = 0; k < 4; k++)
+        for (x = 0; x < 2; x++) {
+          if (s == NULL) goto FAILURE;
+          hmm->xt[k][x] = ascii2prob(s, 1.0);
+          s = strtok(NULL, " \t\n");
+        }
+    } else if (strncmp(buffer, "NULT ", 5) == 0) {
+      /* Null model transitions */
+      if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
+      hmm->p1 = ascii2prob(s, 1.);
+      if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
+      hmm->p1 = hmm->p1 / (hmm->p1 + ascii2prob(s, 1.0));
+    } else if (strncmp(buffer, "NULE ", 5) == 0) {
+      /* Null model emissions */
+      if (Alphabet_type == hmmNOTSETYET)
+        Die("ALPH must precede NULE in HMM save files");
+      s = strtok(buffer+6, " \t\n");
+      for (x = 0; x < Alphabet_size; x++) {
         if (s == NULL) goto FAILURE;
-        hmm->xt[k][x] = ascii2prob(s, 1.0);
+        hmm->null[x] = ascii2prob(s, 1./(float)Alphabet_size);
         s = strtok(NULL, " \t\n");
       }
-      }
-    else if (strncmp(buffer, "NULT ", 5) == 0)
-      {        /* Null model transitions */
-  if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
-  hmm->p1 = ascii2prob(s, 1.);
-  if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
-  hmm->p1 = hmm->p1 / (hmm->p1 + ascii2prob(s, 1.0));
-      }
-    else if (strncmp(buffer, "NULE ", 5) == 0)
-      {        /* Null model emissions */
-  if (Alphabet_type == hmmNOTSETYET)
-    Die("ALPH must precede NULE in HMM save files");
-  s = strtok(buffer+6, " \t\n");
-  for (x = 0; x < Alphabet_size; x++) {
-    if (s == NULL) goto FAILURE;
-    hmm->null[x] = ascii2prob(s, 1./(float)Alphabet_size);
-    s = strtok(NULL, " \t\n");
-  }
-      }
-    else if (strncmp(buffer, "EVD  ", 5) == 0)
-      {        /* EVD parameters */
-  hmm->flags |= PLAN7_STATS;
-  if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
-  hmm->mu = atof(s);
-  if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
-  hmm->lambda = atof(s);
-      }
-    else if (strncmp(buffer, "CKSUM", 5) == 0) hmm->checksum = atoi(buffer+6);
+    } else if (strncmp(buffer, "EVD  ", 5) == 0) {
+      /* EVD parameters */
+      hmm->flags |= PLAN7_STATS;
+      if ((s = strtok(buffer+6, " \t\n")) == NULL) goto FAILURE;
+      hmm->mu = atof(s);
+      if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
+      hmm->lambda = atof(s);
+    } else if (strncmp(buffer, "CKSUM", 5) == 0) hmm->checksum = atoi(buffer+6);
     else if (strncmp(buffer, "HMM  ", 5) == 0) break;
   }
 
-        /* partial check for mandatory fields */
+  /* partial check for mandatory fields */
   if (feof(hmmfp->f))                goto FAILURE;
   if (M < 1)                         goto FAILURE;
   if (hmm->name == NULL)             goto FAILURE;
@@ -705,9 +665,9 @@ read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
    * to probabilities
    */
   AllocPlan7Body(hmm, M);
-        /* skip an annotation line */
+  /* skip an annotation line */
   if (fgets(buffer, 512, hmmfp->f) == NULL)  goto FAILURE;
-        /* parse tbd1 line */
+  /* parse tbd1 line */
   if (fgets(buffer, 512, hmmfp->f) == NULL)  goto FAILURE;
   if ((s = strtok(buffer, " \t\n")) == NULL) goto FAILURE;
   p = ascii2prob(s, 1.0);
@@ -716,9 +676,9 @@ read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   hmm->tbd1 = ascii2prob(s, 1.0);
   hmm->tbd1 = hmm->tbd1 / (p + hmm->tbd1);
 
-        /* main model */
+  /* main model */
   for (k = 1; k <= hmm->M; k++) {
-                                /* Line 1: k, match emissions, map */
+    /* Line 1: k, match emissions, map */
     if (fgets(buffer, 512, hmmfp->f) == NULL)  goto FAILURE;
     if ((s = strtok(buffer, " \t\n")) == NULL) goto FAILURE;
     if (atoi(s) != k)                          goto FAILURE;
@@ -730,17 +690,17 @@ read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
       if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
       hmm->map[k] = atoi(s);
     }
-        /* Line 2:  RF and insert emissions */
+    /* Line 2:  RF and insert emissions */
     if (fgets(buffer, 512, hmmfp->f) == NULL)  goto FAILURE;
     if ((s = strtok(buffer, " \t\n")) == NULL) goto FAILURE;
     if (hmm->flags & PLAN7_RF) hmm->rf[k] = *s;
     if (k < hmm->M) {
       for (x = 0; x < Alphabet_size; x++) {
-  if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
-  hmm->ins[k][x] = ascii2prob(s, hmm->null[x]);
+        if ((s = strtok(NULL, " \t\n")) == NULL) goto FAILURE;
+        hmm->ins[k][x] = ascii2prob(s, hmm->null[x]);
       }
     }
-        /* Line 3: CS and transitions */
+    /* Line 3: CS and transitions */
     if (fgets(buffer, 512, hmmfp->f) == NULL)  goto FAILURE;
     if ((s = strtok(buffer, " \t\n")) == NULL) goto FAILURE;
     if (hmm->flags & PLAN7_CS) hmm->cs[k] = *s;
@@ -778,115 +738,113 @@ FAILURE:
 
 
 static int
-read_bin20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
-   struct plan7_s *hmm;
-   int    k,x;
-   int    type;
-   unsigned int magic;
+read_bin20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
+  struct plan7_s *hmm;
+  int    k,x;
+  int    type;
+  unsigned int magic;
 
-   hmm = NULL;
+  hmm = NULL;
 
-   /* Header section
-    */
-   if (feof(hmmfp->f))                                      return 0;
-   if (! fread((char *) &magic, sizeof(unsigned int), 1, hmmfp->f)) return 0;
+  /* Header section
+   */
+  if (feof(hmmfp->f))                                      return 0;
+  if (! fread((char *) &magic, sizeof(unsigned int), 1, hmmfp->f)) return 0;
 
-   if (hmmfp->byteswap) byteswap((char *)&magic, sizeof(unsigned int));
-   if (magic != v20magic) goto FAILURE;
-        /* allocate HMM shell for header info */
-   hmm = AllocPlan7Shell();
-        /* flags */
-   if (! fread((char *) &(hmm->flags), sizeof(int), 1, hmmfp->f)) goto FAILURE;
-   if (hmmfp->byteswap) byteswap((char *)&(hmm->flags), sizeof(int));
-        /* name */
-   if (! read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->name))) goto FAILURE;
+  if (hmmfp->byteswap) byteswap((char *)&magic, sizeof(unsigned int));
+  if (magic != v20magic) goto FAILURE;
+  /* allocate HMM shell for header info */
+  hmm = AllocPlan7Shell();
+  /* flags */
+  if (! fread((char *) &(hmm->flags), sizeof(int), 1, hmmfp->f)) goto FAILURE;
+  if (hmmfp->byteswap) byteswap((char *)&(hmm->flags), sizeof(int));
+  /* name */
+  if (! read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->name))) goto FAILURE;
 
-        /* optional accession */
-   if ((hmm->flags & PLAN7_ACC) &&
-       ! read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->acc))) goto FAILURE;
-        /* optional description */
-   if ((hmm->flags & PLAN7_DESC) &&
-       ! read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->desc))) goto FAILURE;
-        /* length of model */
-   if (! fread((char *) &hmm->M,  sizeof(int), 1, hmmfp->f)) goto FAILURE;
-   if (hmmfp->byteswap) byteswap((char *)&(hmm->M), sizeof(int));
-        /* alphabet type */
-   if (! fread((char *) &type, sizeof(int), 1, hmmfp->f)) goto FAILURE;
-   if (hmmfp->byteswap) byteswap((char *)&type, sizeof(int));
-   if (Alphabet_type == hmmNOTSETYET) SetAlphabet(type);
-   else if (type != Alphabet_type)
-     Die("Alphabet mismatch error.\nI thought we were working with %s, but tried to read a %s HMM.\n", AlphabetType2String(Alphabet_type), AlphabetType2String(type));
+  /* optional accession */
+  if ((hmm->flags & PLAN7_ACC) &&
+      ! read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->acc))) goto FAILURE;
+  /* optional description */
+  if ((hmm->flags & PLAN7_DESC) &&
+      ! read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->desc))) goto FAILURE;
+  /* length of model */
+  if (! fread((char *) &hmm->M,  sizeof(int), 1, hmmfp->f)) goto FAILURE;
+  if (hmmfp->byteswap) byteswap((char *)&(hmm->M), sizeof(int));
+  /* alphabet type */
+  if (! fread((char *) &type, sizeof(int), 1, hmmfp->f)) goto FAILURE;
+  if (hmmfp->byteswap) byteswap((char *)&type, sizeof(int));
+  if (Alphabet_type == hmmNOTSETYET) SetAlphabet(type);
+  else if (type != Alphabet_type)
+    Die("Alphabet mismatch error.\nI thought we were working with %s, but tried to read a %s HMM.\n", AlphabetType2String(Alphabet_type), AlphabetType2String(type));
 
-        /* now allocate for rest of model */
-   AllocPlan7Body(hmm, hmm->M);
+  /* now allocate for rest of model */
+  AllocPlan7Body(hmm, hmm->M);
 
-        /* optional #=RF alignment annotation */
-   if ((hmm->flags & PLAN7_RF) &&
-       !fread((char *) hmm->rf, sizeof(char), hmm->M+1, hmmfp->f)) goto FAILURE;
-   hmm->rf[hmm->M+1] = '\0';
-        /* optional #=CS alignment annotation */
-   if ((hmm->flags & PLAN7_CS) &&
-       !fread((char *) hmm->cs, sizeof(char), hmm->M+1, hmmfp->f)) goto FAILURE;
-   hmm->cs[hmm->M+1]  = '\0';
-        /* optional alignment map annotation */
-   if ((hmm->flags & PLAN7_MAP) &&
-       !fread((char *) hmm->map, sizeof(int), hmm->M+1, hmmfp->f)) goto FAILURE;
-   if (hmmfp->byteswap)
-     for (k = 1; k <= hmm->M; k++)
-       byteswap((char*)&(hmm->map[k]), sizeof(int));
-        /* command line log */
-   if (!read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->comlog)))  goto FAILURE;
-        /* nseq */
-   if (!fread((char *) &(hmm->nseq),sizeof(int), 1, hmmfp->f))       goto FAILURE;
-   if (hmmfp->byteswap) byteswap((char *)&(hmm->nseq), sizeof(int));
-        /* creation time */
-   if (!read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->ctime)))   goto FAILURE;
-        /* checksum */
-   if (!fread((char *) &(hmm->checksum),sizeof(int), 1, hmmfp->f))       goto FAILURE;
-   if (hmmfp->byteswap) byteswap((char *)&(hmm->checksum), sizeof(int));
+  /* optional #=RF alignment annotation */
+  if ((hmm->flags & PLAN7_RF) &&
+      !fread((char *) hmm->rf, sizeof(char), hmm->M+1, hmmfp->f)) goto FAILURE;
+  hmm->rf[hmm->M+1] = '\0';
+  /* optional #=CS alignment annotation */
+  if ((hmm->flags & PLAN7_CS) &&
+      !fread((char *) hmm->cs, sizeof(char), hmm->M+1, hmmfp->f)) goto FAILURE;
+  hmm->cs[hmm->M+1]  = '\0';
+  /* optional alignment map annotation */
+  if ((hmm->flags & PLAN7_MAP) &&
+      !fread((char *) hmm->map, sizeof(int), hmm->M+1, hmmfp->f)) goto FAILURE;
+  if (hmmfp->byteswap)
+    for (k = 1; k <= hmm->M; k++)
+      byteswap((char*)&(hmm->map[k]), sizeof(int));
+  /* command line log */
+  if (!read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->comlog)))  goto FAILURE;
+  /* nseq */
+  if (!fread((char *) &(hmm->nseq),sizeof(int), 1, hmmfp->f))       goto FAILURE;
+  if (hmmfp->byteswap) byteswap((char *)&(hmm->nseq), sizeof(int));
+  /* creation time */
+  if (!read_bin_string(hmmfp->f, hmmfp->byteswap, &(hmm->ctime)))   goto FAILURE;
+  /* checksum */
+  if (!fread((char *) &(hmm->checksum),sizeof(int), 1, hmmfp->f))       goto FAILURE;
+  if (hmmfp->byteswap) byteswap((char *)&(hmm->checksum), sizeof(int));
 
-        /* Pfam gathering thresholds */
-   if (hmm->flags & PLAN7_GA) {
-     if (! fread((char *) &(hmm->ga1), sizeof(float), 1, hmmfp->f)) goto FAILURE;
-     if (! fread((char *) &(hmm->ga2), sizeof(float), 1, hmmfp->f)) goto FAILURE;
-     if (hmmfp->byteswap) {
-       byteswap((char *) &(hmm->ga1), sizeof(float));
-       byteswap((char *) &(hmm->ga2), sizeof(float));
-     }
-   }
-        /* Pfam trusted cutoffs */
-   if (hmm->flags & PLAN7_TC) {
-     if (! fread((char *) &(hmm->tc1), sizeof(float), 1, hmmfp->f)) goto FAILURE;
-     if (! fread((char *) &(hmm->tc2), sizeof(float), 1, hmmfp->f)) goto FAILURE;
-     if (hmmfp->byteswap) {
-       byteswap((char *) &(hmm->tc1), sizeof(float));
-       byteswap((char *) &(hmm->tc2), sizeof(float));
-     }
-   }
-        /* Pfam noise cutoffs */
-   if (hmm->flags & PLAN7_NC) {
-     if (! fread((char *) &(hmm->nc1), sizeof(float), 1, hmmfp->f)) goto FAILURE;
-     if (! fread((char *) &(hmm->nc2), sizeof(float), 1, hmmfp->f)) goto FAILURE;
-     if (hmmfp->byteswap) {
-       byteswap((char *) &(hmm->nc1), sizeof(float));
-       byteswap((char *) &(hmm->nc2), sizeof(float));
-     }
-   }
+  /* Pfam gathering thresholds */
+  if (hmm->flags & PLAN7_GA) {
+    if (! fread((char *) &(hmm->ga1), sizeof(float), 1, hmmfp->f)) goto FAILURE;
+    if (! fread((char *) &(hmm->ga2), sizeof(float), 1, hmmfp->f)) goto FAILURE;
+    if (hmmfp->byteswap) {
+      byteswap((char *) &(hmm->ga1), sizeof(float));
+      byteswap((char *) &(hmm->ga2), sizeof(float));
+    }
+  }
+  /* Pfam trusted cutoffs */
+  if (hmm->flags & PLAN7_TC) {
+    if (! fread((char *) &(hmm->tc1), sizeof(float), 1, hmmfp->f)) goto FAILURE;
+    if (! fread((char *) &(hmm->tc2), sizeof(float), 1, hmmfp->f)) goto FAILURE;
+    if (hmmfp->byteswap) {
+      byteswap((char *) &(hmm->tc1), sizeof(float));
+      byteswap((char *) &(hmm->tc2), sizeof(float));
+    }
+  }
+  /* Pfam noise cutoffs */
+  if (hmm->flags & PLAN7_NC) {
+    if (! fread((char *) &(hmm->nc1), sizeof(float), 1, hmmfp->f)) goto FAILURE;
+    if (! fread((char *) &(hmm->nc2), sizeof(float), 1, hmmfp->f)) goto FAILURE;
+    if (hmmfp->byteswap) {
+      byteswap((char *) &(hmm->nc1), sizeof(float));
+      byteswap((char *) &(hmm->nc2), sizeof(float));
+    }
+  }
 
-   /* specials */
-   for (k = 0; k < 4; k++)
-     {
-       if (! fread((char *) hmm->xt[k], sizeof(float), 2, hmmfp->f))    goto FAILURE;
-       if (hmmfp->byteswap) {
-   for (x = 0; x < 2; x++)
-     byteswap((char *)&(hmm->xt[k][x]), sizeof(float));
-       }
-     }
+  /* specials */
+  for (k = 0; k < 4; k++) {
+    if (! fread((char *) hmm->xt[k], sizeof(float), 2, hmmfp->f))    goto FAILURE;
+    if (hmmfp->byteswap) {
+      for (x = 0; x < 2; x++)
+        byteswap((char *)&(hmm->xt[k][x]), sizeof(float));
+    }
+  }
 
-   /* null model */
-   if (!fread((char *) &(hmm->p1),sizeof(float), 1, hmmfp->f))        goto FAILURE;
-   if (!fread((char *)hmm->null,sizeof(float),Alphabet_size,hmmfp->f))goto FAILURE;
+  /* null model */
+  if (!fread((char *) &(hmm->p1),sizeof(float), 1, hmmfp->f))        goto FAILURE;
+  if (!fread((char *)hmm->null,sizeof(float),Alphabet_size,hmmfp->f))goto FAILURE;
 
   /* EVD stats */
   if (hmm->flags & PLAN7_STATS) {
@@ -899,19 +857,19 @@ read_bin20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
     }
   }
 
-   /* entry/exit probabilities
-    */
-   if (! fread((char *)&(hmm->tbd1), sizeof(float), 1, hmmfp->f))       goto FAILURE;
-   if (! fread((char *) hmm->begin, sizeof(float), hmm->M+1, hmmfp->f)) goto FAILURE;
-   if (! fread((char *) hmm->end,   sizeof(float), hmm->M+1, hmmfp->f)) goto FAILURE;
+  /* entry/exit probabilities
+   */
+  if (! fread((char *)&(hmm->tbd1), sizeof(float), 1, hmmfp->f))       goto FAILURE;
+  if (! fread((char *) hmm->begin, sizeof(float), hmm->M+1, hmmfp->f)) goto FAILURE;
+  if (! fread((char *) hmm->end,   sizeof(float), hmm->M+1, hmmfp->f)) goto FAILURE;
 
-        /* main model */
-   for (k = 1; k <= hmm->M; k++)
-     if (! fread((char *) hmm->mat[k], sizeof(float), Alphabet_size, hmmfp->f)) goto FAILURE;
-   for (k = 1; k < hmm->M; k++)
-     if (! fread((char *) hmm->ins[k], sizeof(float), Alphabet_size, hmmfp->f)) goto FAILURE;
-   for (k = 1; k < hmm->M; k++)
-     if (! fread((char *) hmm->t[k], sizeof(float), 7, hmmfp->f)) goto FAILURE;
+  /* main model */
+  for (k = 1; k <= hmm->M; k++)
+    if (! fread((char *) hmm->mat[k], sizeof(float), Alphabet_size, hmmfp->f)) goto FAILURE;
+  for (k = 1; k < hmm->M; k++)
+    if (! fread((char *) hmm->ins[k], sizeof(float), Alphabet_size, hmmfp->f)) goto FAILURE;
+  for (k = 1; k < hmm->M; k++)
+    if (! fread((char *) hmm->t[k], sizeof(float), 7, hmmfp->f)) goto FAILURE;
 
   /* byteswapping
    */
@@ -921,19 +879,18 @@ read_bin20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
     byteswap((char *)&(hmm->p1),   sizeof(float));
     byteswap((char *)&(hmm->tbd1), sizeof(float));
 
-    for (k = 1; k <= hmm->M; k++)
-      {
-  for (x = 0; x < Alphabet_size; x++)
-    byteswap((char *)&(hmm->mat[k][x]), sizeof(float));
-  if (k < hmm->M)
-    for (x = 0; x < Alphabet_size; x++)
-      byteswap((char *)&(hmm->ins[k][x]), sizeof(float));
-  byteswap((char *)&(hmm->begin[k]),  sizeof(float));
-  byteswap((char *)&(hmm->end[k]),    sizeof(float));
-  if (k < hmm->M)
-    for (x = 0; x < 7; x++)
-      byteswap((char *)&(hmm->t[k][x]), sizeof(float));
-      }
+    for (k = 1; k <= hmm->M; k++) {
+      for (x = 0; x < Alphabet_size; x++)
+        byteswap((char *)&(hmm->mat[k][x]), sizeof(float));
+      if (k < hmm->M)
+        for (x = 0; x < Alphabet_size; x++)
+          byteswap((char *)&(hmm->ins[k][x]), sizeof(float));
+      byteswap((char *)&(hmm->begin[k]),  sizeof(float));
+      byteswap((char *)&(hmm->end[k]),    sizeof(float));
+      if (k < hmm->M)
+        for (x = 0; x < 7; x++)
+          byteswap((char *)&(hmm->t[k][x]), sizeof(float));
+    }
   }
 
 
@@ -964,8 +921,7 @@ FAILURE:
  *           to anyone.
  */
 static int
-read_asc19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_asc19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   struct plan7_s *hmm;
   FILE *fp;
   char  buffer[512];
@@ -981,10 +937,12 @@ read_asc19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   if (strncmp(buffer, "HMMER v1.9", 10) != 0)             goto FAILURE;
 
   hmm = AllocPlan7Shell();
-          /* read M from first line */
-  if ((s = Getword(fp, sqdARG_INT))    == NULL) goto FAILURE; else M = atoi(s);          /* model length */
+  /* read M from first line */
+  if ((s = Getword(fp, sqdARG_INT))    == NULL) goto FAILURE;
+  else M = atoi(s);          /* model length */
   if ((s = Getword(fp, sqdARG_INT))    == NULL) goto FAILURE;                        /* ignore alphabet size */
-  if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE; else Plan7SetName(hmm, s); /* name */
+  if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
+  else Plan7SetName(hmm, s); /* name */
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE; /* alphabet type */
   s2upper(s);
   if      (strcmp(s, "AMINO") == 0)   atype = hmmAMINO;
@@ -995,17 +953,17 @@ read_asc19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   else if (atype != Alphabet_type)
     Die("Alphabet mismatch error.\nI thought we were working with %s, but tried to read a %s HMM.\n", AlphabetType2String(Alphabet_type), AlphabetType2String(atype));
 
-        /* read alphabet, make sure it's Plan7-compatible... */
+  /* read alphabet, make sure it's Plan7-compatible... */
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
   if (strncmp(s, Alphabet, Alphabet_size) != 0) goto FAILURE;
 
-        /* whether we have ref, cs info */
+  /* whether we have ref, cs info */
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
   if (strcmp(s, "yes") == 0) hmm->flags |= PLAN7_RF;
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
   if (strcmp(s, "yes") == 0) hmm->flags |= PLAN7_CS;
 
-        /* null model. 1.9 has emissions only. invent transitions. */
+  /* null model. 1.9 has emissions only. invent transitions. */
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
   if (strcmp(s, "null") != 0) goto FAILURE;
   for (x = 0; x < Alphabet_size; x++) {
@@ -1040,63 +998,61 @@ read_asc19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   hmm->begin[1] = ascii2prob(s, 1.0);
   if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
   hmm->tbd1 = ascii2prob(s, 1.0);
-        /* renormalize */
+  /* renormalize */
   hmm->begin[1] = hmm->begin[1] / (hmm->begin[1] + hmm->tbd1);
   hmm->tbd1     = hmm->tbd1     / (hmm->begin[1] + hmm->tbd1);
-        /* skip rest of line, seven integer fields, two char fields */
+  /* skip rest of line, seven integer fields, two char fields */
   for (x = 0; x < 7; x++)
     if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
   if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
 
-        /* main model: table of emissions, transitions, annotation */
-  for (k = 1; k <= hmm->M; k++)
-    {
-        /* position index ignored */
+  /* main model: table of emissions, transitions, annotation */
+  for (k = 1; k <= hmm->M; k++) {
+    /* position index ignored */
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    /* match emissions */
+    for (x = 0; x < Alphabet_size; x++) {
       if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-        /* match emissions */
-      for (x = 0; x < Alphabet_size; x++) {
-  if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-  hmm->mat[k][x] = ascii2prob(s, hmm->null[x]);
-      }
-        /* nine transitions; two are ignored */
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TMM] = ascii2prob(s, 1.0);
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TMD] = (k == hmm->M) ? 0.0 : ascii2prob(s, 1.0);
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TMI] = ascii2prob(s, 1.0);
-
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TDM] = ascii2prob(s, 1.0);
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TDD] = (k == hmm->M) ? 0.0 : ascii2prob(s, 1.0);
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;/* TDI ignored. */
-
-        /* no insert state at k == M, be careful */
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TIM]  = ascii2prob(s, 1.0);
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE; /* TID ignored. */
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-      if (k < hmm->M) hmm->t[k][TII] = ascii2prob(s, 1.0);
-
-        /* annotations */
-      if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
-      if (hmm->flags & PLAN7_RF) hmm->rf[k] = *s;
-      if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
-      if (hmm->flags & PLAN7_CS) hmm->cs[k] = *s;
+      hmm->mat[k][x] = ascii2prob(s, hmm->null[x]);
     }
-        /* table of insert emissions;
-                                 * Plan7 has no insert state at 0 or M  */
-  for (k = 0; k <= hmm->M; k++)
-    {
-      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE; /* position index ignored */
-      for (x = 0; x < Alphabet_size; x++) {
-  if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
-  if (k > 0 && k < hmm->M)
-    hmm->ins[k][x] = ascii2prob(s, hmm->null[x]);
-      }
+    /* nine transitions; two are ignored */
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TMM] = ascii2prob(s, 1.0);
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TMD] = (k == hmm->M) ? 0.0 : ascii2prob(s, 1.0);
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TMI] = ascii2prob(s, 1.0);
+
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TDM] = ascii2prob(s, 1.0);
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TDD] = (k == hmm->M) ? 0.0 : ascii2prob(s, 1.0);
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;/* TDI ignored. */
+
+    /* no insert state at k == M, be careful */
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TIM]  = ascii2prob(s, 1.0);
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE; /* TID ignored. */
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+    if (k < hmm->M) hmm->t[k][TII] = ascii2prob(s, 1.0);
+
+    /* annotations */
+    if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
+    if (hmm->flags & PLAN7_RF) hmm->rf[k] = *s;
+    if ((s = Getword(fp, sqdARG_STRING)) == NULL) goto FAILURE;
+    if (hmm->flags & PLAN7_CS) hmm->cs[k] = *s;
+  }
+  /* table of insert emissions;
+                           * Plan7 has no insert state at 0 or M  */
+  for (k = 0; k <= hmm->M; k++) {
+    if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE; /* position index ignored */
+    for (x = 0; x < Alphabet_size; x++) {
+      if ((s = Getword(fp, sqdARG_INT)) == NULL) goto FAILURE;
+      if (k > 0 && k < hmm->M)
+        hmm->ins[k][x] = ascii2prob(s, hmm->null[x]);
     }
+  }
 
   /* Set flags and return
    */
@@ -1115,8 +1071,7 @@ FAILURE:
 }
 
 static int
-read_bin19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_bin19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   unsigned int     magic;
   struct plan7_s  *hmm;     /* plan7 HMM */
   struct plan9_s  *p9hmm;   /* old style 1.x HMM */
@@ -1128,7 +1083,10 @@ read_bin19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   if (! fread((char *) &magic, sizeof(unsigned int), 1, hmmfp->f)) return 0;
 
   p9hmm = read_plan9_binhmm(hmmfp->f, HMMER1_9B, hmmfp->byteswap);
-  if (p9hmm == NULL) { *ret_hmm = NULL; return 1; }
+  if (p9hmm == NULL) {
+    *ret_hmm = NULL;
+    return 1;
+  }
 
   Plan9toPlan7(p9hmm, &hmm);
 
@@ -1136,12 +1094,11 @@ read_bin19hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   Plan7SetCtime(hmm);
 
   P9FreeHMM(p9hmm);
- *ret_hmm = hmm;
+  *ret_hmm = hmm;
   return 1;
 }
 static int
-read_asc17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_asc17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   struct plan7_s  *hmm;     /* plan7 HMM */
   struct plan9_s  *p9hmm;   /* old style 1.x HMM */
   char   buffer[512];
@@ -1152,7 +1109,10 @@ read_asc17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   if (feof(hmmfp->f) || fgets(buffer, 512, hmmfp->f) == NULL) return 0;
 
   p9hmm = read_plan9_aschmm(hmmfp->f, HMMER1_7F);
-  if (p9hmm == NULL) { *ret_hmm = NULL; return 1; }
+  if (p9hmm == NULL) {
+    *ret_hmm = NULL;
+    return 1;
+  }
 
   Plan9toPlan7(p9hmm, &hmm);
 
@@ -1161,13 +1121,12 @@ read_asc17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
 
   P9FreeHMM(p9hmm);
   Plan7Renormalize(hmm);
- *ret_hmm = hmm;
+  *ret_hmm = hmm;
   return 1;
 }
 
 static int
-read_bin17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_bin17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   unsigned int     magic;
   struct plan7_s  *hmm;     /* plan7 HMM */
   struct plan9_s  *p9hmm;   /* old style 1.x HMM */
@@ -1179,7 +1138,10 @@ read_bin17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   if (! fread((char *) &magic, sizeof(unsigned int), 1, hmmfp->f)) return 0;
 
   p9hmm = read_plan9_binhmm(hmmfp->f, HMMER1_7B, hmmfp->byteswap);
-  if (p9hmm == NULL) { *ret_hmm = NULL; return 1; }
+  if (p9hmm == NULL) {
+    *ret_hmm = NULL;
+    return 1;
+  }
 
   Plan9toPlan7(p9hmm, &hmm);
 
@@ -1187,19 +1149,17 @@ read_bin17hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   Plan7SetCtime(hmm);
 
   P9FreeHMM(p9hmm);
- *ret_hmm = hmm;
+  *ret_hmm = hmm;
   return 1;
 }
 
 static int
-read_asc11hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_asc11hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   Die("1.1 ASCII HMMs unsupported");
   return 1;
 }
 static int
-read_bin11hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_bin11hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   unsigned int     magic;
   struct plan7_s  *hmm;     /* plan7 HMM */
   struct plan9_s  *p9hmm;   /* old style 1.x HMM */
@@ -1211,7 +1171,10 @@ read_bin11hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   if (! fread((char *) &magic, sizeof(unsigned int), 1, hmmfp->f)) return 0;
 
   p9hmm = read_plan9_binhmm(hmmfp->f, HMMER1_1B, hmmfp->byteswap);
-  if (p9hmm == NULL) { *ret_hmm = NULL; return 1; }
+  if (p9hmm == NULL) {
+    *ret_hmm = NULL;
+    return 1;
+  }
 
   Plan9toPlan7(p9hmm, &hmm);
 
@@ -1219,20 +1182,18 @@ read_bin11hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   Plan7SetCtime(hmm);
 
   P9FreeHMM(p9hmm);
- *ret_hmm = hmm;
+  *ret_hmm = hmm;
   return 1;
 }
 
 static int
-read_asc10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_asc10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   Die("1.0 ASCII HMMs unsupported");
   return 1;
 }
 
 static int
-read_bin10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
-{
+read_bin10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) {
   unsigned int     magic;
   struct plan7_s  *hmm;     /* plan7 HMM */
   struct plan9_s  *p9hmm;   /* old style 1.x HMM */
@@ -1244,7 +1205,10 @@ read_bin10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   if (! fread((char *) &magic, sizeof(unsigned int), 1, hmmfp->f)) return 0;
 
   p9hmm = read_plan9_binhmm(hmmfp->f, HMMER1_0B, hmmfp->byteswap);
-  if (p9hmm == NULL) { *ret_hmm = NULL; return 1; }
+  if (p9hmm == NULL) {
+    *ret_hmm = NULL;
+    return 1;
+  }
 
   Plan9toPlan7(p9hmm, &hmm);
 
@@ -1252,7 +1216,7 @@ read_bin10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   Plan7SetCtime(hmm);
 
   P9FreeHMM(p9hmm);
- *ret_hmm = hmm;
+  *ret_hmm = hmm;
   return 1;
 }
 
@@ -1267,8 +1231,7 @@ read_bin10hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
  *
  */
 static char *
-prob2ascii(float p, float null)
-{
+prob2ascii(float p, float null) {
   static char buffer[8];
 
   if (p == 0.0) return "*";
@@ -1282,8 +1245,7 @@ prob2ascii(float p, float null)
  * Purpose:  Convert a saved string back to a probability.
  */
 static float
-ascii2prob(char *s, float null)
-{
+ascii2prob(char *s, float null) {
   return (*s == '*') ? 0. : Score2Prob(atoi(s), null);
 }
 
@@ -1309,11 +1271,10 @@ ascii2prob(char *s, float null)
  * Date: Sun Feb 12 10:26:22 1995
  */
 static void
-byteswap(char *swap, int nbytes)
-{
+byteswap(char *swap, int nbytes) {
   int  x;
 
-  for (x = 0; x < nbytes / 2; x++){
+  for (x = 0; x < nbytes / 2; x++) {
     char byte;
     byte = swap[nbytes - x - 1];
     swap[nbytes - x - 1] = swap[x];
@@ -1329,20 +1290,16 @@ byteswap(char *swap, int nbytes)
  *           the string.
  */
 static void
-write_bin_string(FILE *fp, char *s)
-{
+write_bin_string(FILE *fp, char *s) {
   int len;
-  if (s != NULL)
-    {
-      len = strlen(s) + 1;
-      fwrite((char *) &len, sizeof(int),  1,   fp);
-      fwrite((char *) s,    sizeof(char), len, fp);
-    }
-  else
-    {
-      len = 0;
-      fwrite((char *) &len, sizeof(int), 1, fp);
-    }
+  if (s != NULL) {
+    len = strlen(s) + 1;
+    fwrite((char *) &len, sizeof(int),  1,   fp);
+    fwrite((char *) s,    sizeof(char), len, fp);
+  } else {
+    len = 0;
+    fwrite((char *) &len, sizeof(int), 1, fp);
+  }
 }
 
 /* Function: read_bin_string()
@@ -1358,19 +1315,17 @@ write_bin_string(FILE *fp, char *s)
  * Return:   0 on failure. ret_s is malloc'ed here.
  */
 static int
-read_bin_string(FILE *fp, int doswap, char **ret_s)
-{
+read_bin_string(FILE *fp, int doswap, char **ret_s) {
   char *s;
   int   len;
 
   if (! fread((char *) &len, sizeof(int), 1, fp))  return 0;
   if (doswap) byteswap((char *)&len, sizeof(int));
   s = MallocOrDie (sizeof(char) * (len));
-  if (! fread((char *) s, sizeof(char), len, fp))
-    {
-      free(s);
-      return 0;
-    }
+  if (! fread((char *) s, sizeof(char), len, fp)) {
+    free(s);
+    return 0;
+  }
 
   *ret_s = s;
   return 1;
@@ -1398,19 +1353,17 @@ read_bin_string(FILE *fp, int doswap, char **ret_s)
  * Return:   (void)
  */
 static void
-multiline(FILE *fp, char *pfx, char *s)
-{
+multiline(FILE *fp, char *pfx, char *s) {
   char *buf;
   char *sptr;
 
   if (s == NULL) return;
   buf  = Strdup(s);
   sptr = strtok(buf, "\n");
-  while (sptr != NULL)
-    {
-      fprintf(fp, "%s%s\n", pfx, sptr);
-      sptr = strtok(NULL, "\n");
-    }
+  while (sptr != NULL) {
+    fprintf(fp, "%s%s\n", pfx, sptr);
+    sptr = strtok(NULL, "\n");
+  }
   free(buf);
 }
 
@@ -1434,8 +1387,7 @@ multiline(FILE *fp, char *pfx, char *s)
  * on ancient HMMER macro definitions).
  */
 static struct plan9_s *
-read_plan9_binhmm(FILE *fp, int version, int swapped)
-{
+read_plan9_binhmm(FILE *fp, int version, int swapped) {
   struct plan9_s *hmm;
   int   M;                      /* length of model  */
   int   k;                      /* state number  */
@@ -1445,7 +1397,7 @@ read_plan9_binhmm(FILE *fp, int version, int swapped)
   int   atype;      /* alphabet type (read but ignored) */
   char  abet[20];    /* alphabet (read but ignored) */
 
- /* read M and alphabet size */
+  /* read M and alphabet size */
   if (! fread((char *) &(M), sizeof(int), 1, fp))  return NULL;
   if (! fread((char *) &asize, sizeof(int), 1, fp)) return NULL;
   if (swapped) {
@@ -1485,82 +1437,78 @@ read_plan9_binhmm(FILE *fp, int version, int swapped)
 
   /* Get optional info in V1.7 and later
    */
-  if (version == HMMER1_7B || version == HMMER1_9B)
-    {
-      if (! fread((char *) &(hmm->flags), sizeof(int), 1, fp)) return NULL;
-      if (swapped) byteswap((char *) &hmm->flags, sizeof(int));
-      if ((hmm->flags & HMM_REF) &&
-          ! fread((char *) hmm->ref, sizeof(char), hmm->M+1, fp)) return NULL;
-      hmm->ref[hmm->M+1] = '\0';
-      if ((hmm->flags & HMM_CS) &&
-          ! fread((char *) hmm->cs,  sizeof(char), hmm->M+1, fp)) return NULL;
-      hmm->cs[hmm->M+1]  = '\0';
-    }
+  if (version == HMMER1_7B || version == HMMER1_9B) {
+    if (! fread((char *) &(hmm->flags), sizeof(int), 1, fp)) return NULL;
+    if (swapped) byteswap((char *) &hmm->flags, sizeof(int));
+    if ((hmm->flags & HMM_REF) &&
+        ! fread((char *) hmm->ref, sizeof(char), hmm->M+1, fp)) return NULL;
+    hmm->ref[hmm->M+1] = '\0';
+    if ((hmm->flags & HMM_CS) &&
+        ! fread((char *) hmm->cs,  sizeof(char), hmm->M+1, fp)) return NULL;
+    hmm->cs[hmm->M+1]  = '\0';
+  }
 
   /* Get the null model in V1.9 and later
    */
-  if (version == HMMER1_9B)
-    {
-      if (! fread((char *) hmm->null, sizeof(float), Alphabet_size, fp)) return NULL;
-      if (swapped)
-        for (x = 0; x < Alphabet_size; x++)
-          byteswap((char *) &(hmm->null[x]), sizeof(float));
-    }
-  else P9DefaultNullModel(hmm->null);
+  if (version == HMMER1_9B) {
+    if (! fread((char *) hmm->null, sizeof(float), Alphabet_size, fp)) return NULL;
+    if (swapped)
+      for (x = 0; x < Alphabet_size; x++)
+        byteswap((char *) &(hmm->null[x]), sizeof(float));
+  } else P9DefaultNullModel(hmm->null);
 
   /* everything else is states */
-  for (k = 0; k <= hmm->M; k++)
-    {
-      /* get match state info */
-      if (! fread((char *) &(hmm->mat[k].t[MATCH]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) &(hmm->mat[k].t[DELETE]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) &(hmm->mat[k].t[INSERT]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) hmm->mat[k].p, sizeof(float), Alphabet_size, fp)) return NULL
-;
-      if (swapped) {
-        byteswap((char *) &(hmm->mat[k].t[MATCH]),  sizeof(float));
-        byteswap((char *) &(hmm->mat[k].t[DELETE]), sizeof(float));
-        byteswap((char *) &(hmm->mat[k].t[INSERT]), sizeof(float));
-        for (x = 0; x < Alphabet_size; x++)
-          byteswap((char *) &(hmm->mat[k].p[x]), sizeof(float));
-      }
-
-      /* skip the regularizer info in V1.0 */
-      if (version == HMMER1_0B)
-        fseek(fp, (long)(sizeof(float) * (3 + Alphabet_size)), SEEK_CUR);
-
-      /* get delete state info */
-      if (! fread((char *) &(hmm->del[k].t[MATCH]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) &(hmm->del[k].t[DELETE]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) &(hmm->del[k].t[INSERT]), sizeof(float), 1, fp)) return NULL;
-      if (swapped) {
-        byteswap((char *) &(hmm->del[k].t[MATCH]),  sizeof(float));
-        byteswap((char *) &(hmm->del[k].t[DELETE]), sizeof(float));
-        byteswap((char *) &(hmm->del[k].t[INSERT]), sizeof(float));
-      }
-
-      /* skip the regularizer info in V1.0 */
-      if (version == HMMER1_0B)
-        fseek(fp, (long)(sizeof(float) * 3), SEEK_CUR);
-
-      /* get insert state info */
-      if (! fread((char *) &(hmm->ins[k].t[MATCH]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) &(hmm->ins[k].t[DELETE]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) &(hmm->ins[k].t[INSERT]), sizeof(float), 1, fp)) return NULL;
-      if (! fread((char *) hmm->ins[k].p, sizeof(float), Alphabet_size, fp)) return NULL
-;
-      if (swapped) {
-        byteswap((char *) &(hmm->ins[k].t[MATCH]),  sizeof(float));
-        byteswap((char *) &(hmm->ins[k].t[DELETE]), sizeof(float));
-        byteswap((char *) &(hmm->ins[k].t[INSERT]), sizeof(float));
-        for (x = 0; x < Alphabet_size; x++)
-          byteswap((char *) &(hmm->ins[k].p[x]), sizeof(float));
-      }
-
-      /* skip the regularizer info in V1.0 */
-      if (version == HMMER1_0B)
-        fseek(fp, (long)(sizeof(float) * (3 + Alphabet_size)), SEEK_CUR);
+  for (k = 0; k <= hmm->M; k++) {
+    /* get match state info */
+    if (! fread((char *) &(hmm->mat[k].t[MATCH]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) &(hmm->mat[k].t[DELETE]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) &(hmm->mat[k].t[INSERT]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) hmm->mat[k].p, sizeof(float), Alphabet_size, fp)) return NULL
+          ;
+    if (swapped) {
+      byteswap((char *) &(hmm->mat[k].t[MATCH]),  sizeof(float));
+      byteswap((char *) &(hmm->mat[k].t[DELETE]), sizeof(float));
+      byteswap((char *) &(hmm->mat[k].t[INSERT]), sizeof(float));
+      for (x = 0; x < Alphabet_size; x++)
+        byteswap((char *) &(hmm->mat[k].p[x]), sizeof(float));
     }
+
+    /* skip the regularizer info in V1.0 */
+    if (version == HMMER1_0B)
+      fseek(fp, (long)(sizeof(float) * (3 + Alphabet_size)), SEEK_CUR);
+
+    /* get delete state info */
+    if (! fread((char *) &(hmm->del[k].t[MATCH]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) &(hmm->del[k].t[DELETE]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) &(hmm->del[k].t[INSERT]), sizeof(float), 1, fp)) return NULL;
+    if (swapped) {
+      byteswap((char *) &(hmm->del[k].t[MATCH]),  sizeof(float));
+      byteswap((char *) &(hmm->del[k].t[DELETE]), sizeof(float));
+      byteswap((char *) &(hmm->del[k].t[INSERT]), sizeof(float));
+    }
+
+    /* skip the regularizer info in V1.0 */
+    if (version == HMMER1_0B)
+      fseek(fp, (long)(sizeof(float) * 3), SEEK_CUR);
+
+    /* get insert state info */
+    if (! fread((char *) &(hmm->ins[k].t[MATCH]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) &(hmm->ins[k].t[DELETE]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) &(hmm->ins[k].t[INSERT]), sizeof(float), 1, fp)) return NULL;
+    if (! fread((char *) hmm->ins[k].p, sizeof(float), Alphabet_size, fp)) return NULL
+          ;
+    if (swapped) {
+      byteswap((char *) &(hmm->ins[k].t[MATCH]),  sizeof(float));
+      byteswap((char *) &(hmm->ins[k].t[DELETE]), sizeof(float));
+      byteswap((char *) &(hmm->ins[k].t[INSERT]), sizeof(float));
+      for (x = 0; x < Alphabet_size; x++)
+        byteswap((char *) &(hmm->ins[k].p[x]), sizeof(float));
+    }
+
+    /* skip the regularizer info in V1.0 */
+    if (version == HMMER1_0B)
+      fseek(fp, (long)(sizeof(float) * (3 + Alphabet_size)), SEEK_CUR);
+  }
   P9Renormalize(hmm);
   return hmm;
 }
@@ -1580,8 +1528,7 @@ read_plan9_binhmm(FILE *fp, int version, int swapped)
  * or NULL on failure.
  */
 static struct plan9_s *
-read_plan9_aschmm(FILE *fp, int version)
-{
+read_plan9_aschmm(FILE *fp, int version) {
   struct plan9_s *hmm;
   int   M;      /* length of model  */
   char buffer[512];
@@ -1590,12 +1537,12 @@ read_plan9_aschmm(FILE *fp, int version)
   int   asize;      /* Alphabet size */
   int   atype = -1;      /* Alphabet type */
 
-        /* read M from first line */
+  /* read M from first line */
   if (fgets(buffer, 512, fp) == NULL) return NULL;
   if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
   if (!isdigit((int) (*s))) return NULL;
   M = atoi(s);
-        /* read alphabet_length */
+  /* read alphabet_length */
   if (fgets(buffer, 512, fp) == NULL) return NULL;
   if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
   if (!isdigit((int) (*s))) return NULL;
@@ -1610,15 +1557,15 @@ read_plan9_aschmm(FILE *fp, int version)
   else if (atype != Alphabet_type)
     Die("Alphabet mismatch error.\nI thought we were working with %s, but tried to read a %s HMM.\n", AlphabetType2String(Alphabet_type), AlphabetType2String(atype));
 
-        /* now, create space for hmm */
+  /* now, create space for hmm */
   if ((hmm = P9AllocHMM(M)) == NULL)
     Die("malloc failed for reading hmm in\n");
 
-        /* read alphabet_type but ignore */
+  /* read alphabet_type but ignore */
   if (fgets(buffer, 512, fp) == NULL) return NULL;
   if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
   if (!isdigit((int) (*s))) return NULL;
-        /* read alphabet but ignore */
+  /* read alphabet but ignore */
   if (fgets(buffer, 512, fp) == NULL) return NULL;
   if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
 
@@ -1629,30 +1576,28 @@ read_plan9_aschmm(FILE *fp, int version)
 
   /* V1.7 has lines for whether we have valid ref, cs info
    */
-  if (version == HMMER1_7F)
-    {
-      if (fgets(buffer, 512, fp) == NULL) return NULL;
-      if (strncmp(buffer, "yes", 3) == 0) hmm->flags |= HMM_REF;
-      if (fgets(buffer, 512, fp) == NULL) return NULL;
-      if (strncmp(buffer, "yes", 3) == 0) hmm->flags |= HMM_CS;
-    }
+  if (version == HMMER1_7F) {
+    if (fgets(buffer, 512, fp) == NULL) return NULL;
+    if (strncmp(buffer, "yes", 3) == 0) hmm->flags |= HMM_REF;
+    if (fgets(buffer, 512, fp) == NULL) return NULL;
+    if (strncmp(buffer, "yes", 3) == 0) hmm->flags |= HMM_CS;
+  }
 
-        /* everything else is states */
-  while (fgets(buffer, 512, fp) != NULL){
-        /* get state type and index info */
-      char *statetype;
-      if ((statetype = strtok(buffer, " \t\n")) == NULL) return NULL;
-      if ((s = strtok((char *) NULL, " \t\n")) == NULL) return NULL;
-      if (!isdigit((int) (*s))) return NULL;
-      int   k;      /* state number  */
-      k = atoi(s);
-      if (k < 0 || k > hmm->M+1) return NULL;
+  /* everything else is states */
+  while (fgets(buffer, 512, fp) != NULL) {
+    /* get state type and index info */
+    char *statetype;
+    if ((statetype = strtok(buffer, " \t\n")) == NULL) return NULL;
+    if ((s = strtok((char *) NULL, " \t\n")) == NULL) return NULL;
+    if (!isdigit((int) (*s))) return NULL;
+    int   k;      /* state number  */
+    k = atoi(s);
+    if (k < 0 || k > hmm->M+1) return NULL;
 
-      if (strcmp(statetype, "###MATCH_STATE") == 0){
-        /* V1.7: get ref, cs info:   */
-                          /* ###MATCH_STATE 16 (x) (H) */
-    if (version == HMMER1_7F)
-      {
+    if (strcmp(statetype, "###MATCH_STATE") == 0) {
+      /* V1.7: get ref, cs info:   */
+      /* ###MATCH_STATE 16 (x) (H) */
+      if (version == HMMER1_7F) {
         s = strtok(NULL, "\n");
         while (*s != '(' && *s != '\0') s++;
         if (*s != '(') return NULL;
@@ -1662,80 +1607,73 @@ read_plan9_aschmm(FILE *fp, int version)
         hmm->cs[k] = *(s+1);
       }
 
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->mat[k].t[MATCH] = (float) atof(s);
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->mat[k].t[MATCH] = (float) atof(s);
 
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->mat[k].t[DELETE] = (float) atof(s);
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->mat[k].t[DELETE] = (float) atof(s);
 
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->mat[k].t[INSERT] = (float) atof(s);
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->mat[k].t[INSERT] = (float) atof(s);
 
-    for (i = 0; i < Alphabet_size; i++)
-      {
+      for (i = 0; i < Alphabet_size; i++) {
         if (fgets(buffer, 512, fp) == NULL) return NULL;
         if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
         hmm->mat[k].p[i] = (float) atof(s);
       }
 
-        /* Skip all regularizer info for V1.0 */
-    if (version == HMMER1_0F)
-      for (i = 0; i < Alphabet_size + 3; i++)
-        if (fgets(buffer, 512, fp) == NULL) return NULL;
+      /* Skip all regularizer info for V1.0 */
+      if (version == HMMER1_0F)
+        for (i = 0; i < Alphabet_size + 3; i++)
+          if (fgets(buffer, 512, fp) == NULL) return NULL;
 
-  }
-      else if (strcmp(statetype, "###INSERT_STATE") == 0)
-  {
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->ins[k].t[MATCH] = (float) atof(s);
+    } else if (strcmp(statetype, "###INSERT_STATE") == 0) {
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->ins[k].t[MATCH] = (float) atof(s);
 
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->ins[k].t[DELETE] = (float) atof(s);
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->ins[k].t[DELETE] = (float) atof(s);
 
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->ins[k].t[INSERT] = (float) atof(s);
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->ins[k].t[INSERT] = (float) atof(s);
 
-    for (i = 0; i < Alphabet_size; i++)
-      {
+      for (i = 0; i < Alphabet_size; i++) {
         if (fgets(buffer, 512, fp) == NULL) return NULL;
         if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
         hmm->ins[k].p[i] = (float) atof(s);
       }
 
-    /* Skip all regularizer info in V1.0 files */
-    if (version == HMMER1_0F)
-      for (i = 0; i < Alphabet_size + 3; i++)
-        if (fgets(buffer, 512, fp) == NULL) return NULL;
+      /* Skip all regularizer info in V1.0 files */
+      if (version == HMMER1_0F)
+        for (i = 0; i < Alphabet_size + 3; i++)
+          if (fgets(buffer, 512, fp) == NULL) return NULL;
 
+    } else if (strcmp(statetype, "###DELETE_STATE") == 0) {
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->del[k].t[MATCH] = (float) atof(s);
+
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->del[k].t[DELETE] = (float) atof(s);
+
+      if (fgets(buffer, 512, fp) == NULL) return NULL;
+      if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
+      hmm->del[k].t[INSERT] = (float) atof(s);
+
+      /* Skip all regularizer info in V1.0 files*/
+      if (version == HMMER1_0F)
+        for (i = 0; i < 3; i++)
+          if (fgets(buffer, 512, fp) == NULL) return NULL;
+    } else
+      return NULL;
   }
-      else if (strcmp(statetype, "###DELETE_STATE") == 0)
-  {
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->del[k].t[MATCH] = (float) atof(s);
-
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->del[k].t[DELETE] = (float) atof(s);
-
-    if (fgets(buffer, 512, fp) == NULL) return NULL;
-    if ((s = strtok(buffer, " \t\n")) == NULL) return NULL;
-    hmm->del[k].t[INSERT] = (float) atof(s);
-
-    /* Skip all regularizer info in V1.0 files*/
-    if (version == HMMER1_0F)
-      for (i = 0; i < 3; i++)
-        if (fgets(buffer, 512, fp) == NULL) return NULL;
-  }
-      else
-  return NULL;
-    }
 
   P9DefaultNullModel(hmm->null);
   P9Renormalize(hmm);

@@ -88,8 +88,7 @@
  * Returns:  (void)
  */
 void
-WriteProfile(FILE *fp, struct plan7_s *hmm, int do_xsw)
-{
+WriteProfile(FILE *fp, struct plan7_s *hmm, int do_xsw) {
   int k;      /* position in model      */
   int x;      /* symbol index           */
   int sc;      /* a score to print       */
@@ -103,7 +102,7 @@ WriteProfile(FILE *fp, struct plan7_s *hmm, int do_xsw)
    */
   if (hmm->M > 1000 && !do_xsw)
     Warn("Profile %s will have more than 1000 positions. GCG won't read it; Compugen will.",
-   hmm->name);
+         hmm->name);
 
   /* Header information.
    * GCG will look for sequence type and length of model.
@@ -118,33 +117,30 @@ WriteProfile(FILE *fp, struct plan7_s *hmm, int do_xsw)
   if (Alphabet_type == hmmAMINO)        fprintf(fp, "(Peptide) ");
   else if (Alphabet_type == hmmNUCLEIC) fprintf(fp, "(Nucleotide) ");
   fprintf(fp, "HMMCONVERT v%s Length: %d %s|%s|%s\n",
-    PACKAGE_VERSION, hmm->M, hmm->name,
-    (hmm->flags & PLAN7_ACC) ? hmm->acc : "",
-    (hmm->flags & PLAN7_DESC) ? hmm->desc : "");
+          PACKAGE_VERSION, hmm->M, hmm->name,
+          (hmm->flags & PLAN7_ACC) ? hmm->acc : "",
+          (hmm->flags & PLAN7_DESC) ? hmm->desc : "");
 
   /* Insert some HMMER-specific commentary
    */
-  if (do_xsw)
-    {
-      fprintf(fp, "   Profile converted from a profile HMM using HMMER v%s emulation.\n", PACKAGE_VERSION);
-      fprintf(fp, "   Compugen XSW extended profile format.\n");
-      fprintf(fp, "   Use -model=xsw.model -nonor -noave -gapop=10 -gapext=1 -qgapop=10 -qgapext=1\n");
-      fprintf(fp, "      with om on the Compugen BIC to get the closest approximation to HMMER bit scores.\n");
-      fprintf(fp, "   WARNING: There is a loss of information in this conversion.\n");
-      fprintf(fp, "      Neither the scores nor even the rank order of hits will be precisely\n");
-      fprintf(fp, "      preserved in a comparison of HMMER hmmsearch to GCG profilesearch.\n");
-      fprintf(fp, "      The profile score is an approximation of the (single-hit) HMMER score.\n\n");
-    }
-  else
-    {
-      fprintf(fp, "   Profile converted from a profile HMM using HMMER v%s emulation.\n", PACKAGE_VERSION);
-      fprintf(fp, "   Use -nonor -noave -gap=10 -len=1 with profilesearch and friends\n");
-      fprintf(fp, "      to get the closest approximation to HMMER bit scores.\n");
-      fprintf(fp, "   WARNING: There is a loss of information in this conversion.\n");
-      fprintf(fp, "      Neither the scores nor even the rank order of hits will be precisely\n");
-      fprintf(fp, "      preserved in a comparison of HMMER hmmsearch to GCG profilesearch.\n");
-      fprintf(fp, "      The profile score is an approximation of the (single-hit) HMMER score.\n\n");
-    }
+  if (do_xsw) {
+    fprintf(fp, "   Profile converted from a profile HMM using HMMER v%s emulation.\n", PACKAGE_VERSION);
+    fprintf(fp, "   Compugen XSW extended profile format.\n");
+    fprintf(fp, "   Use -model=xsw.model -nonor -noave -gapop=10 -gapext=1 -qgapop=10 -qgapext=1\n");
+    fprintf(fp, "      with om on the Compugen BIC to get the closest approximation to HMMER bit scores.\n");
+    fprintf(fp, "   WARNING: There is a loss of information in this conversion.\n");
+    fprintf(fp, "      Neither the scores nor even the rank order of hits will be precisely\n");
+    fprintf(fp, "      preserved in a comparison of HMMER hmmsearch to GCG profilesearch.\n");
+    fprintf(fp, "      The profile score is an approximation of the (single-hit) HMMER score.\n\n");
+  } else {
+    fprintf(fp, "   Profile converted from a profile HMM using HMMER v%s emulation.\n", PACKAGE_VERSION);
+    fprintf(fp, "   Use -nonor -noave -gap=10 -len=1 with profilesearch and friends\n");
+    fprintf(fp, "      to get the closest approximation to HMMER bit scores.\n");
+    fprintf(fp, "   WARNING: There is a loss of information in this conversion.\n");
+    fprintf(fp, "      Neither the scores nor even the rank order of hits will be precisely\n");
+    fprintf(fp, "      preserved in a comparison of HMMER hmmsearch to GCG profilesearch.\n");
+    fprintf(fp, "      The profile score is an approximation of the (single-hit) HMMER score.\n\n");
+  }
 
 
   /* Do the CONS line, which gives the valid IUPAC symbols and their order
@@ -159,66 +155,56 @@ WriteProfile(FILE *fp, struct plan7_s *hmm, int do_xsw)
 
   /* Now, the profile; for each position in the HMM, write a line of profile.
    */
-  for (k = 1; k <= hmm->M; k++)
-    {
-        /* GCG adds some indexing as comments */
-      if ((k-1)%10 == 0 && k > 10)
-  fprintf(fp, "! %d\n", k);
+  for (k = 1; k <= hmm->M; k++) {
+    /* GCG adds some indexing as comments */
+    if ((k-1)%10 == 0 && k > 10)
+      fprintf(fp, "! %d\n", k);
 
-        /* find consensus residue by max prob */
-      x = FArgMax(hmm->mat[k], Alphabet_size);
-      fprintf(fp, " %c  ", Alphabet[x]);
-        /* generate emission score profile;
-         * Profiles are scaled by a factor of 100
-         */
-      for (x = 0; x < Alphabet_iupac; x++)
-  {
-    sc = hmm->msc[x][k];
-    if (k < hmm->M) sc += hmm->tsc[TMM][k];
-    sc = sc * 100 / INTSCALE;
-    fprintf(fp, "%5d ", sc);
-  }
-        /* Generate gap open, gap extend penalties;
-           note we will force profilesearch to weights of 10, 1,
-           and that GCG profile values are percentages
-           of these base penalties, 0..100.*/
-        /* gap open (insertion)*/
-      if (k > 1)
-  {
-    gap = -1 * (hmm->tsc[TMI][k-1] + hmm->tsc[TIM][k-1] - hmm->tsc[TMM][k-1] - hmm->tsc[TII][k-1]);
-    gap = gap * 100 / (10.0 * INTSCALE);
-  }
-      else gap = 100;    /* doesn't matter because GAP_1 is never used */
-
-        /* gap extend (insertion)*/
-      if (k > 1)
-  {
-    len = -1 * hmm->tsc[TII][k-1];
-    len = len * 100 / (1.0 * INTSCALE);
-  }
-      else len = 100;    /* again, doesn't matter because LEN_1 is never used */
-
-        /* gap open (deletion) */
-      if (k > 1)
-  {
-    qgap = -1 * (hmm->tsc[TDM][k-1] + hmm->tsc[TMD][k-1] - hmm->tsc[TMM][k-1] - hmm->tsc[TDD][k-1]);
-    qgap = qgap * 100 / (10.0 * INTSCALE);
-  }
-      else qgap = 100;
-        /* gap extend (deletion) */
-      if (k > 1)
-  {
-    qlen = -1 * hmm->tsc[TDD][k-1];
-    qlen = qlen * 100 / (1.0 * INTSCALE);
-  }
-      else qlen = 100;
-
-
-      if (do_xsw)
-  fprintf(fp, "%5d %5d %5d %5d\n", gap, len, qgap, qlen);
-      else
-  fprintf(fp, "%5d %5d\n", gap, len); /* assume insertions >= deletions */
+    /* find consensus residue by max prob */
+    x = FArgMax(hmm->mat[k], Alphabet_size);
+    fprintf(fp, " %c  ", Alphabet[x]);
+    /* generate emission score profile;
+     * Profiles are scaled by a factor of 100
+     */
+    for (x = 0; x < Alphabet_iupac; x++) {
+      sc = hmm->msc[x][k];
+      if (k < hmm->M) sc += hmm->tsc[TMM][k];
+      sc = sc * 100 / INTSCALE;
+      fprintf(fp, "%5d ", sc);
     }
+    /* Generate gap open, gap extend penalties;
+       note we will force profilesearch to weights of 10, 1,
+       and that GCG profile values are percentages
+       of these base penalties, 0..100.*/
+    /* gap open (insertion)*/
+    if (k > 1) {
+      gap = -1 * (hmm->tsc[TMI][k-1] + hmm->tsc[TIM][k-1] - hmm->tsc[TMM][k-1] - hmm->tsc[TII][k-1]);
+      gap = gap * 100 / (10.0 * INTSCALE);
+    } else gap = 100;  /* doesn't matter because GAP_1 is never used */
+
+    /* gap extend (insertion)*/
+    if (k > 1) {
+      len = -1 * hmm->tsc[TII][k-1];
+      len = len * 100 / (1.0 * INTSCALE);
+    } else len = 100;  /* again, doesn't matter because LEN_1 is never used */
+
+    /* gap open (deletion) */
+    if (k > 1) {
+      qgap = -1 * (hmm->tsc[TDM][k-1] + hmm->tsc[TMD][k-1] - hmm->tsc[TMM][k-1] - hmm->tsc[TDD][k-1]);
+      qgap = qgap * 100 / (10.0 * INTSCALE);
+    } else qgap = 100;
+    /* gap extend (deletion) */
+    if (k > 1) {
+      qlen = -1 * hmm->tsc[TDD][k-1];
+      qlen = qlen * 100 / (1.0 * INTSCALE);
+    } else qlen = 100;
+
+
+    if (do_xsw)
+      fprintf(fp, "%5d %5d %5d %5d\n", gap, len, qgap, qlen);
+    else
+      fprintf(fp, "%5d %5d\n", gap, len); /* assume insertions >= deletions */
+  }
 
   /* The final line of the profile is a count of the observed
    * residues in the training sequences. This information is not
@@ -226,7 +212,7 @@ WriteProfile(FILE *fp, struct plan7_s *hmm, int do_xsw)
    * Approximate it by calculating a /very/ rough expectation.
    */
   fprintf(fp, " *  ");
-  for (x = 0; x < Alphabet_size; x++){
+  for (x = 0; x < Alphabet_size; x++) {
     float nx;      /* expected # of symbol x */
     nx = 0.0;
     for (k = 1; k <= hmm->M; k++)

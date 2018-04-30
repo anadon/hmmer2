@@ -5,8 +5,7 @@
 #include "stopwatch.h"
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   int          n = 1000000;
   int          r1;
   float        r2;
@@ -36,6 +35,6 @@ main(int argc, char **argv)
   StopwatchFree(w);
   return(EXIT_SUCCESS);
 }
-  
 
-  
+
+

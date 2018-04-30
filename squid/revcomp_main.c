@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -40,14 +40,13 @@ static struct opt_s OPTIONS[] = {
 
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char  *seqfile;               /* name of sequence file */
-  SQFILE *dbfp;			/* open sequence file */
-  int    fmt;			/* format of seqfile  */
-  char  *seq;			/* sequence */
+  SQFILE *dbfp;     /* open sequence file */
+  int    fmt;     /* format of seqfile  */
+  char  *seq;     /* sequence */
   SQINFO sqinfo;                /* additional sequence info */
-  char  *rev;			/* reverse complement */
+  char  *rev;     /* reverse complement */
   int    swap;
 
   char *optname;                /* name of option found by Getopt()      */
@@ -71,37 +70,34 @@ main(int argc, char **argv)
     }
   }
 
-  if (argc - optind != 1) Die("%s\n", usage); 
+  if (argc - optind != 1) Die("%s\n", usage);
   seqfile = argv[optind];
-		 
+
   if ((dbfp = SeqfileOpen(seqfile, fmt, NULL)) == NULL)
     Die("Failed to open sequence file %s for reading", seqfile);
-  
-  while (ReadSeq(dbfp, dbfp->format, &seq, &sqinfo))
-    {
-      if ((rev = (char *) malloc ((sqinfo.len + 1) * sizeof(char))) == NULL)
-	Die("malloc failed");
 
-      revcomp(rev, seq);
-      if (sqinfo.flags & (SQINFO_START | SQINFO_STOP))
-	{
-	  swap         = sqinfo.start;
-	  sqinfo.start = sqinfo.stop;
-	  sqinfo.stop  = swap;
-	}
-	/* secondary structure of reverse strand is nonsense
-	 */
-      if (sqinfo.flags & SQINFO_SS)
-	{
-	  sqinfo.flags = sqinfo.flags & ~SQINFO_SS;
-	  free(sqinfo.ss);
-	}
+  while (ReadSeq(dbfp, dbfp->format, &seq, &sqinfo)) {
+    if ((rev = (char *) malloc ((sqinfo.len + 1) * sizeof(char))) == NULL)
+      Die("malloc failed");
 
-      WriteSeq(stdout, SQFILE_FASTA, rev, &sqinfo);
-
-      free(rev);
-      FreeSequence(seq, &sqinfo);
+    revcomp(rev, seq);
+    if (sqinfo.flags & (SQINFO_START | SQINFO_STOP)) {
+      swap         = sqinfo.start;
+      sqinfo.start = sqinfo.stop;
+      sqinfo.stop  = swap;
     }
+    /* secondary structure of reverse strand is nonsense
+     */
+    if (sqinfo.flags & SQINFO_SS) {
+      sqinfo.flags = sqinfo.flags & ~SQINFO_SS;
+      free(sqinfo.ss);
+    }
+
+    WriteSeq(stdout, SQFILE_FASTA, rev, &sqinfo);
+
+    free(rev);
+    FreeSequence(seq, &sqinfo);
+  }
 
   SeqfileClose(dbfp);
   return 0;

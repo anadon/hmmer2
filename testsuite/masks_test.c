@@ -1,8 +1,8 @@
 /* masks_test.c
  * SRE, Tue Nov 18 11:10:20 1997 [St. Louis]
- * 
+ *
  * Test driver for sequence masking routines in masks.c
- * 
+ *
  * CVS $Id: masks_test.c 913 2003-10-04 18:26:49Z eddy $
  */
 
@@ -52,8 +52,7 @@ PXXXXXXXXXXXXXXXXXXSTVWYACDEFGHIKLMNPXXXXXXXXXXXXXXXXXXSTVWY\
 ACDEFGHIKLMNPXXXXXXXXXXXXXXXXXXSTVWY";
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   char          *seq;
   unsigned char *dsq;
   int   len;
@@ -64,10 +63,10 @@ main(int argc, char **argv)
   char *optarg;                 /* argument found by Getopt()               */
   int   optind;                 /* index in argv[]                          */
   int   be_verbose;
-  char *xnufile;		/* NULL, or file to run xnu on     */
+  char *xnufile;    /* NULL, or file to run xnu on     */
 
 
-  /*********************************************** 
+  /***********************************************
    * Parse command line
    ***********************************************/
 
@@ -76,9 +75,11 @@ main(int argc, char **argv)
 
   while (Getopt(argc, argv, OPTIONS, NOPTIONS, usage,
                 &optind, &optname, &optarg))  {
-    if      (strcmp(optname, "-v")       == 0) { be_verbose = TRUE;   }
-    else if (strcmp(optname, "--xnu")    == 0) { xnufile    = optarg; }
-    else if (strcmp(optname, "-h")       == 0) {
+    if      (strcmp(optname, "-v")       == 0) {
+      be_verbose = TRUE;
+    } else if (strcmp(optname, "--xnu")    == 0) {
+      xnufile    = optarg;
+    } else if (strcmp(optname, "-h")       == 0) {
       HMMERBanner(stdout, banner);
       puts(usage);
       puts(experts);
@@ -97,23 +98,21 @@ main(int argc, char **argv)
   dsq = DigitizeSequence(seq, len);
   XNU(dsq, len);
   result = MallocOrDie(sizeof(char) * (len+1));
-  
+
   for (i = 0; i < len; i++)
     result[i] = Alphabet[dsq[i+1]];
   result[len] = '\0';
-  
-  if (be_verbose)
-    {
-      printf("XNU test:\n");
-      for (i = 1; i <= len; i+=60)
-	{
-	  for (j = i; j < i+60 && j <= len; j++)
-	    putc(Alphabet[(int) dsq[j]], stdout);
-	  putc('\n', stdout);
-	}
-      if (strcmp(answer1, result) == 0)
-	printf("-- OK; Identical to expected\n");
+
+  if (be_verbose) {
+    printf("XNU test:\n");
+    for (i = 1; i <= len; i+=60) {
+      for (j = i; j < i+60 && j <= len; j++)
+        putc(Alphabet[(int) dsq[j]], stdout);
+      putc('\n', stdout);
     }
+    if (strcmp(answer1, result) == 0)
+      printf("-- OK; Identical to expected\n");
+  }
 
   if (strcmp(answer1, result) != 0)
     Die("XNU test failed.");
@@ -122,30 +121,28 @@ main(int argc, char **argv)
 
   /* On demand XNU test.
    */
-  if (xnufile != NULL)
-    {
-      SQFILE *sqfp;
-      SQINFO  sqinfo;
-      int     xnum;
-      
-      if ((sqfp = SeqfileOpen(xnufile, SQFILE_UNKNOWN, NULL)) == NULL)
-	Die("Failed to open sequence database file %s\n%s\n", xnufile, usage);
-      while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) 
-	{
-	  dsq = DigitizeSequence(seq, sqinfo.len);
-	  xnum = XNU(dsq, sqinfo.len);
-	  result = DedigitizeSequence(dsq, sqinfo.len);
+  if (xnufile != NULL) {
+    SQFILE *sqfp;
+    SQINFO  sqinfo;
+    int     xnum;
 
-	  printf("%-20s\t%5d\n", sqinfo.name, xnum);
-	  if (be_verbose)
-	    WriteSeq(stdout, SQFILE_FASTA, result, &sqinfo);
+    if ((sqfp = SeqfileOpen(xnufile, SQFILE_UNKNOWN, NULL)) == NULL)
+      Die("Failed to open sequence database file %s\n%s\n", xnufile, usage);
+    while (ReadSeq(sqfp, sqfp->format, &seq, &sqinfo)) {
+      dsq = DigitizeSequence(seq, sqinfo.len);
+      xnum = XNU(dsq, sqinfo.len);
+      result = DedigitizeSequence(dsq, sqinfo.len);
 
-	  free(dsq);
-	  FreeSequence(seq, &sqinfo);
-	  free(result);
-	}
-      SeqfileClose(sqfp);
+      printf("%-20s\t%5d\n", sqinfo.name, xnum);
+      if (be_verbose)
+        WriteSeq(stdout, SQFILE_FASTA, result, &sqinfo);
+
+      free(dsq);
+      FreeSequence(seq, &sqinfo);
+      free(result);
     }
+    SeqfileClose(sqfp);
+  }
 
   return EXIT_SUCCESS;
 }

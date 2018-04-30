@@ -29,17 +29,17 @@
 void PrintIscore(int sc);
 
 void PrintTransition(char src,
-         int isrc,
-         int ksrc,
-         char dest,
-         int idest,
-         int kdest,
-         int sc,
-         struct p7trace_s **alignment,
-         int *min,
-         int *max,
-         int *on,
-         int A);
+                     int isrc,
+                     int ksrc,
+                     char dest,
+                     int idest,
+                     int kdest,
+                     int sc,
+                     struct p7trace_s **alignment,
+                     int *min,
+                     int *max,
+                     int *on,
+                     int A);
 
 
 /* Function: DisplayPlan7Posteriors()

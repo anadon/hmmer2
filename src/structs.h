@@ -522,7 +522,7 @@ struct threshold_s {
   double globE;      /* E parameter: keep hits < globE E-value   */
   float  domT;      /* T parameter for individual domains       */
   double domE;      /* E parameter for individual domains       */
-        /* autosetting of cutoffs using Pfam annot: */
+  /* autosetting of cutoffs using Pfam annot: */
   enum { CUT_NONE, CUT_GA, CUT_NC, CUT_TC } autocut;
   int   Z;      /* nseq to base E value calculation on      */
 };

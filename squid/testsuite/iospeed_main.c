@@ -8,8 +8,7 @@
 #define SEQLEN 200
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
   SQFILE *sqfp;
   SQINFO  sqinfo;
   FILE *fp;
@@ -27,19 +26,18 @@ main(int argc, char **argv)
    */
   testfile = tmpnam(NULL);
   if ((fp = fopen(testfile, "w")) == NULL) Die("failed to open %s", testfile);
-  for (i = 0; i < NSEQ; i++)
-    {
-      buf = RandomSequence(AMINO_ALPHABET, aafq, 20, SEQLEN);
-      WriteSimpleFASTA(fp, buf, "foo", NULL);
-      free(buf);
-    }
+  for (i = 0; i < NSEQ; i++) {
+    buf = RandomSequence(AMINO_ALPHABET, aafq, 20, SEQLEN);
+    WriteSimpleFASTA(fp, buf, "foo", NULL);
+    free(buf);
+  }
   fclose(fp);
 
   /* Timing test 1: fgets().
    */
   StopwatchStart(w);
   for (i = 0; i < n; i++) {
-    if ((fp = fopen(testfile, "r")) == NULL) 
+    if ((fp = fopen(testfile, "r")) == NULL)
       Die("iospeed failed to open %s", testfile);
     buf = malloc(sizeof(char) * 256);
     buflen = 256;
@@ -83,6 +81,6 @@ main(int argc, char **argv)
   StopwatchFree(w);
   return(EXIT_SUCCESS);
 }
-  
 
-  
+
+

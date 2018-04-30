@@ -45,8 +45,7 @@
  */
 float
 Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
-  float targetent)
-{
+        float targetent) {
   int i;
   int j;
   float eff_no;                  /* New effective sequence number */
@@ -74,10 +73,10 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
   count    = 0;
 //  flag     = 0;
 
-  for(i = 0; i < Alphabet_size; i++){
+  for(i = 0; i < Alphabet_size; i++) {
     pmat[i] = 0;
   }
-  for(i = 0; i < hmm->M+1; i++){
+  for(i = 0; i < hmm->M+1; i++) {
     ent[i] = 0;
   }
 
@@ -86,8 +85,8 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
    ***************************************/
 
   /* Copy model match state probabilities into our temporary pmat[] */
-  for(i = 1; i < hmm->M+1; i++){
-    for(j = 0; j < Alphabet_size; j++){
+  for(i = 1; i < hmm->M+1; i++) {
+    for(j = 0; j < Alphabet_size; j++) {
       pmat[j] = hmm->mat[i][j];
     }
     /* Add priors to the current match state prob dist. (prior.c) */
@@ -109,11 +108,10 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
      entropy. Thus, the leftscale produces the lowest mean entropy
      bracket and rightscale produces the highest mean entropy
      bracket */
-  if(current < targetent){
+  if(current < targetent) {
     leftscale  = 1;
     rightscale = 0;
-  }
-  else{
+  } else {
     /* Current model has a higher entropy than our target.
        Calculated effective seq numb <= Number of seqs. Design decision.
     */
@@ -126,11 +124,11 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
    * Binary search for target mean entropy
    ***************************************/
   /* Check to see if the current model mean entropy is within 0.01 bits of our target */
-  while((current < targetent - 0.01) || (current > targetent + 0.01)){
+  while((current < targetent - 0.01) || (current > targetent + 0.01)) {
     count++;
 
     /* Emergency brake in case there is a bug in our binary search */
-    if(count > 50){
+    if(count > 50) {
       printf("\nBUG: Problem with adjusting the model entropy. Please report.\n");
       break;
     }
@@ -144,9 +142,9 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
      * Scale the counts and re-calc the entropy
      *******************************************/
     /* Re-copy match state probabilities into pmat[] */
-    for(i = 1; i < hmm->M+1; i++){
-      for(j = 0; j < Alphabet_size; j++){
-  pmat[j] = hmm->mat[i][j];
+    for(i = 1; i < hmm->M+1; i++) {
+      for(j = 0; j < Alphabet_size; j++) {
+        pmat[j] = hmm->mat[i][j];
       }
       /* Re-scale the current counts by the previously determined amount. (squid/vectorops.c) */
       FScale(pmat, Alphabet_size, scale);
@@ -158,10 +156,9 @@ Eweight(struct plan7_s *hmm,  struct p7prior_s *pri, float numb_seqs,
     current = FSum(ent, hmm->M+1)/hmm->M;
 
     /* Adjust the brackets according to the new mean entropy value */
-    if(current < targetent){
+    if(current < targetent) {
       leftscale = scale;
-    }
-    else{
+    } else {
       /* We overshot the target. Replace right bracket with the current scale */
       rightscale = scale;
     }

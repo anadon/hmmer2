@@ -2,7 +2,7 @@
  * HMMER - Biological sequence analysis with profile HMMs
  * Copyright (C) 1992-2006 HHMI Janelia Farm
  * All Rights Reserved
- * 
+ *
  *     This source code is distributed under the terms of the
  *     GNU General Public License. See the files COPYING and LICENSE
  *     for details.
@@ -11,7 +11,7 @@
 #ifndef SQFUNCSH_INCLUDED
 #define SQFUNCSH_INCLUDED
 /* sqfuncs.h
- * 
+ *
  * Prototypes for squid library functions;
  * also makes a good reference list for what the package contains.
  *
@@ -24,7 +24,7 @@
  * SVN $Id: sqfuncs.h 1530 2005-12-13 20:53:08Z eddy $
  */
 
-/* 
+/*
  * from aligneval.c
  */
 extern float ComparePairAlignments(char *known1, char *known2, char *calc1, char *calc2);
@@ -35,7 +35,7 @@ extern float PairwiseIdentity(char *s1, char *s2);
 extern float AlignmentIdentityBySampling(char **aseq, int L, int N, int nsample);
 extern char *MajorityRuleConsensus(char **aseq, int nseq, int alen);
 
-/* 
+/*
  * from alignio.c
  */
 extern void AllocAlignment(int nseq, int alen, char ***ret_aseq, AINFO *ainfo);
@@ -47,11 +47,11 @@ extern int  MakeAlignedString(char *aseq, int alen, char *ss, char **ret_s);
 extern int  MakeDealignedString(char *aseq, int alen, char *ss, char **ret_s);
 extern int  DealignedLength(char *aseq);
 extern int  WritePairwiseAlignment(FILE *ofp, char *aseq1, char *name1, int spos1,
-				   char *aseq2, char *name2, int spos2,
-				   int **pam, int indent);
+                                   char *aseq2, char *name2, int spos2,
+                                   int **pam, int indent);
 extern int  MingapAlignment(char **aseqs, AINFO *ainfo);
 extern int  RandomAlignment(char **rseqs, SQINFO *sqinfo, int nseq, float pop, float pex,
-			    char ***ret_aseqs, AINFO *ainfo);
+                            char ***ret_aseqs, AINFO *ainfo);
 extern void AlignmentHomogenousGapsym(char **aseq, int nseq, int alen, char gapsym);
 
 /* from cluster.c
@@ -64,7 +64,7 @@ extern void MakeIdentityMx(char **aseqs, int num, float ***ret_imx);
 extern void PrintNewHampshireTree(FILE *fp, AINFO *ainfo, struct phylo_s *tree, int N);
 extern void PrintPhylo(FILE *fp, AINFO *ainfo, struct phylo_s *tree, int N);
 
-/* 
+/*
  * from dayhoff.c
  */
 extern int  ParsePAMFile(FILE *fp, int ***ret_pam, float *ret_scale);
@@ -84,9 +84,9 @@ extern int   FileExists(char *filename);
 
 /* from getopt.c
  */
-extern int  Getopt(int argc, char **argv, 
-		   struct opt_s *opt, int nopts, char *usage,
-		   int *ret_optind, char **ret_optname, char **ret_optarg);
+extern int  Getopt(int argc, char **argv,
+                   struct opt_s *opt, int nopts, char *usage,
+                   int *ret_optind, char **ret_optname, char **ret_optarg);
 
 
 /* from hsregex.c
@@ -102,11 +102,11 @@ extern void        sqd_regerror(char *message);
 /* from interleaved.c
  */
 extern int IsInterleavedFormat(int format);
-extern int ReadInterleaved(char *seqfile, 
-			   int (*skip_header)(FILE *),
-			   int (*parse_header)(FILE *, AINFO *),
-			   int (*is_dataline)(char *, char *), 
-			   char ***ret_aseqs, AINFO *ainfo);
+extern int ReadInterleaved(char *seqfile,
+                           int (*skip_header)(FILE *),
+                           int (*parse_header)(FILE *, AINFO *),
+                           int (*is_dataline)(char *, char *),
+                           char ***ret_aseqs, AINFO *ainfo);
 extern int ReadAlignment(char *seqfile, int format, char ***ret_aseqs, AINFO *ainfo);
 
 
@@ -114,14 +114,14 @@ extern int ReadAlignment(char *seqfile, int format, char ***ret_aseqs, AINFO *ai
  */
 extern char *revcomp(char *comp, char *seq);
 
-/* 
+/*
  * from selex.c
  */
 extern int  DealignAseqs(char **aseqs, int num, char ***ret_rseqs);
 extern int  IsSELEXFormat(char *filename);
 extern int  TruncateNames(char **names, int N); /* OBSOLETE? */
 
-/* 
+/*
  * from seqencode.c
  */
 extern int seqcmp(char *s1, char *s2, int allow);
@@ -131,7 +131,7 @@ extern int coded_revcomp(char *comp, char *seq);
 extern int seqdecode(char *str, char *codeseq);
 extern int seqndecode(char *str, char *codeseq, int n);
 
-/* 
+/*
  * from shuffle.c
  */
 extern int  StrShuffle(char *s1, char *s2);
@@ -144,7 +144,7 @@ extern int  AlignmentShuffle(char **ali1, char **ali2, int nseq, int alen);
 extern int  AlignmentBootstrap(char **ali1, char **ali2, int nseq, int alen);
 extern int  QRNAShuffle(char *xs, char *ys, char *x, char *y);
 
-/* 
+/*
  * from sqerror.c
  */
 extern void Die(char *format, ...);
@@ -152,7 +152,7 @@ extern void Warn(char *format, ...);
 extern void Panic(char *file, int line);
 
 
-/* 
+/*
  * from sqio.c
  */
 extern void  FreeSequence(char *seq, SQINFO *sqinfo);
@@ -162,8 +162,8 @@ extern void  ToDNA(char *seq);
 extern void  ToRNA(char *seq);
 extern void  ToIUPAC(char *seq, int is_aseq);
 extern void  ToSimplyN(char *seq, int is_aseq);
-extern int   ReadMultipleRseqs(char *seqfile, int fformat, char ***ret_rseqs, 
-			       SQINFO **ret_sqinfo, int *ret_num);
+extern int   ReadMultipleRseqs(char *seqfile, int fformat, char ***ret_rseqs,
+                               SQINFO **ret_sqinfo, int *ret_num);
 extern SQFILE *SeqfileOpen(char *filename, int format, char *env);
 extern SQFILE *SeqfileOpenForIndexing(char *filename, int format, char *env, int ssimode);
 extern int     SeqfileFormat(FILE *fp);
@@ -181,11 +181,11 @@ extern int   Seqtype(char *seq);
 extern int   GuessAlignmentSeqtype(char **aseq, int nseq);
 extern int   String2SeqfileFormat(char *s);
 extern char *SeqfileFormat2String(int code);
-extern SQINFO *MSAToSqinfo(MSA *msa); 
+extern SQINFO *MSAToSqinfo(MSA *msa);
 
 /* from squidcore.c
  */
-extern void SqdBanner(FILE *fp, char *banner); 
+extern void SqdBanner(FILE *fp, char *banner);
 
 
 /* from sre_ctype.c
@@ -195,12 +195,12 @@ extern int sre_toupper(int c);
 
 /* from sre_math.c
  */
-extern int      FLinefit(float *x, float *y, int N, 
-		        float *ret_a, float *ret_b, float *ret_r);
-extern int      DLinefit(double *x, double *y, int N, 
-			 double *ret_a, double *ret_b, double *ret_r);
+extern int      FLinefit(float *x, float *y, int N,
+                         float *ret_a, float *ret_b, float *ret_r);
+extern int      DLinefit(double *x, double *y, int N,
+                         double *ret_a, double *ret_b, double *ret_r);
 extern void     WeightedLinefit(float *x, float *y, float *var, int N,
-			     float *ret_m, float *ret_b);
+                                float *ret_m, float *ret_b);
 extern float  **FMX2Alloc(int rows, int cols);
 extern void     FMX2Free(float **mx);
 extern double **DMX2Alloc(int rows, int cols);
@@ -240,12 +240,12 @@ extern int  PopIntStack(struct intstack_s  *stack, int *ret_data);
 extern void ReverseIntStack(struct intstack_s *stack);
 extern int  FreeIntStack( struct intstack_s *stack );
 
-/* 
+/*
  * from translate.c
  */
 extern char *Translate(char *seq, char **code);
 
-/* 
+/*
  * from types.c
  */
 extern int  IsInt(char *s);
@@ -260,7 +260,7 @@ extern sqd_uint32 sre_hton32(sqd_uint32 hostlong);
 extern sqd_uint64 sre_ntoh64(sqd_uint64 net_int64);
 extern sqd_uint64 sre_hton64(sqd_uint64 host_int64);
 
-/* 
+/*
  * from weight.c
  */
 extern void GSCWeights(char **aseq, int nseq, int alen, float *wgt);
@@ -269,8 +269,8 @@ extern void BlosumWeights(char **aseq, int nseq, int alen, float blosumlevel, fl
 extern void PositionBasedWeights(char **aseq, int nseq, int alen, float *wgt);
 extern void FilterAlignment(MSA *msa, float cutoff, MSA **ret_new);
 extern void SampleAlignment(MSA *msa, int sample,   MSA **ret_new);
-extern void SingleLinkCluster(char **aseq, int nseq, int alen, float maxid, 
-		  int **ret_c, int *ret_nc);
+extern void SingleLinkCluster(char **aseq, int nseq, int alen, float maxid,
+                              int **ret_c, int *ret_nc);
 
 /* from wuss.c
  */
