@@ -4,33 +4,34 @@
 #   CC      - which compiler to use
 #   CFLAGS  - compiler flags to use
 #
-prefix      = /usr
-exec_prefix = ${prefix}
-BINDIR      = ${exec_prefix}/bin
-MANDIR      = ${prefix}/share/man
+export prefix      = /usr
+export exec_prefix = ${prefix}
+export BINDIR      = ${exec_prefix}/bin
+export MANDIR      = ${prefix}/share/man
 
-PROGSUFFIX = 2
-MANSUFFIX = 1
+export PROGSUFFIX = 2
+export MANSUFFIX = 1
 
-CC     = gcc
+export CC     = gcc
+
 
 # The program lists below for HMMER are not necessarily
 # a complete manifest. They are the list of stable programs that the
 # package will install. There must be a man page for each one of them
 # in the appropriate places (documentation/man for HMMER)
 #
-PROGS = hmmalign\
-        hmmbuild\
-        hmmcalibrate\
-        hmmconvert\
-        hmmemit\
-        hmmfetch\
-        hmmindex\
-        hmmpfam\
-        hmmsearch
+export PROGS = hmmalign\
+               hmmbuild\
+               hmmcalibrate\
+               hmmconvert\
+               hmmemit\
+               hmmfetch\
+               hmmindex\
+               hmmpfam\
+               hmmsearch
 
-HMMER2_LIBS = libsquid.a \
-              libhmmer.a
+
+HMMER2_LIBS = libhmmer$(PROGSUFFIX).a
 
 
 # all: Compile everything.

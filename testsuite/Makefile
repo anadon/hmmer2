@@ -1,7 +1,7 @@
 CC        = gcc
 CFLAGS    = -march=native -O1 -g -pipe --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2
 LIBS      =  -lm -pthread
-MYLIBS    = -lhmmer2 -lsquid
+MYLIBS    = -lhmmer$(PROGSUFFIX) -lsquid
 
 SHELL     = /bin/bash
 

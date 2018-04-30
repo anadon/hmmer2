@@ -15,15 +15,8 @@ MYLIBS	 = -lsquid
 MYLIBDIR = -L../squid
 MYINCDIR = -I../squid
 
-PROGS = hmmalign\
-	hmmbuild\
-	hmmcalibrate\
-	hmmconvert\
-	hmmemit\
-	hmmfetch\
-	hmmindex\
-	hmmpfam\
-	hmmsearch\
+HMMLIB = libhmmer$(PROGSUFFIX).so
+
 
 OBJS =	alphabet.o\
 	core_algorithms.o\
@@ -71,14 +64,15 @@ ${PROGS}: %: %.o ${OBJS}
 #################################################################
 ## Targets used in making HMMER module for testsuite compilation.
 ##
-module: libhmmer2.so
+module: $(HMMLIB)
 
-libhmmer2.so: $(OBJS)
+$(HMMLIB): $(OBJS)
 #	$(AR) libhmmer.a $(OBJS)
 #	$(RANLIB) libhmmer.a
 #	chmod 644 libhmmer.a
-	gcc -shared $(OBJS) -o libhmmer2.so
+	gcc -shared $(OBJS) -o $@
 
 
 clean:
-	-rm -f *.o *~ Makefile.bak core $(PROGS) TAGS gmon.out libhmmer2.so
+	rm -f *.o *~ Makefile.bak core $(PROGS) TAGS gmon.out *.so
+	rm -f hmmalign hmmbuild hmmcalibrate hmmconvert hmmemit hmmfetch hmmindex hmmpfam hmmsearch
