@@ -401,7 +401,7 @@ overrides it).
 .TP
 .B --wme
 Use the Krogh/Mitchison maximum entropy algorithm to "weight"
-the sequences. This supercedes the Eddy/Mitchison/Durbin
+the sequences. This supersedes the Eddy/Mitchison/Durbin
 maximum discrimination algorithm, which gives almost
 identical weights but is less robust. ME weighting seems
 to give a marginal increase in sensitivity
